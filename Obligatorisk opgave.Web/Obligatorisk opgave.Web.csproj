@@ -7,4 +7,9 @@
         <RootNamespace>Obligatorisk_opgave</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Obligatorisk opgave.Infrastructure\Obligatorisk opgave.Infrastructure.csproj" />
+      <ProjectReference Include="..\Obligatorisk.opgave.Domain\Obligatorisk.opgave.Domain.csproj" />
+    </ItemGroup>
+
 </Project>
