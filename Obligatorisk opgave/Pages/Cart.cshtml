@@ -2,18 +2,71 @@
 @model Obligatorisk_opgave.Pages.Cart
 
 @{
-    Layout = null;
+    ViewData["Title"] = "Kurv";
 }
 
-<!DOCTYPE html>
+<section class="cart-page">
 
-<html>
-<head>
-    <title> test test </title>
-</head>
-<body>
-<div>
-    
-</div>
-</body>
-</html>
+    <h1>Din kurv</h1>
+
+    <div class="cart-layout">
+
+        @* Produkterne i kurven *@
+        <div class="cart-items">
+
+            <div class="cart-item">
+
+                <div>
+                    <h2>@Model.ProductName</h2>
+                    <p>Smuk buket med roser og sæsonens blomster.</p>
+                </div>
+
+                <div>
+                    <p>Antal: @Model.Quantity</p>
+                    <p>@Model.Price kr.</p>
+
+                    @* Knap til at fjerne varen fra kurven *@
+                    <button type="button" class="remove-button">
+                        Fjern
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+        @* Ordreoversigt *@
+        <div class="cart-summary">
+
+            <h2>Din ordre</h2>
+
+            @* Pris for alle varer i kurven *@
+            <div class="summary-row">
+                <span>Varer</span>
+                <span>@Model.Subtotal kr.</span>
+            </div>
+
+            @* Leveringspris *@
+            <div class="summary-row">
+                <span>Levering</span>
+                <span>@Model.ShippingPrice kr.</span>
+            </div>
+
+            <hr />
+
+            @* Samlet pris inkl. levering *@
+            <div class="summary-row">
+                <strong>Total</strong>
+                <strong>@Model.TotalPrice kr.</strong>
+            </div>
+
+            @* Knap til at gå videre til checkout *@
+            <button type="button" class="checkout-button">
+                Fortsæt til checkout
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
