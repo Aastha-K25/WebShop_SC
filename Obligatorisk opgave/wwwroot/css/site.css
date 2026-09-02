@@ -29,3 +29,131 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+}
+
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
+    color: var(--bs-secondary-color);
+    text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
+    text-align: start;
+}
+
+
+/* ------------------------- */
+/* CART */
+/* ------------------------- */
+
+/* Hele kurv-siden */
+.cart-page {
+    padding: 40px 0 60px 0;
+}
+
+    /* Titel på kurv-siden */
+    .cart-page h1 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 36px;
+        margin-bottom: 30px;
+    }
+
+/* Produkter til venstre og ordreoversigt til højre */
+.cart-layout {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+/* Produktområdet */
+.cart-items {
+    flex: 2;
+}
+
+/* En enkelt vare i kurven */
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border: 1px solid #e6e1da;
+    border-radius: 8px;
+    background-color: #fffdf9;
+}
+
+    /* Produktnavn */
+    .cart-item h2 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 24px;
+    }
+
+/* Ordreoversigt */
+.cart-summary {
+    flex: 1;
+    padding: 25px;
+    border: 1px solid #ebe6df;
+    border-radius: 8px;
+    background-color: #f8f5f0;
+}
+
+    /* Titel i ordreoversigten */
+    .cart-summary h2 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 24px;
+        margin-bottom: 25px;
+    }
+
+/* Varer / levering / total */
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+/* Checkout-knap */
+.checkout-button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 4px;
+    background-color: #5f7254;
+    color: white;
+    cursor: pointer;
+}
+
+    /* Når musen er over checkout-knappen */
+    .checkout-button:hover {
+        background-color: #4f6146;
+    }
+
+/* Fjern-knap */
+.remove-button {
+    padding: 7px 14px;
+    border: 1px solid #b9b4ac;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+}
