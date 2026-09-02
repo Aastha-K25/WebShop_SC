@@ -29,6 +29,100 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+.navbar {
+    min-height: 85px;
+}
+
+.navbar .container {
+    display: flex;
+    align-items: center;
+}
+
+/* Logo og navnet Paper & Petals */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-right: 65px;
+    color: #292b27;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.55rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.navbar-brand:hover {
+    color: #5d6d52;
+}
+
+/* Logoets stÃ¸rrelse */
+.navbar-logo {
+    width: 54px;
+    height: 48px;
+    object-fit: contain;
+}
+
+/* Menupunkterne placeres tÃ¦ttere pÃ¥ logoet */
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 27px;
+    margin-right: auto;
+}
+
+/* Samme rolige skrifttype og farve pÃ¥ alle menupunkter */
+.navbar-nav .nav-link {
+    color: #363a34 !important;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.94rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #65765a !important;
+}
+
+.navbar-icons {
+    display: flex;
+    align-items: center;
+    gap: 19px;
+    margin-left: 35px;
+}
+
+.navbar-icons a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar-icons img {
+    width: 25px;
+    height: 25px;
+    object-fit: contain;
+    opacity: 0.72;
+    transition:
+            opacity 0.2s ease,
+            transform 0.2s ease;
+}
+
+.navbar-icons a:hover img {
+    opacity: 1;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 575px) {
+    .navbar-nav {
+        gap: 0;
+    }
+
+    .navbar-icons {
+        padding: 12px 0;
+    }
+}
+
 /* ------------------------- */
 /* CART */
 /* ------------------------- */
@@ -38,21 +132,21 @@ body {
     padding: 40px 0 60px 0;
 }
 
-    /* Titel på kurv-siden */
+    /* Titel pï¿½ kurv-siden */
     .cart-page h1 {
         font-family: Georgia, "Times New Roman", serif;
         font-size: 36px;
         margin-bottom: 30px;
     }
 
-/* Produkter til venstre og ordreoversigt til højre */
+/* Produkter til venstre og ordreoversigt til hï¿½jre */
 .cart-layout {
     display: flex;
     gap: 40px;
     align-items: flex-start;
 }
 
-/* Produktområdet */
+/* Produktomrï¿½det */
 .cart-items {
     flex: 2;
 }
@@ -109,7 +203,7 @@ body {
     cursor: pointer;
 }
 
-    /* Når musen er over checkout-knappen */
+    /* Nï¿½r musen er over checkout-knappen */
     .checkout-button:hover {
         background-color: #4f6146;
     }

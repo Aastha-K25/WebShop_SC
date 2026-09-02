@@ -12,4 +12,8 @@
       <ProjectReference Include="..\Obligatorisk.opgave.Domain\Obligatorisk.opgave.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\Images\" />
+    </ItemGroup>
+
 </Project>

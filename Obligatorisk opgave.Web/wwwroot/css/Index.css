@@ -1,0 +1,433 @@
+/* Farver som genbruges på hele forsiden */
+:root {
+    --background-color: #fbfaf8;
+    --hero-background-color: #f1ebe5;
+    --card-background-color: #ffffff;
+    --primary-text-color: #292b27;
+    --secondary-text-color: #60635c;
+    --primary-green-color: #667558;
+    --dark-green-color: #506047;
+    --border-color: #e5e1db;
+}
+
+/* Hele forsiden */
+.front-page {
+    width: 100%;
+    overflow-x: hidden;
+    background-color: var(--background-color);
+    color: var(--primary-text-color);
+}
+
+body > .container {
+    width: 100%;
+    max-width: 100%;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+body > .container > main {
+    width: 100%;
+    padding-bottom: 0 !important;
+}
+
+/* Sørger for samme bredde og centrering i sektionerne */
+.page-container {
+    width: min(1320px, 90%);
+    margin: 0 auto;
+}
+
+/* ---------- HERO-SEKTION ---------- */
+
+.hero-section {
+    position: relative;
+    min-height: 510px;
+    display: flex;
+    align-items: center;
+    background-color: var(--hero-background-color);
+
+    /* Billedet kan tilføjes senere i wwwroot/images */
+   /* background-image: url("/images/hero-buket.jpg");*/
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+/* Lægger et lyst lag over billedets venstre side, så teksten forbliver tydelig og læbar. */
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+            90deg,
+            rgba(241, 235, 229, 1) 0%,
+            rgba(241, 235, 229, 0.98) 31%,
+            rgba(241, 235, 229, 0.7) 48%,
+            rgba(241, 235, 229, 0.08) 72%
+    );
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    padding: 75px 0;
+}
+
+.hero-content h1 {
+    max-width: 650px;
+    margin: 0 0 27px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(3rem, 5vw, 4.4rem);
+    font-weight: 500;
+    line-height: 1.06;
+    letter-spacing: -1.5px;
+}
+
+.hero-content p {
+    max-width: 460px;
+    margin: 0 0 33px;
+    color: var(--secondary-text-color);
+    font-size: 1.08rem;
+    line-height: 1.8;
+}
+
+/* Linket til produktsiden vises som en knap */
+.primary-button {
+    display: inline-block;
+    padding: 15px 30px;
+    border: 1px solid var(--primary-green-color);
+    border-radius: 3px;
+    background-color: var(--primary-green-color);
+    color: #ffffff;
+    font-weight: 600;
+    text-decoration: none;
+
+    transition:
+            background-color 0.25s ease,
+            border-color 0.25s ease,
+            transform 0.25s ease,
+            box-shadow 0.25s ease;
+}
+
+.primary-button:hover {
+    border-color: var(--dark-green-color);
+    background-color: var(--dark-green-color);
+    color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 9px 20px rgba(52, 65, 46, 0.2);
+}
+
+.primary-button:focus-visible {
+    outline: 3px solid rgba(102, 117, 88, 0.45);
+    outline-offset: 4px;
+}
+
+/* ---------- FORDELE tranchelade ---------- */
+
+.benefits-section {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    background-color: #ffffff;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 31px 0;
+}
+
+.benefit {
+    min-height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 19px;
+    padding: 0 30px;
+    border-right: 1px solid var(--border-color);
+}
+
+.benefit:last-child {
+    border-right: none;
+}
+
+/* Størrelse og farve til de billeder, der senere bruges som ikoner */
+.benefit-icon {
+    width: 39px;
+    height: 39px;
+    flex-shrink: 0;
+    object-fit: contain;
+    opacity: 0.75;
+}
+
+.benefit p {
+    margin: 0;
+    color: var(--secondary-text-color);
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+/* ---------- POPULÆRE PRODUKTER ---------- */
+
+.products-section {
+    padding: 48px 0 80px;
+    background-color: var(--background-color);
+}
+
+.products-header {
+    position: relative;
+    min-height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 28px;
+}
+
+.products-header h2 {
+    position: absolute;
+    left: 50%;
+    margin: 0;
+    transform: translateX(-50%);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 2rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.products-header a {
+    color: var(--secondary-text-color);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.products-header a:hover {
+    color: var(--primary-green-color);
+    text-decoration: underline;
+}
+
+.products-header a:focus-visible {
+    outline: 3px solid rgba(102, 117, 88, 0.45);
+    outline-offset: 4px;
+}
+
+/* De fire produkter placeres ved siden af hinanden */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.empty-products {
+    padding: 30px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: #ffffff;
+    text-align: center;
+}
+
+/* ---------- PRODUKTKORT ---------- */
+
+/*
+    Hele produktkortet er et link.
+    Farve og understregning nulstilles, så kortet ikke ligner et normalt link.
+*/
+.product-card {
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--card-background-color);
+    color: var(--primary-text-color);
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(44, 47, 40, 0.05);
+
+    /* Gør hover-effekten glidende */
+    transition:
+            transform 0.28s ease,
+            box-shadow 0.28s ease,
+            border-color 0.28s ease;
+}
+
+/*
+    Når musen placeres over et produktkort,
+    løftes kortet og bliver en lille smule større.
+*/
+.product-card:hover {
+    border-color: #c5cec0;
+    color: var(--primary-text-color);
+    text-decoration: none;
+    transform: translateY(-9px) scale(1.015);
+    box-shadow: 0 18px 35px rgba(49, 57, 44, 0.17);
+}
+
+/* Gør det tydeligt, hvilket produkt der er valgt med tastaturet */
+.product-card:focus-visible {
+    outline: 3px solid rgba(102, 117, 88, 0.5);
+    outline-offset: 4px;
+}
+
+.product-image-container {
+    height: 285px;
+    overflow: hidden;
+    background-color: #eee8df;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform 0.38s ease;
+}
+
+/* Billedet zoomer en smule, når musen er over produktkortet */
+.product-card:hover .product-image {
+    transform: scale(1.055);
+}
+
+.product-information {
+    min-height: 158px;
+    padding: 20px 25px 25px;
+}
+
+.product-information h3 {
+    margin: 0 0 7px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.12rem;
+    font-weight: 600;
+}
+
+.product-genre {
+    min-height: 24px;
+    margin: 0 0 24px;
+    color: var(--secondary-text-color);
+    font-size: 0.94rem;
+}
+
+.product-price {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+/* ---------- TABLET ---------- */
+
+@media (max-width: 950px) {
+    .hero-section {
+        min-height: 470px;
+        background-position: 62% center;
+    }
+
+    .hero-overlay {
+        background: linear-gradient(
+                90deg,
+                rgba(241, 235, 229, 1) 0%,
+                rgba(241, 235, 229, 0.92) 48%,
+                rgba(241, 235, 229, 0.25) 100%
+        );
+    }
+
+    .benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .benefit:nth-child(2) {
+        border-right: none;
+    }
+
+    .benefit:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* ---------- MOBIL ---------- */
+
+@media (max-width: 600px) {
+    .page-container {
+        width: min(92%, 500px);
+    }
+
+    .hero-section {
+        min-height: 550px;
+        align-items: flex-end;
+        background-position: 67% center;
+    }
+
+    .hero-overlay {
+        background: linear-gradient(
+                0deg,
+                rgba(241, 235, 229, 1) 0%,
+                rgba(241, 235, 229, 0.92) 43%,
+                rgba(241, 235, 229, 0.12) 100%
+        );
+    }
+
+    .hero-content {
+        padding: 55px 0;
+    }
+
+    .hero-content h1 {
+        font-size: 2.55rem;
+    }
+
+    .hero-content p {
+        font-size: 1rem;
+    }
+
+    .benefits-grid {
+        grid-template-columns: 1fr;
+        padding: 0;
+    }
+
+    .benefit {
+        min-height: 90px;
+        justify-content: flex-start;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .benefit:last-child {
+        border-bottom: none;
+    }
+
+    .products-header {
+        gap: 15px;
+    }
+
+    .products-header h2 {
+        position: static;
+        margin-right: auto;
+        transform: none;
+        font-size: 1.55rem;
+        white-space: normal;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-image-container {
+        height: 350px;
+    }
+}
+
+/*
+    Fjerner bevægelsen for brugere, som har valgt
+    reducerede animationer i deres operativsystem.
+*/
+@media (prefers-reduced-motion: reduce) {
+    .primary-button,
+    .product-card,
+    .product-image {
+        transition: none;
+    }
+
+    .primary-button:hover,
+    .product-card:hover,
+    .product-card:hover .product-image {
+        transform: none;
+    }
+}

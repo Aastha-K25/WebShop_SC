@@ -1,16 +1,133 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Paper & Petals";
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script type="importmap"></script>
-    <title>@ViewData["Title"] Blomster </title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/Index.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/DyrvaernetRoskilde.styles.css" asp-append-version="true" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/css/Index.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/Obligatorisk_opgave.Web.styles.css" asp-append-version="true"/>
 </head>
+
+<!-- Forsiden med den store buket og introduktion -->
+<div class="hero-section">
+    <div class="hero-overlay"></div>
+
+    <div class="page-container hero-content">
+        <h1>
+            Blomster der<br/>
+            fortæller en historie
+        </h1>
+        <p>
+            Sammensæt din helt egen buket med din yndlingsfarve og den perfekte bog.
+        </p>
+        <a class="primary-button" href="/Products">
+            Udforsk buketter
+        </a>
+    </div>
+</div>
+
+
+<!-- Fordele ved at handle hos Paper & Petals (benefit) -->
+<div class="benefits-section">
+    <div class="page-container benefits-grid">
+
+        <div class="benefit">
+            <img class="benefit-icon"
+                 src="~/images/flower-icon.png"
+                 alt="Blomsterikon"/>
+            <p>
+                Håndbundet<br/> med kærlighed
+            </p>
+        </div>
+
+        <div class="benefit">
+            <img class="benefit-icon"
+                 src="~/images/delivery-icon.png"
+                 alt="Leveringsikon"/>
+            <p>
+                Levering 1–3<br/> hverdage
+            </p>
+        </div>
+
+        <div class="benefit">
+            <img class="benefit-icon"
+                 src="~/images/gift-icon.png"
+                 alt="Gaveikon"/>
+
+            <p>
+                Den perfekte<br/> gave
+            </p>
+        </div>
+
+        <div class="benefit">
+            <img class="benefit-icon"
+                 src="~/images/leaf-icon.png"
+                 alt="Bladikon"/>
+
+            <p>
+                Bæredygtige<br/> materialer
+            </p>
+        </div>
+    </div>
+</div>
+
+
+<!-- Populære buketter -->
+<div class="products-section">
+    <div class="page-container">
+
+        <div class="products-header">
+            <h2>Populære buketter</h2>
+
+            <a href="/Products">
+                Se alle buketter
+            </a>
+        </div>
+
+
+        <!-- Vises, hvis der ikke findes nogen produkter -->
+        @if (Model.PopularProducts.Count == 0)
+        {
+            <div class="empty-products">
+                <p>Der er endnu ikke tilføjet nogen buketter.</p>
+            </div>
+        }
+        else
+        {
+            <div class="products-grid">
+
+                @for (int i = 0; i < Model.PopularProducts.Count; i++)
+                {
+                    /*
+                        Hele produktkortet fungerer som et link.
+                        Produktets ID sendes til Products-siden, så det rigtige produkt senere kan findes.
+                    */
+                    <a class="product-card"
+                       href="/Products?ProductId=@Model.PopularProducts[i].Id"
+                       aria-label="Læs mere om @Model.PopularProducts[i].Name">
+                        
+
+                        <div class="product-information">
+                            <h3>@Model.PopularProducts[i].Name</h3>
+
+                            <p class="product-genre">
+                                + @Model.PopularProducts[i].BookGenre
+                            </p>
+
+                            <p class="product-price">
+                                @Model.PopularProducts[i].Price.ToString("0") kr.
+                            </p>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+
+    </div>
+</div>
