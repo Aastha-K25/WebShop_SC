@@ -1,133 +1,201 @@
 ﻿@page
 @model IndexModel
+
 @{
     ViewData["Title"] = "Paper & Petals";
 }
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@ViewData["Title"]</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="~/css/Index.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/Obligatorisk_opgave.Web.styles.css" asp-append-version="true"/>
-</head>
 
-<!-- Forsiden med den store buket og introduktion -->
-<div class="hero-section">
-    <div class="hero-overlay"></div>
-
-    <div class="page-container hero-content">
-        <h1>
-            Blomster der<br/>
-            fortæller en historie
-        </h1>
-        <p>
-            Sammensæt din helt egen buket med din yndlingsfarve og den perfekte bog.
-        </p>
-        <a class="primary-button" href="/Products">
-            Udforsk buketter
-        </a>
-    </div>
-</div>
+<link rel="stylesheet"
+      href="~/css/Index.css"
+      asp-append-version="true" />
 
 
-<!-- Fordele ved at handle hos Paper & Petals (benefit) -->
-<div class="benefits-section">
-    <div class="page-container benefits-grid">
+<div class="front-page">
 
-        <div class="benefit">
-            <img class="benefit-icon"
-                 src="~/images/flower-icon.png"
-                 alt="Blomsterikon"/>
-            <p>
-                Håndbundet<br/> med kærlighed
-            </p>
-        </div>
+    <!-- HERO -->
+    <section class="hero-section">
 
-        <div class="benefit">
-            <img class="benefit-icon"
-                 src="~/images/delivery-icon.png"
-                 alt="Leveringsikon"/>
-            <p>
-                Levering 1–3<br/> hverdage
-            </p>
-        </div>
+        <div class="hero-overlay"></div>
 
-        <div class="benefit">
-            <img class="benefit-icon"
-                 src="~/images/gift-icon.png"
-                 alt="Gaveikon"/>
+        <div class="page-container hero-content">
 
-            <p>
-                Den perfekte<br/> gave
-            </p>
-        </div>
+            <div class="hero-text">
 
-        <div class="benefit">
-            <img class="benefit-icon"
-                 src="~/images/leaf-icon.png"
-                 alt="Bladikon"/>
+                <p class="hero-eyebrow">
+                    BOOKS • FLOWERS • STORIES
+                </p>
 
-            <p>
-                Bæredygtige<br/> materialer
-            </p>
-        </div>
-    </div>
-</div>
+                <h1>
+                    Flowers that<br />
+                    tell a story
+                </h1>
 
+                <p class="hero-description">
+                    Create your own bouquet with your favorite color
+                    and the perfect book.
+                </p>
 
-<!-- Populære buketter -->
-<div class="products-section">
-    <div class="page-container">
+                <a class="primary-button"
+                   href="/Products">
+                    Explore Bouquets →
+                </a>
 
-        <div class="products-header">
-            <h2>Populære buketter</h2>
-
-            <a href="/Products">
-                Se alle buketter
-            </a>
-        </div>
-
-
-        <!-- Vises, hvis der ikke findes nogen produkter -->
-        @if (Model.PopularProducts.Count == 0)
-        {
-            <div class="empty-products">
-                <p>Der er endnu ikke tilføjet nogen buketter.</p>
             </div>
-        }
-        else
-        {
-            <div class="products-grid">
 
-                @for (int i = 0; i < Model.PopularProducts.Count; i++)
-                {
-                    /*
-                        Hele produktkortet fungerer som et link.
-                        Produktets ID sendes til Products-siden, så det rigtige produkt senere kan findes.
-                    */
-                    <a class="product-card"
-                       href="/Products?ProductId=@Model.PopularProducts[i].Id"
-                       aria-label="Læs mere om @Model.PopularProducts[i].Name">
-                        
+        </div>
 
-                        <div class="product-information">
-                            <h3>@Model.PopularProducts[i].Name</h3>
+    </section>
 
-                            <p class="product-genre">
-                                + @Model.PopularProducts[i].BookGenre
-                            </p>
 
-                            <p class="product-price">
-                                @Model.PopularProducts[i].Price.ToString("0") kr.
-                            </p>
-                        </div>
-                    </a>
-                }
+    <!-- BENEFITS -->
+    <section class="benefits-section">
+
+        <div class="page-container benefits-grid">
+
+            <div class="benefit">
+
+                <img class="benefit-icon"
+                     src="~/Images/flower-icon.png"
+                     alt="Flower icon" />
+
+                <p>
+                    Hand-tied<br />
+                    with love
+                </p>
+
             </div>
-        }
 
-    </div>
+
+            <div class="benefit">
+
+                <img class="benefit-icon"
+                     src="~/Images/delivery-icon.png"
+                     alt="Delivery icon" />
+
+                <p>
+                    Delivery in 1–3<br />
+                    business days
+                </p>
+
+            </div>
+
+
+            <div class="benefit">
+
+                <img class="benefit-icon"
+                     src="~/Images/gift-icon.png"
+                     alt="Gift icon" />
+
+                <p>
+                    The perfect<br />
+                    gift
+                </p>
+
+            </div>
+
+
+            <div class="benefit">
+
+                <img class="benefit-icon"
+                     src="~/Images/leaf-icon.png"
+                     alt="Leaf icon" />
+
+                <p>
+                    Sustainable<br />
+                    materials
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- POPULAR BOUQUETS -->
+    <section class="products-section">
+
+        <div class="page-container">
+
+            <div class="products-header">
+
+                <h2>Popular Bouquets</h2>
+
+                <a href="/Products">
+                    View All Bouquets →
+                </a>
+
+            </div>
+
+
+            @if (Model.PopularProducts.Count == 0)
+            {
+                <div class="empty-products">
+
+                    <p>No bouquets have been added yet.</p>
+
+                </div>
+            }
+            else
+            {
+                <div class="products-grid">
+
+                    @for (int i = 0; i < Model.PopularProducts.Count; i++)
+                    {
+                        <a class="product-card"
+                           href="/Products?ProductId=@Model.PopularProducts[i].Id"
+                           aria-label="Read more about @Model.PopularProducts[i].Name">
+
+                            <div class="product-image-container">
+
+                                <img class="product-image"
+                                     src="@Model.PopularProducts[i].ImagePath"
+                                     alt="@Model.PopularProducts[i].ImageDescription" />
+
+                            </div>
+
+
+                            <div class="product-information">
+
+                                <h3>
+                                    @Model.PopularProducts[i].Name
+                                </h3>
+
+                                <p class="product-genre">
+                                    + @Model.PopularProducts[i].BookGenre
+                                </p>
+
+                                <p class="product-price">
+                                    @Model.PopularProducts[i].Price.ToString("0") kr.
+                                </p>
+
+                            </div>
+
+                        </a>
+                    }
+
+                </div>
+            }
+
+
+            <div class="products-quote">
+
+                <span></span>
+
+                <p>
+                    Books and flowers. A more beautiful world.
+                </p>
+
+                <span></span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ned.png ligger alene nederst -->
+        <div class="bottom-decoration"></div>
+
+    </section>
+
 </div>

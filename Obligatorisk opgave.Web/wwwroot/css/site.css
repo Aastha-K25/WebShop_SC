@@ -1,157 +1,272 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
+
+/* ================================================== */
+/* BODY */
+/* ================================================== */
 
 body {
-  margin-bottom: 60px;
+    margin: 0;
+    min-height: 100vh;
+    background-color: #ffffff;
+    color: #292b27;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
-}
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
-}
+/* ================================================== */
+/* NAVBAR */
+/* ================================================== */
+
 .navbar {
-    min-height: 85px;
+    min-height: 78px;
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #ebe7e0;
+    box-shadow: none;
 }
 
-.navbar .container {
-    display: flex;
-    align-items: center;
-}
 
-/* Logo og navnet Paper & Petals */
+    /* Navbarens indhold */
+    .navbar .container {
+        width: min(1500px, 94%);
+        max-width: 1500px;
+        display: flex;
+        align-items: center;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+
+/* Logo + navn */
 .navbar-brand {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-right: 65px;
+    gap: 11px;
+    margin-right: 60px;
     color: #292b27;
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 1.55rem;
+    font-size: 1.45rem;
     font-weight: 600;
     text-decoration: none;
     white-space: nowrap;
 }
 
-.navbar-brand:hover {
-    color: #5d6d52;
-}
 
-/* Logoets størrelse */
+    .navbar-brand:hover {
+        color: #5d6d52;
+    }
+
+
+/* Logo */
 .navbar-logo {
-    width: 54px;
-    height: 48px;
+    width: 48px;
+    height: 44px;
     object-fit: contain;
 }
 
-/* Menupunkterne placeres tættere på logoet */
+
+/* Navigation */
 .navbar-nav {
     display: flex;
     align-items: center;
-    gap: 27px;
+    gap: 26px;
     margin-right: auto;
 }
 
-/* Samme rolige skrifttype og farve på alle menupunkter */
-.navbar-nav .nav-link {
-    color: #363a34 !important;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 0.94rem;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: color 0.2s ease;
-}
 
-.navbar-nav .nav-link:hover {
-    color: #65765a !important;
-}
+    .navbar-nav .nav-link {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        color: #363a34 !important;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 0.88rem;
+        font-weight: 500;
+        white-space: nowrap;
+        transition: color 0.2s ease;
+    }
 
+
+        .navbar-nav .nav-link:hover {
+            color: #65765a !important;
+        }
+
+
+/* Ikoner */
 .navbar-icons {
     display: flex;
     align-items: center;
-    gap: 19px;
-    margin-left: 35px;
+    gap: 18px;
+    margin-left: 30px;
 }
 
-.navbar-icons a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+
+    .navbar-icons a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+
+    .navbar-icons img {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+        opacity: 0.72;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+
+    .navbar-icons a:hover img {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+
+
+/* ================================================== */
+/* MAIN */
+/* ================================================== */
+
+/*
+    VIGTIGT:
+    Main-content må bruge hele browserbredden.
+    Den er ikke længere fanget i Bootstrap .container.
+*/
+.main-content {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
 }
 
-.navbar-icons img {
-    width: 25px;
-    height: 25px;
-    object-fit: contain;
-    opacity: 0.72;
-    transition:
-            opacity 0.2s ease,
-            transform 0.2s ease;
+
+    .main-content main {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+
+/* ================================================== */
+/* FOOTER */
+/* ================================================== */
+
+.footer {
+    width: 100%;
+    padding: 15px 0;
+    background-color: #ffffff;
+    border-top: 1px solid #ebe7e0 !important;
+    font-size: 0.85rem;
 }
 
-.navbar-icons a:hover img {
-    opacity: 1;
-    transform: translateY(-2px);
-}
+
+    /* Footer-indhold */
+    .footer .container {
+        width: min(1500px, 94%);
+        max-width: 1500px;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+
+/* ================================================== */
+/* MOBIL NAVBAR */
+/* ================================================== */
 
 @media (max-width: 575px) {
-    .navbar-nav {
-        gap: 0;
+
+    .navbar {
+        min-height: 68px;
     }
+
+
+        .navbar .container {
+            width: 92%;
+        }
+
+
+    .navbar-brand {
+        margin-right: 0;
+        font-size: 1.15rem;
+    }
+
+
+    .navbar-logo {
+        width: 42px;
+        height: 38px;
+    }
+
+
+    .navbar-collapse {
+        margin-top: 10px;
+        padding: 15px;
+        border-top: 1px solid #ebe7e0;
+        background-color: #ffffff;
+    }
+
+
+    .navbar-nav {
+        gap: 2px;
+    }
+
 
     .navbar-icons {
-        padding: 12px 0;
+        margin-left: 0;
+        padding: 12px 0 4px;
     }
 }
 
-/* ------------------------- */
-/* CART */
-/* ------------------------- */
 
-/* Hele kurv-siden */
+/* ================================================== */
+/* CART */
+/* ================================================== */
+
 .cart-page {
-    padding: 40px 0 60px 0;
+    width: min(1200px, 92%);
+    margin: 0 auto;
+    padding: 40px 0 60px;
 }
 
-    /* Titel p� kurv-siden */
+
     .cart-page h1 {
+        margin-bottom: 30px;
         font-family: Georgia, "Times New Roman", serif;
         font-size: 36px;
-        margin-bottom: 30px;
     }
 
-/* Produkter til venstre og ordreoversigt til h�jre */
+
+/* Produkter til venstre og ordreoversigt til højre */
 .cart-layout {
     display: flex;
     gap: 40px;
     align-items: flex-start;
 }
 
-/* Produktomr�det */
+
+/* Produktområde */
 .cart-items {
     flex: 2;
 }
 
-/* En enkelt vare i kurven */
+
+/* En enkelt vare */
 .cart-item {
     display: flex;
     justify-content: space-between;
@@ -162,11 +277,12 @@ body {
     background-color: #fffdf9;
 }
 
-    /* Produktnavn */
+
     .cart-item h2 {
         font-family: Georgia, "Times New Roman", serif;
         font-size: 24px;
     }
+
 
 /* Ordreoversigt */
 .cart-summary {
@@ -177,12 +293,13 @@ body {
     background-color: #f8f5f0;
 }
 
-    /* Titel i ordreoversigten */
+
     .cart-summary h2 {
+        margin-bottom: 25px;
         font-family: Georgia, "Times New Roman", serif;
         font-size: 24px;
-        margin-bottom: 25px;
     }
+
 
 /* Varer / levering / total */
 .summary-row {
@@ -190,6 +307,7 @@ body {
     justify-content: space-between;
     margin-bottom: 14px;
 }
+
 
 /* Checkout-knap */
 .checkout-button {
@@ -203,10 +321,11 @@ body {
     cursor: pointer;
 }
 
-    /* N�r musen er over checkout-knappen */
+
     .checkout-button:hover {
         background-color: #4f6146;
     }
+
 
 /* Fjern-knap */
 .remove-button {
@@ -215,4 +334,22 @@ body {
     border-radius: 4px;
     background-color: white;
     cursor: pointer;
+}
+
+
+/* ================================================== */
+/* CART MOBIL */
+/* ================================================== */
+
+@media (max-width: 700px) {
+
+    .cart-layout {
+        flex-direction: column;
+    }
+
+
+    .cart-items,
+    .cart-summary {
+        width: 100%;
+    }
 }

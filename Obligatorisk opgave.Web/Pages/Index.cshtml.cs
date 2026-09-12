@@ -1,62 +1,61 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Obligatoris.opgave.Domain.Models;
-
 
 namespace Obligatorisk_opgave.Pages;
 
 public class IndexModel : PageModel
 {
-    //Produkterne, som Index.cshtml skal vise.
-    //IReadOnlyList bruges, fordi Razor-siden kun skal læse produkterne og ikke ændre samlingen.
-    public IReadOnlyList<Product> PopularProducts { get; private set; } 
-    = Array.Empty<Product>();
+    // Buketterne som forsiden skal vise
+    public IReadOnlyList<Bouquet> PopularProducts { get; private set; }
+        = Array.Empty<Bouquet>();
 
-    // OnGet bliver automatisk kaldt, når browseren sender en GET-request til forsiden.
-    
+    // Kører når forsiden åbnes
     public void OnGet()
     {
-        PopularProducts = new List<Product>
+        PopularProducts = new List<Bouquet>
         {
-            new Product
+            new Bouquet
             {
                 Id = 1,
-                Name = "Romantisk buket",
+                Name = "Romance Bouquet",
                 BookGenre = "Romance",
                 Price = 449m,
-                Imagepath = "..",
-                ImageDescription = "Røde buket med en romantisk bog",
+                ImagePath = "/Images/romanceall.png",
+                ImageDescription = "Romance bouquet with books and flowers",
                 IsPopular = true
             },
-            new Product
+
+            new Bouquet
             {
                 Id = 2,
-                Name = "Krimi buket",
-                BookGenre = "Krimi",
+                Name = "Crime Bouquet",
+                BookGenre = "Crime",
                 Price = 449m,
-                Imagepath = "..",
-                ImageDescription = "Hvide buket med en krimi bog",
+                ImagePath = "/Images/crimeall.png",
+                ImageDescription = "Crime bouquet with books and flowers",
                 IsPopular = true
             },
-            new Product
+
+            new Bouquet
             {
                 Id = 3,
-                Name = "Fantasy buket",
+                Name = "Fantasy Bouquet",
                 BookGenre = "Fantasy",
                 Price = 449m,
-                Imagepath = "..",
-                ImageDescription = "Lilla buket med en fantasy bog",
-                IsPopular = true,
+                ImagePath = "/Images/fantasyall.png",
+                ImageDescription = "Fantasy bouquet with books and flowers",
+                IsPopular = true
             },
-            new Product
+
+            new Bouquet
             {
                 Id = 4,
-                Name = "Biografi buket",
-                BookGenre = "Biografi",
+                Name = "Biography Bouquet",
+                BookGenre = "Biography",
                 Price = 449m,
-                Imagepath = "..",
-                ImageDescription = "Orange buket med en biografi bog",
-                IsPopular = true,
+                ImagePath = "/Images/Bioall.png",
+                ImageDescription = "Biography bouquet with books and flowers",
+                IsPopular = true
             }
         };
     }

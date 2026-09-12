@@ -2,12 +2,12 @@
 @model Obligatorisk_opgave.Pages.Cart
 
 @{
-    ViewData["Title"] = "Kurv";
+    ViewData["Title"] = "Cart";
 }
 
 <section class="cart-page">
 
-    <h1>Din kurv</h1>
+    <h1>Your Cart</h1>
 
     <div class="cart-layout">
 
@@ -18,16 +18,16 @@
 
                 <div>
                     <h2>@Model.ProductName</h2>
-                    <p>Smuk buket med roser og sæsonens blomster.</p>
+                    <p>Beautiful bouquet with roses and seasonal flowers.</p>
                 </div>
 
                 <div>
-                    <p>Antal: @Model.Quantity</p>
+                    <p>Quantity: @Model.Quantity</p>
                     <p>@Model.Price kr.</p>
 
-                    @* Knap til at fjerne varen fra kurven *@
+                    @* Knap til at fjerne varen *@
                     <button type="button" class="remove-button">
-                        Fjern
+                        Remove
                     </button>
                 </div>
 
@@ -38,31 +38,31 @@
         @* Ordreoversigt *@
         <div class="cart-summary">
 
-            <h2>Din ordre</h2>
+            <h2>Your Order</h2>
 
-            @* Pris for alle varer i kurven *@
+            @* Pris for alle varer *@
             <div class="summary-row">
-                <span>Varer</span>
+                <span>Items</span>
                 <span>@Model.Subtotal kr.</span>
             </div>
 
             @* Leveringspris *@
             <div class="summary-row">
-                <span>Levering</span>
+                <span>Shipping</span>
                 <span>@Model.ShippingPrice kr.</span>
             </div>
 
             <hr />
 
-            @* Samlet pris inkl. levering *@
+            @* Samlet pris *@
             <div class="summary-row">
                 <strong>Total</strong>
                 <strong>@Model.TotalPrice kr.</strong>
             </div>
 
-            @* Knap til at gå videre til checkout *@
+            @* Knap til checkout *@
             <button type="button" class="checkout-button">
-                Fortsæt til checkout
+                Proceed to Checkout
             </button>
 
         </div>
