@@ -1,50 +1,14 @@
-html {
-    font-size: 14px;
-    position: relative;
-    min-height: 100%;
-}
-
-@media (min-width: 768px) {
-    html {
-        font-size: 16px;
-    }
-}
-
-
-.btn:focus,
-.btn:active:focus,
-.btn-link.nav-link:focus,
-.form-control:focus,
-.form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-
 /* ================================================== */
-/* BODY */
-/* ================================================== */
-
-body {
-    margin: 0;
-    min-height: 100vh;
-    background-color: #ffffff;
-    color: #292b27;
-}
-
-
-/* ================================================== */
-/* NAVBAR */
+/* NAVBAR - POLISH */
 /* ================================================== */
 
 .navbar {
-    min-height: 78px;
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #ebe7e0;
-    box-shadow: none;
+    min-height: 82px;
+    background-color: rgba(255, 255, 255, 0.98) !important;
+    border-bottom: 1px solid #ece7df;
+    box-shadow: 0 2px 12px rgba(55, 48, 40, 0.035);
 }
 
-
-    /* Navbarens indhold */
     .navbar .container {
         width: min(1500px, 94%);
         max-width: 1500px;
@@ -59,26 +23,27 @@ body {
 .navbar-brand {
     display: flex;
     align-items: center;
-    gap: 11px;
-    margin-right: 60px;
-    color: #292b27;
+    gap: 12px;
+    margin-right: 70px;
+    color: #283027;
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 1.45rem;
+    font-size: 1.52rem;
     font-weight: 600;
     text-decoration: none;
     white-space: nowrap;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
-
     .navbar-brand:hover {
-        color: #5d6d52;
+        color: #5f7058;
+        transform: translateY(-1px);
     }
 
 
 /* Logo */
 .navbar-logo {
-    width: 48px;
-    height: 44px;
+    width: 50px;
+    height: 46px;
     object-fit: contain;
 }
 
@@ -87,107 +52,173 @@ body {
 .navbar-nav {
     display: flex;
     align-items: center;
-    gap: 26px;
+    gap: 31px;
     margin-right: auto;
 }
 
-
     .navbar-nav .nav-link {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        color: #363a34 !important;
+        position: relative;
+        padding: 28px 0 26px !important;
+        color: #41463f !important;
         font-family: Arial, Helvetica, sans-serif;
-        font-size: 0.88rem;
+        font-size: 0.89rem;
         font-weight: 500;
         white-space: nowrap;
-        transition: color 0.2s ease;
+        transition: color 0.2s ease, transform 0.2s ease;
     }
 
 
+        /* Elegant lille linje under menu */
+        .navbar-nav .nav-link::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: 19px;
+            width: 0;
+            height: 1px;
+            transform: translateX(-50%);
+            background-color: #75836b;
+            transition: width 0.22s ease;
+        }
+
         .navbar-nav .nav-link:hover {
             color: #65765a !important;
+            transform: translateY(-1px);
         }
+
+            .navbar-nav .nav-link:hover::after {
+                width: 22px;
+            }
 
 
 /* Ikoner */
 .navbar-icons {
     display: flex;
     align-items: center;
-    gap: 18px;
-    margin-left: 30px;
+    gap: 8px;
+    margin-left: 36px;
 }
 
-
     .navbar-icons a {
+        width: 38px;
+        height: 38px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s ease, transform 0.2s ease;
     }
 
+        .navbar-icons a:hover {
+            background-color: #f4f1ec;
+            transform: translateY(-2px);
+        }
 
     .navbar-icons img {
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
         object-fit: contain;
-        opacity: 0.72;
-        transition: opacity 0.2s ease, transform 0.2s ease;
+        opacity: 0.68;
+        transition: opacity 0.2s ease;
     }
-
 
     .navbar-icons a:hover img {
         opacity: 1;
-        transform: translateY(-2px);
     }
 
 
 /* ================================================== */
-/* MAIN */
+/* BENEFITS - POLISH */
 /* ================================================== */
 
-/*
-    VIGTIGT:
-    Main-content må bruge hele browserbredden.
-    Den er ikke længere fanget i Bootstrap .container.
-*/
-.main-content {
+.benefits-section {
     width: 100%;
-    max-width: none;
-    margin: 0;
+    padding: 14px 0;
+    background-color: #fffefa;
+    border-top: 1px solid #ebe6df;
+    border-bottom: 1px solid #ebe6df;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
     padding: 0;
 }
 
-
-    .main-content main {
-        width: 100%;
-        margin: 0;
-        padding: 0;
-    }
-
-
-/* ================================================== */
-/* FOOTER */
-/* ================================================== */
-
-.footer {
-    width: 100%;
-    padding: 15px 0;
-    background-color: #ffffff;
-    border-top: 1px solid #ebe7e0 !important;
-    font-size: 0.85rem;
+.benefit {
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 12px 24px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background-color: transparent;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 
-    /* Footer-indhold */
-    .footer .container {
-        width: min(1500px, 94%);
-        max-width: 1500px;
-        padding-left: 0;
-        padding-right: 0;
+/* Fjern de gamle hårde lodrette streger */
+.benefit {
+    border-right: none;
+}
+
+    .benefit:hover {
+        background-color: #faf7f2;
+        border-color: #ece5dc;
+        transform: translateY(-2px);
+        box-shadow: 0 7px 18px rgba(64, 55, 45, 0.05);
     }
 
 
+/* Ikoner */
+.benefit-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    object-fit: contain;
+    opacity: 0.72;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.benefit:hover .benefit-icon {
+    transform: translateY(-2px) scale(1.04);
+    opacity: 0.95;
+}
+
+.benefit p {
+    margin: 0;
+    color: #4f554d;
+    font-size: 0.89rem;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+
 /* ================================================== */
-/* MOBIL NAVBAR */
+/* TABLET */
+/* ================================================== */
+
+@media (max-width: 950px) {
+
+    .navbar-brand {
+        margin-right: 35px;
+    }
+
+    .navbar-nav {
+        gap: 20px;
+    }
+
+    .benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+
+/* ================================================== */
+/* MOBIL */
 /* ================================================== */
 
 @media (max-width: 575px) {
@@ -196,160 +227,65 @@ body {
         min-height: 68px;
     }
 
-
         .navbar .container {
             width: 92%;
         }
 
-
     .navbar-brand {
         margin-right: 0;
-        font-size: 1.15rem;
+        font-size: 1.16rem;
     }
-
 
     .navbar-logo {
         width: 42px;
         height: 38px;
     }
 
-
     .navbar-collapse {
-        margin-top: 10px;
-        padding: 15px;
+        margin-top: 8px;
+        padding: 14px;
         border-top: 1px solid #ebe7e0;
         background-color: #ffffff;
     }
 
-
     .navbar-nav {
-        gap: 2px;
+        gap: 0;
     }
 
+        .navbar-nav .nav-link {
+            padding: 10px 0 !important;
+        }
+
+            .navbar-nav .nav-link::after {
+                display: none;
+            }
 
     .navbar-icons {
         margin-left: 0;
-        padding: 12px 0 4px;
-    }
-}
-
-
-/* ================================================== */
-/* CART */
-/* ================================================== */
-
-.cart-page {
-    width: min(1200px, 92%);
-    margin: 0 auto;
-    padding: 40px 0 60px;
-}
-
-
-    .cart-page h1 {
-        margin-bottom: 30px;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 36px;
+        padding: 12px 0 2px;
     }
 
-
-/* Produkter til venstre og ordreoversigt til højre */
-.cart-layout {
-    display: flex;
-    gap: 40px;
-    align-items: flex-start;
-}
-
-
-/* Produktområde */
-.cart-items {
-    flex: 2;
-}
-
-
-/* En enkelt vare */
-.cart-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 24px;
-    border: 1px solid #e6e1da;
-    border-radius: 8px;
-    background-color: #fffdf9;
-}
-
-
-    .cart-item h2 {
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 24px;
+    .benefits-section {
+        padding: 10px 0;
     }
 
-
-/* Ordreoversigt */
-.cart-summary {
-    flex: 1;
-    padding: 25px;
-    border: 1px solid #ebe6df;
-    border-radius: 8px;
-    background-color: #f8f5f0;
-}
-
-
-    .cart-summary h2 {
-        margin-bottom: 25px;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 24px;
+    .benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
 
-
-/* Varer / levering / total */
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 14px;
-}
-
-
-/* Checkout-knap */
-.checkout-button {
-    width: 100%;
-    margin-top: 20px;
-    padding: 12px 18px;
-    border: none;
-    border-radius: 4px;
-    background-color: #5f7254;
-    color: white;
-    cursor: pointer;
-}
-
-
-    .checkout-button:hover {
-        background-color: #4f6146;
+    .benefit {
+        min-height: 82px;
+        justify-content: flex-start;
+        padding: 10px 12px;
     }
 
-
-/* Fjern-knap */
-.remove-button {
-    padding: 7px 14px;
-    border: 1px solid #b9b4ac;
-    border-radius: 4px;
-    background-color: white;
-    cursor: pointer;
-}
-
-
-/* ================================================== */
-/* CART MOBIL */
-/* ================================================== */
-
-@media (max-width: 700px) {
-
-    .cart-layout {
-        flex-direction: column;
+    .benefit-icon {
+        width: 34px;
+        height: 34px;
     }
 
-
-    .cart-items,
-    .cart-summary {
-        width: 100%;
+    .benefit p {
+        font-size: 0.78rem;
     }
 }
