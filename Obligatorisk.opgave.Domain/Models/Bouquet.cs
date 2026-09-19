@@ -4,8 +4,9 @@ namespace Obligatoris.opgave.Domain.Models;
 
 public class Bouquet : Product
 {
-    public string FlowerType { get; set; }
-    public string BouquetSize { get; set; }
-    public string BookGenre { get; set; }
+    public required string FlowerType { get; set; }
+    public required string BouquetSize { get; set; }
+    public required string BookGenre { get; set; }
+    public int NumberOfBooks { get; set; }
     
 }

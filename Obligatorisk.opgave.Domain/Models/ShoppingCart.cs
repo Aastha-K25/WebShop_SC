@@ -5,9 +5,9 @@ public class ShoppingCart
     public int Id { get; set; }
     public int CustomerId { get; set; }
 
-    //den siger pris * antal 
-    public decimal CalculateTotal(IEnumerable<(decimal Price, int Quantity)> products)
+    //den beregner totalprisen inkluderet levering. 
+    public decimal CalculateTotal(decimal productsPrice, decimal shippingPrice)
     {
-        return products.Sum(product => product.Price * product.Quantity);
+        return productsPrice + shippingPrice;
     }
 }

@@ -3,8 +3,10 @@ namespace Obligatoris.opgave.Domain.Models;
 public class User
 {
     public int Id { get; set; }
-    public string Name { get; set; }
-    public string Email { get; set; }
-    public string PasswordHash { get; set; }
+    public required string Name { get; set; }
+    public required string Email { get; set; }
+    //Vi gemmer kun et hash af adgangskoden
+    //må aldrig gemmes i klartekst
+    public required string PasswordHash { get; set; }
     public bool IsActive { get; set; } = true;
 }
