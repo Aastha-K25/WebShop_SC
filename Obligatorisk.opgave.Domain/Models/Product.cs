@@ -3,7 +3,7 @@ namespace Obligatoris.opgave.Domain.Models;
 //Denne klasse er en abstrakt for alle produkter i webshoppen 
 //De har en fælles produktegenskaber. 
 
-public class Product
+public abstract class Product
 {
     public int Id { get; set; }
     public required string Name { get; set; }

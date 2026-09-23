@@ -3,7 +3,7 @@ using Obligatoris.opgave.Domain.Models;
 
 namespace Obligatorisk_opgave.Infrastructure.Repositories;
 
-public class OrderRepository
+public class OrderRepository : IOrderRepository
 {
     public Order? GetById(int id)
     {

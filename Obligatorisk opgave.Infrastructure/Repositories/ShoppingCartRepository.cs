@@ -57,3 +57,4 @@ public class ShoppingCartRepository : IShoppingCartRepository
         // to do: Fjern alle produkter fra indkøbskurven
         throw new NotImplementedException();
     }
+}

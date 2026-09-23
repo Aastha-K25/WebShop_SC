@@ -1,15 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>Obligatorisk_opgave</RootNamespace>
-    </PropertyGroup>
+      <UserSecretsId>aa9ccf36-9cb2-4dcb-bccc-ee3546f933a6</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Obligatorisk opgave.Infrastructure\Obligatorisk opgave.Infrastructure.csproj" />
       <ProjectReference Include="..\Obligatorisk.opgave.Domain\Obligatorisk.opgave.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.0" />
     </ItemGroup>
 
 </Project>
