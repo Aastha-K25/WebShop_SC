@@ -7,7 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 
 // Dependency Injection
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped <IProductRepository, ProductRepository>();
+builder.Services.AddScoped <IUserRepository, UserRepository>();
+builder.Services.AddScoped <IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+builder.Services.AddScoped <IOrderRepository, OrderRepository>();
+builder.Services.AddScoped <IShoppingCartRepository, ShoppingCartRepository>();
 
 var app = builder.Build();
 

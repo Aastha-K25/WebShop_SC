@@ -23,5 +23,5 @@ public interface IOrderRepository
         decimal priceAtPurchase);
 
     // Opdaterer ordrens status
-    void UpdateStatus(int orderId, string status);
+    void UpdateStatus(int orderId, OrderStatus status);
 }

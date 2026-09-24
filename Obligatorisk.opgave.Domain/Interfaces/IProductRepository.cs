@@ -19,7 +19,7 @@ public interface IProductRepository
     List<Bouquet> GetPopularBouquets(int amount);
 
     // Henter buketter fra en bestemt genre
-    List<Bouquet> GetBouquetsByGenre(string genre);
+    List<Bouquet> GetBouquetsByGenre(BookGenre genre);
 
     // Gemmer et nyt produkt
     void Add(Product product);
