@@ -5,17 +5,22 @@
     ViewData["Title"] = "Paper & Petals";
 }
 
-<link rel="stylesheet"
-      href="~/css/Index.css"
-      asp-append-version="true" />
+@section Styles
+{
+    <link rel="stylesheet"
+          href="~/css/Index.css"
+          asp-append-version="true" />
+}
 
 
 <div class="front-page">
 
-    <!-- HERO -->
+
+    @* Hero *@
     <section class="hero-section">
 
         <div class="hero-overlay"></div>
+
 
         <div class="page-container hero-content">
 
@@ -25,19 +30,24 @@
                     BOOKS • FLOWERS • STORIES
                 </p>
 
+
                 <h1>
                     Flowers that<br />
                     tell a story
                 </h1>
+
 
                 <p class="hero-description">
                     Create your own bouquet with your favorite color
                     and the perfect book.
                 </p>
 
+
                 <a class="primary-button"
-                   href="/Products">
+                   asp-page="/Products">
+
                     Explore Bouquets →
+
                 </a>
 
             </div>
@@ -47,10 +57,12 @@
     </section>
 
 
-    <!-- BENEFITS -->
+
+    @* Benefits *@
     <section class="benefits-section">
 
         <div class="page-container benefits-grid">
+
 
             <div class="benefit">
 
@@ -112,27 +124,37 @@
     </section>
 
 
-    <!-- POPULAR BOUQUETS -->
+
+    @* Popular Bouquets *@
     <section class="products-section">
 
         <div class="page-container">
 
+
             <div class="products-header">
 
-                <h2>Popular Bouquets</h2>
+                <h2>
+                    Popular Bouquets
+                </h2>
 
-                <a href="/Products">
+
+                <a asp-page="/Products">
+
                     View All Bouquets →
+
                 </a>
 
             </div>
+
 
 
             @if (Model.PopularProducts.Count == 0)
             {
                 <div class="empty-products">
 
-                    <p>No bouquets have been added yet.</p>
+                    <p>
+                        No bouquets have been added yet.
+                    </p>
 
                 </div>
             }
@@ -140,11 +162,14 @@
             {
                 <div class="products-grid">
 
+
                     @for (int i = 0; i < Model.PopularProducts.Count; i++)
                     {
                         <a class="product-card"
-                           href="/Products?ProductId=@Model.PopularProducts[i].Id"
+                           asp-page="/Product"
+                           asp-route-id="@Model.PopularProducts[i].Id"
                            aria-label="Read more about @Model.PopularProducts[i].Name">
+
 
                             <div class="product-image-container">
 
@@ -155,15 +180,31 @@
                             </div>
 
 
+
                             <div class="product-information">
 
                                 <h3>
                                     @Model.PopularProducts[i].Name
                                 </h3>
 
+
                                 <p class="product-genre">
-                                    + @Model.PopularProducts[i].BookGenre
+
+                                    @if (Model.PopularProducts[i].BookGenre == BookGenre.DarkRomance)
+                                    {
+                                        <span>
+                                            + Dark Romance
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>
+                                            + @Model.PopularProducts[i].BookGenre
+                                        </span>
+                                    }
+
                                 </p>
+
 
                                 <p class="product-price">
                                     @Model.PopularProducts[i].Price.ToString("0") kr.
@@ -174,8 +215,10 @@
                         </a>
                     }
 
+
                 </div>
             }
+
 
 
             <div class="products-quote">
@@ -193,9 +236,9 @@
         </div>
 
 
-        <!-- ned.png ligger alene nederst -->
         <div class="bottom-decoration"></div>
 
     </section>
+
 
 </div>

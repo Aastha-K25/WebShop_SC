@@ -1,0 +1,112 @@
+﻿@page
+@model Obligatorisk_opgave.Pages.OrderConfirmation
+
+@{
+    ViewData["Title"] = "Order Confirmation";
+}
+
+<section class="confirmation-page">
+
+    @if (Model.Order == null)
+    {
+        <div class="confirmation-box">
+
+            <h1>
+                Order not found
+            </h1>
+
+            <a asp-page="/Products">
+                Back to Bouquets
+            </a>
+
+        </div>
+    }
+    else
+    {
+        <div class="confirmation-box">
+
+            <p class="confirmation-eyebrow">
+                PAPER & PETALS
+            </p>
+
+            <h1>
+                Thank You
+            </h1>
+
+            <p class="confirmation-text">
+                Your order has been placed successfully.
+            </p>
+
+
+            <div class="confirmation-details">
+
+                <div>
+
+                    <span>
+                        Order Number
+                    </span>
+
+                    <strong>
+                        #@Model.Order.Id
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Order Date
+                    </span>
+
+                    <strong>
+                        @Model.Order.OrderDate.ToString("dd/MM/yyyy")
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong>
+                        @Model.Order.TotalPrice.ToString("0.00") kr.
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Status
+                    </span>
+
+                    <strong>
+                        @Model.Order.Status
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <p class="confirmation-note">
+                Your bouquet will be carefully prepared and packed.
+            </p>
+
+
+            <a asp-page="/Products"
+               class="confirmation-button">
+
+                Continue Shopping
+
+            </a>
+
+        </div>
+    }
+
+</section>

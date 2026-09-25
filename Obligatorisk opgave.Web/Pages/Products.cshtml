@@ -1,19 +1,502 @@
-@page
+﻿@page
 @model Obligatorisk_opgave.Pages.Products
 
 @{
-    Layout = null;
+    ViewData["Title"] = "Bouquets";
 }
 
-<!DOCTYPE html>
+@section Styles
+{
+    <link rel="stylesheet"
+          href="~/css/Products.css"
+          asp-append-version="true" />
+}
 
-<html>
-<head>
-    <title></title>
-</head>
-<body>
-<div>
-    
+
+<div class="products-page">
+
+
+    @* Popular collections *@
+    <section class="popular-section">
+
+
+        <div class="section-heading">
+
+            <div>
+
+                <p class="section-eyebrow">
+                    DISCOVER OUR COLLECTIONS
+                </p>
+
+                <h1>
+                    Popular Bouquets
+                </h1>
+
+            </div>
+
+
+            <a asp-page="/Products"
+               class="view-all-link">
+
+                View All Bouquets →
+
+            </a>
+
+        </div>
+
+
+
+        <div class="popular-grid">
+
+
+            @* Romance *@
+            <div class="collection-card">
+
+                <a href="/Products?genre=Romance"
+                   class="collection-image-link">
+
+                    <img src="@Model.GetCollectionImage(BookGenre.Romance)"
+                         alt="Romance bouquet collection"
+                         class="collection-image" />
+
+                </a>
+
+
+                <div class="collection-content">
+
+                    <p class="collection-genre">
+                        ROMANCE
+                    </p>
+
+                    <h2>
+                        Romance Collection
+                    </h2>
+
+                    <p class="collection-text">
+                        Soft flowers and romantic stories made for dreamy moments.
+                    </p>
+
+
+                    <div class="collection-bottom">
+
+                        <div>
+
+                            <span class="from-text">
+                                Explore
+                            </span>
+
+                            <strong>
+                                Romance
+                            </strong>
+
+                        </div>
+
+
+                        <a href="/Products?genre=Romance"
+                           class="collection-button">
+
+                            View Collection
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            @* Crime *@
+            <div class="collection-card">
+
+                <a href="/Products?genre=Crime"
+                   class="collection-image-link">
+
+                    <img src="@Model.GetCollectionImage(BookGenre.Crime)"
+                         alt="Crime bouquet collection"
+                         class="collection-image" />
+
+                </a>
+
+
+                <div class="collection-content">
+
+                    <p class="collection-genre">
+                        CRIME
+                    </p>
+
+                    <h2>
+                        Crime Collection
+                    </h2>
+
+                    <p class="collection-text">
+                        Mysterious stories paired with bold and dramatic flowers.
+                    </p>
+
+
+                    <div class="collection-bottom">
+
+                        <div>
+
+                            <span class="from-text">
+                                Explore
+                            </span>
+
+                            <strong>
+                                Crime
+                            </strong>
+
+                        </div>
+
+
+                        <a href="/Products?genre=Crime"
+                           class="collection-button">
+
+                            View Collection
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            @* Fantasy *@
+            <div class="collection-card">
+
+                <a href="/Products?genre=Fantasy"
+                   class="collection-image-link">
+
+                    <img src="@Model.GetCollectionImage(BookGenre.Fantasy)"
+                         alt="Fantasy bouquet collection"
+                         class="collection-image" />
+
+                </a>
+
+
+                <div class="collection-content">
+
+                    <p class="collection-genre">
+                        FANTASY
+                    </p>
+
+                    <h2>
+                        Fantasy Collection
+                    </h2>
+
+                    <p class="collection-text">
+                        Magical worlds surrounded by enchanting flowers and colors.
+                    </p>
+
+
+                    <div class="collection-bottom">
+
+                        <div>
+
+                            <span class="from-text">
+                                Explore
+                            </span>
+
+                            <strong>
+                                Fantasy
+                            </strong>
+
+                        </div>
+
+
+                        <a href="/Products?genre=Fantasy"
+                           class="collection-button">
+
+                            View Collection
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            @* Biography *@
+            <div class="collection-card">
+
+                <a href="/Products?genre=Biography"
+                   class="collection-image-link">
+
+                    <img src="@Model.GetCollectionImage(BookGenre.Biography)"
+                         alt="Biography bouquet collection"
+                         class="collection-image" />
+
+                </a>
+
+
+                <div class="collection-content">
+
+                    <p class="collection-genre">
+                        BIOGRAPHY
+                    </p>
+
+                    <h2>
+                        Biography Collection
+                    </h2>
+
+                    <p class="collection-text">
+                        Remarkable lives and meaningful stories paired with elegant flowers.
+                    </p>
+
+
+                    <div class="collection-bottom">
+
+                        <div>
+
+                            <span class="from-text">
+                                Explore
+                            </span>
+
+                            <strong>
+                                Biography
+                            </strong>
+
+                        </div>
+
+
+                        <a href="/Products?genre=Biography"
+                           class="collection-button">
+
+                            View Collection
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    @* All bouquets *@
+    <section class="all-products-section">
+
+
+        <div class="all-products-heading">
+
+            <p class="section-eyebrow">
+                PAPER & PETALS
+            </p>
+
+            <h2>
+                All Bouquets
+            </h2>
+
+            <p>
+                Choose the story and bouquet that feels right for you.
+            </p>
+
+        </div>
+
+
+
+        @* Filter *@
+        <div class="products-filter">
+
+            <a href="/Products"
+               class="filter-button">
+
+                All
+
+            </a>
+
+
+            <a href="/Products?genre=Romance"
+               class="filter-button">
+
+                Romance
+
+            </a>
+
+
+            <a href="/Products?genre=DarkRomance"
+               class="filter-button">
+
+                Dark Romance
+
+            </a>
+
+
+            <a href="/Products?genre=Fantasy"
+               class="filter-button">
+
+                Fantasy
+
+            </a>
+
+
+            <a href="/Products?genre=Crime"
+               class="filter-button">
+
+                Crime
+
+            </a>
+
+
+            <a href="/Products?genre=Biography"
+               class="filter-button">
+
+                Biography
+
+            </a>
+
+        </div>
+
+
+
+        @if (Model.Bouquets.Count == 0)
+        {
+            <div class="empty-products">
+
+                <p>
+                    No bouquets were found.
+                </p>
+
+            </div>
+        }
+        else
+        {
+            <div class="products-grid">
+
+
+                @foreach (Bouquet bouquet in Model.Bouquets)
+                {
+                    <div class="product-card">
+
+
+                        @* Produktbillede *@
+                        <a href="/Product?id=@bouquet.Id"
+                           class="product-image-link">
+
+                            <div class="product-image-container">
+
+                                @if (!string.IsNullOrEmpty(bouquet.ImagePath))
+                                {
+                                    <img src="@bouquet.ImagePath"
+                                         alt="@bouquet.ImageDescription"
+                                         class="product-image" />
+                                }
+
+                            </div>
+
+                        </a>
+
+
+
+                        <div class="product-content">
+
+
+                            <p class="product-genre">
+
+                                @if (bouquet.BookGenre == BookGenre.DarkRomance)
+                                {
+                                    <span>
+                                        DARK ROMANCE
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        @bouquet.BookGenre
+                                    </span>
+                                }
+
+                            </p>
+
+
+
+                            @* Produktnavn *@
+                            <a href="/Product?id=@bouquet.Id"
+                               class="product-name-link">
+
+                                <h3>
+                                    @bouquet.Name
+                                </h3>
+
+                            </a>
+
+
+
+                            <p class="product-meta">
+
+                                @bouquet.BouquetSize
+
+                                <span>
+                                    •
+                                </span>
+
+                                @bouquet.NumberOfBooks books
+
+                            </p>
+
+
+
+                            <div class="product-bottom">
+
+
+                                <div>
+
+                                    <p class="product-price">
+                                        @bouquet.Price.ToString("0") kr.
+                                    </p>
+
+
+                                    @if (bouquet.StockQuantity > 0)
+                                    {
+                                        <p class="product-stock">
+                                            In stock
+                                        </p>
+                                    }
+                                    else
+                                    {
+                                        <p class="product-stock sold-out">
+                                            Sold out
+                                        </p>
+                                    }
+
+                                </div>
+
+
+
+                                <a href="/Product?id=@bouquet.Id"
+                                   class="product-view-button">
+
+                                    View
+
+                                </a>
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+
+            </div>
+        }
+
+
+    </section>
+
+
 </div>
-</body>
-</html>

@@ -1,0 +1,224 @@
+﻿@page
+@model Obligatorisk_opgave.Pages.Checkout
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<section class="checkout-page">
+
+    <div class="checkout-header">
+
+        <p class="checkout-eyebrow">
+            PAPER & PETALS
+        </p>
+
+        <h1>
+            Checkout
+        </h1>
+
+        <p>
+            Almost there. Your stories and blooms are ready.
+        </p>
+
+    </div>
+
+
+    <div class="checkout-layout">
+
+
+        @* Leveringsoplysninger *@
+        <div class="checkout-information">
+
+            <section class="checkout-box">
+
+                <p class="checkout-box-label">
+                    DELIVERY
+                </p>
+
+                <h2>
+                    Delivery Details
+                </h2>
+
+
+                @if (Model.Customer != null)
+                {
+                    <div class="customer-information">
+
+                        <div>
+                            <span>Name</span>
+
+                            <p>
+                                @Model.Customer.Name
+                            </p>
+                        </div>
+
+
+                        <div>
+                            <span>Email</span>
+
+                            <p>
+                                @Model.Customer.Email
+                            </p>
+                        </div>
+
+
+                        <div>
+                            <span>Address</span>
+
+                            <p>
+                                @Model.Customer.Address
+                            </p>
+                        </div>
+
+                    </div>
+                }
+
+            </section>
+
+
+
+            @* Produkterne *@
+            <section class="checkout-box">
+
+                <p class="checkout-box-label">
+                    YOUR BOUQUETS
+                </p>
+
+                <h2>
+                    Order Items
+                </h2>
+
+
+                @foreach (var product in Model.Products)
+                {
+                    <div class="checkout-product">
+
+                        <div class="checkout-product-image">
+
+                            @if (!string.IsNullOrEmpty(product.ImagePath))
+                            {
+                                <img src="@product.ImagePath"
+                                     alt="@product.ImageDescription" />
+                            }
+
+                        </div>
+
+
+                        <div class="checkout-product-info">
+
+                            <h3>
+                                @product.Name
+                            </h3>
+
+                            <p>
+                                Quantity:
+                                @Model.GetQuantity(product.Id)
+                            </p>
+
+                            <p>
+                                @product.Price.ToString("0.00") kr. each
+                            </p>
+
+                        </div>
+
+
+                        <div class="checkout-product-total">
+
+                            @Model.GetProductTotal(product).ToString("0.00") kr.
+
+                        </div>
+
+                    </div>
+                }
+
+            </section>
+
+        </div>
+
+
+
+        @* Ordreoversigt *@
+        <aside class="checkout-summary">
+
+            <p class="summary-eyebrow">
+                ORDER SUMMARY
+            </p>
+
+            <h2>
+                Your Order
+            </h2>
+
+
+            <div class="summary-row">
+
+                <span>
+                    Items
+                </span>
+
+                <span>
+                    @Model.GetSubtotal().ToString("0.00") kr.
+                </span>
+
+            </div>
+
+
+            <div class="summary-row">
+
+                <span>
+                    Shipping
+                </span>
+
+                <span>
+                    @Model.ShippingPrice.ToString("0.00") kr.
+                </span>
+
+            </div>
+
+
+            <hr />
+
+
+            <div class="summary-row checkout-total">
+
+                <strong>
+                    Total
+                </strong>
+
+                <strong>
+                    @Model.GetTotalPrice().ToString("0.00") kr.
+                </strong>
+
+            </div>
+
+
+
+            <form method="post">
+
+                <button type="submit"
+                        class="place-order-button">
+
+                    Place Order
+
+                </button>
+
+            </form>
+
+
+            <p class="checkout-note">
+                Carefully packed and prepared with love.
+            </p>
+
+
+            <a asp-page="/Cart"
+               class="back-to-cart">
+
+                Back to Bag
+
+            </a>
+
+        </aside>
+
+    </div>
+
+</section>

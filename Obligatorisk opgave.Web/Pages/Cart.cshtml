@@ -7,66 +7,268 @@
 
 <section class="cart-page">
 
-    <h1>Your Cart</h1>
+    <div class="cart-header">
 
-    <div class="cart-layout">
+        <p class="cart-eyebrow">
+            PAPER & PETALS
+        </p>
 
-        @* Produkterne i kurven *@
-        <div class="cart-items">
+        <h1>
+            Your Bag
+        </h1>
 
-            <div class="cart-item">
-
-                <div>
-                    <h2>@Model.ProductName</h2>
-                    <p>Beautiful bouquet with roses and seasonal flowers.</p>
-                </div>
-
-                <div>
-                    <p>Quantity: @Model.Quantity</p>
-                    <p>@Model.Price kr.</p>
-
-                    @* Knap til at fjerne varen *@
-                    <button type="button" class="remove-button">
-                        Remove
-                    </button>
-                </div>
-
-            </div>
-
-        </div>
-
-        @* Ordreoversigt *@
-        <div class="cart-summary">
-
-            <h2>Your Order</h2>
-
-            @* Pris for alle varer *@
-            <div class="summary-row">
-                <span>Items</span>
-                <span>@Model.Subtotal kr.</span>
-            </div>
-
-            @* Leveringspris *@
-            <div class="summary-row">
-                <span>Shipping</span>
-                <span>@Model.ShippingPrice kr.</span>
-            </div>
-
-            <hr />
-
-            @* Samlet pris *@
-            <div class="summary-row">
-                <strong>Total</strong>
-                <strong>@Model.TotalPrice kr.</strong>
-            </div>
-
-            @* Knap til checkout *@
-            <button type="button" class="checkout-button">
-                Proceed to Checkout
-            </button>
-
-        </div>
+        <p>
+            Your selected stories and blooms.
+        </p>
 
     </div>
+
+
+    @if (Model.Products.Count == 0)
+    {
+        <div class="empty-cart">
+
+            <h2>
+                Your bag is empty
+            </h2>
+
+            <p>
+                Find a bouquet made for your story.
+            </p>
+
+            <a asp-page="/Products"
+               class="continue-shopping-button">
+
+                Explore Bouquets
+
+            </a>
+
+        </div>
+    }
+    else
+    {
+        <div class="cart-layout">
+
+
+            @* Produkterne i kurven *@
+            <div class="cart-items">
+
+
+                @foreach (var product in Model.Products)
+                {
+                    <article class="cart-item">
+
+
+                        <div class="cart-item-image">
+
+                            @if (!string.IsNullOrEmpty(product.ImagePath))
+                            {
+                                <img src="@product.ImagePath"
+                                     alt="@product.ImageDescription" />
+                            }
+
+                        </div>
+
+
+                        <div class="cart-item-information">
+
+                            <p class="cart-item-label">
+                                PAPER & PETALS
+                            </p>
+
+
+                            <h2>
+                                @product.Name
+                            </h2>
+
+
+                            <p class="cart-item-price">
+                                @product.Price.ToString("0.00") kr.
+                            </p>
+
+
+                            @* Ændrer antal *@
+                            <form method="post"
+                                  class="quantity-form">
+
+                                <input type="hidden"
+                                       name="action"
+                                       value="update" />
+
+                                <input type="hidden"
+                                       name="productId"
+                                       value="@product.Id" />
+
+
+                                <label>
+                                    Quantity
+                                </label>
+
+
+                                <input type="number"
+                                       name="quantity"
+                                       value="@Model.GetQuantity(product.Id)"
+                                       min="1"
+                                       max="@product.StockQuantity" />
+
+
+                                <button type="submit"
+                                        class="update-button">
+
+                                    Update
+
+                                </button>
+
+                            </form>
+
+
+                            @* Fjerner produktet *@
+                            <form method="post">
+
+                                <input type="hidden"
+                                       name="action"
+                                       value="remove" />
+
+                                <input type="hidden"
+                                       name="productId"
+                                       value="@product.Id" />
+
+                                <input type="hidden"
+                                       name="quantity"
+                                       value="0" />
+
+
+                                <button type="submit"
+                                        class="remove-button">
+
+                                    Remove
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+
+                        <div class="cart-item-total">
+
+                            <p>
+                                @Model.GetProductTotal(product).ToString("0.00") kr.
+                            </p>
+
+                        </div>
+
+                    </article>
+                }
+
+
+                <div class="cart-actions">
+
+                    <a asp-page="/Products">
+                        Continue Shopping
+                    </a>
+
+
+                    @* Tømmer hele kurven *@
+                    <form method="post">
+
+                        <input type="hidden"
+                               name="action"
+                               value="clear" />
+
+                        <input type="hidden"
+                               name="productId"
+                               value="0" />
+
+                        <input type="hidden"
+                               name="quantity"
+                               value="0" />
+
+
+                        <button type="submit"
+                                class="clear-cart-button">
+
+                            Clear Bag
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+
+            @* Ordreoversigt *@
+            <aside class="cart-summary">
+
+                <p class="summary-eyebrow">
+                    ORDER SUMMARY
+                </p>
+
+                <h2>
+                    Your Order
+                </h2>
+
+
+                <div class="summary-row">
+
+                    <span>
+                        Items
+                    </span>
+
+                    <span>
+                        @Model.GetSubtotal().ToString("0.00") kr.
+                    </span>
+
+                </div>
+
+
+                <div class="summary-row">
+
+                    <span>
+                        Shipping
+                    </span>
+
+                    <span>
+                        @Model.ShippingPrice.ToString("0.00") kr.
+                    </span>
+
+                </div>
+
+
+                <hr />
+
+
+                <div class="summary-row total-row">
+
+                    <strong>
+                        Total
+                    </strong>
+
+                    <strong>
+                        @Model.GetTotalPrice().ToString("0.00") kr.
+                    </strong>
+
+                </div>
+
+
+                <button type="button"
+                        class="checkout-button">
+
+                    Proceed to Checkout
+
+                </button>
+
+
+                <p class="summary-note">
+                    Secure checkout · Carefully packed
+                </p>
+
+            </aside>
+
+        </div>
+    }
 
 </section>

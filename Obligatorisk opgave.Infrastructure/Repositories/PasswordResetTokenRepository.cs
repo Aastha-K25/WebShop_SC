@@ -55,7 +55,8 @@ public class PasswordResetTokenRepository
 
         connection.Open();
 
-        using SqlDataReader reader = command.ExecuteReader();
+        using SqlDataReader reader =
+            command.ExecuteReader();
 
         if (reader.Read())
         {
@@ -171,15 +172,16 @@ public class PasswordResetTokenRepository
     }
 
 
-    // Sletter tokens, som er udløbet.
+    // Sletter tokens, som ikke længere kan bruges.
     //
-    // Det begrænser mængden af gamle og sikkerhedsfølsomme
-    // oplysninger i databasen.
+    // Det gælder både tokens, der er udløbet,
+    // og tokens, der allerede er blevet brugt.
     public void DeleteExpiredTokens()
     {
         string sql = """
             DELETE FROM paperpetals.PasswordResetTokens
-            WHERE ExpiresAt <= @CurrentTime;
+            WHERE ExpiresAt <= @CurrentTime
+               OR UsedAt IS NOT NULL;
             """;
 
         using SqlConnection connection =

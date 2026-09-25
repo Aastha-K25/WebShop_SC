@@ -1,6 +1,9 @@
 using Obligatoris.opgave.Domain.Models;
+
 namespace Obligatoris.opgave.Domain.Interfaces;
 
+// Interfacet beskriver de funktioner,
+// som UserRepository implementerer.
 public interface IUserRepository
 {
     // Henter alle brugere
@@ -21,6 +24,6 @@ public interface IUserRepository
     // Opdaterer en eksisterende bruger
     void Update(User user);
 
-    // Deaktiverer en bruger
+    // Deaktiverer en bruger uden at slette data
     void Deactivate(int id);
 }

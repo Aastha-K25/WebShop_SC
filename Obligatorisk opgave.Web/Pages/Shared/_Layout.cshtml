@@ -1,45 +1,75 @@
 ﻿@{
-    var isHomePage = ViewContext.RouteData.Values["page"]?.ToString() == "/Index";
+    var isHomePage =
+        ViewContext.RouteData.Values["page"]?.ToString() == "/Index";
 }
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>@ViewData["Title"] - Paper & Petals</title>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+
+    <title>
+        @ViewData["Title"] - Paper & Petals
+    </title>
+
 
     <script type="importmap"></script>
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Obligatorisk_opgave.styles.css" asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/Obligatorisk_opgave.styles.css"
+          asp-append-version="true" />
+
+
+    @* Gør det muligt at bruge separat CSS på hver side *@
+    @await RenderSectionAsync("Styles", required: false)
+
 </head>
+
 
 <body class="@(isHomePage ? "home-page" : "")">
 
+
     <header class="@(isHomePage ? "home-header" : "")">
+
 
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light
                     @(isHomePage ? "home-navbar" : "bg-white border-bottom box-shadow")">
 
+
             <div class="container">
 
-                <!-- Logo og navn -->
+
+                @* Logo og navn *@
                 <a class="navbar-brand"
-                   asp-area=""
                    asp-page="/Index">
 
                     <img class="navbar-logo"
                          src="~/Images/logo.png"
                          alt="Paper & Petals logo" />
 
-                    <span>Paper & Petals</span>
+                    <span>
+                        Paper & Petals
+                    </span>
+
                 </a>
 
-                <!-- Mobilmenu -->
+
+
+                @* Mobilmenu *@
                 <button class="navbar-toggler"
                         type="button"
                         data-bs-toggle="collapse"
@@ -49,88 +79,134 @@
                         aria-label="Open navigation">
 
                     <span class="navbar-toggler-icon"></span>
+
                 </button>
+
+
 
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 
-                    <!-- Navigation -->
+
+                    @* Navigation *@
                     <ul class="navbar-nav">
 
+
                         <li class="nav-item">
+
                             <a class="nav-link text-dark"
-                               asp-area=""
                                asp-page="/Index">
+
                                 Home
+
                             </a>
+
                         </li>
 
+
                         <li class="nav-item">
+
                             <a class="nav-link text-dark"
-                               asp-area=""
                                asp-page="/Products">
+
                                 Bouquets
+
                             </a>
+
                         </li>
 
+
                         <li class="nav-item">
+
                             <a class="nav-link text-dark"
-                               href="/#how-it-works">
+                               asp-page="/Index"
+                               asp-fragment="how-it-works">
+
                                 How It Works
+
                             </a>
+
                         </li>
 
+
                         <li class="nav-item">
+
                             <a class="nav-link text-dark"
-                               href="/#about">
+                               asp-page="/Index"
+                               asp-fragment="about">
+
                                 About Us
+
                             </a>
+
                         </li>
 
+
                         <li class="nav-item">
+
                             <a class="nav-link text-dark"
-                               href="/#contact">
+                               asp-page="/Index"
+                               asp-fragment="contact">
+
                                 Contact
+
                             </a>
+
                         </li>
+
 
                     </ul>
 
-                    <!-- Ikoner -->
+
+
+                    @* Ikoner *@
                     <div class="navbar-icons">
 
+
+                        @* Søgefunktion bliver lavet senere *@
                         <a asp-page="/Products"
-                           aria-label="Search for products">
+                           aria-label="Browse bouquets">
 
                             <img src="~/Images/search-icon.png"
-                                 alt="Search" />
+                                 alt="Browse bouquets" />
+
                         </a>
 
+
                         <a asp-page="/Login"
-                           aria-label="Log in">
+                           aria-label="Login">
 
                             <img src="~/Images/user-icon.png"
                                  alt="User" />
+
                         </a>
+
 
                         <a asp-page="/Cart"
-                           aria-label="View shopping cart">
+                           aria-label="View shopping bag">
 
                             <img src="~/Images/cart-icon.png"
-                                 alt="Shopping cart" />
+                                 alt="Shopping bag" />
+
                         </a>
+
 
                     </div>
 
+
                 </div>
+
 
             </div>
 
+
         </nav>
+
 
     </header>
 
 
-    <!-- Hele siden må nu bruge hele bredden -->
+
+    @* Sidens indhold *@
     <div class="main-content">
 
         <main role="main">
@@ -142,14 +218,14 @@
     </div>
 
 
+
     <footer class="border-top footer text-muted">
 
         <div class="container">
 
             &copy; 2026 - Paper & Petals -
 
-            <a asp-area=""
-               asp-page="/Privacy">
+            <a asp-page="/Privacy">
                 Privacy
             </a>
 
@@ -158,9 +234,14 @@
     </footer>
 
 
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+
 
     @await RenderSectionAsync("Scripts", required: false)
 

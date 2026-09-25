@@ -2,18 +2,121 @@
 @model Obligatorisk_opgave.Pages.Register
 
 @{
-    Layout = null;
+    ViewData["Title"] = "Create Account";
 }
 
-<!DOCTYPE html>
+<section class="register-page">
 
-<html>
-<head>
-    <title></title>
-</head>
-<body>
-<div>
-    
-</div>
-</body>
-</html>
+    <div class="register-container">
+
+        <p class="register-eyebrow">
+            PAPER & PETALS
+        </p>
+
+        <h1>Create Account</h1>
+
+        <p class="register-description">
+            Create an account and keep your favourite stories and blooms close.
+        </p>
+
+
+        @* Viser fejlbesked *@
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <p class="register-error">
+                @TempData["ErrorMessage"]
+            </p>
+        }
+
+
+        @* Register formular *@
+        <form method="post">
+
+            <div class="form-group">
+
+                <label for="name">
+                    Name
+                </label>
+
+                <input type="text"
+                       id="name"
+                       name="name" />
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input type="email"
+                       id="email"
+                       name="email" />
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="address">
+                    Address
+                </label>
+
+                <input type="text"
+                       id="address"
+                       name="address" />
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input type="password"
+                       id="password"
+                       name="password" />
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="confirmPassword">
+                    Confirm Password
+                </label>
+
+                <input type="password"
+                       id="confirmPassword"
+                       name="confirmPassword" />
+
+            </div>
+
+
+            <button type="submit"
+                    class="register-button">
+
+                Create Account
+
+            </button>
+
+        </form>
+
+
+        <p class="account-link">
+
+            Already have an account?
+
+            <a asp-page="/Login">
+                Login
+            </a>
+
+        </p>
+
+    </div>
+
+</section>
