@@ -22,7 +22,7 @@ var app = builder.Build();
 // Hvis vi ikke kører i development
 if (!app.Environment.IsDevelopment())
 {
-    // Viser vores error-side ved fejl
+    // Viser vores error side ved fejl
     app.UseExceptionHandler("/Error");
 
 
@@ -36,11 +36,10 @@ app.UseHttpsRedirection();
 
 
 
-// Tillader kun de HTTP-metoder vi bruger
+// Tillader kun de HTTP metoder vi bruger
 app.Use(async (context, next) =>
 {
-    HashSet<string> allowedMethods =
-        new HashSet<string>
+    HashSet<string> allowedMethods = new HashSet<string>
         {
             "GET",
             "POST",
@@ -54,8 +53,7 @@ app.Use(async (context, next) =>
         context.Response.StatusCode = 405;
 
 
-        await context.Response.WriteAsync(
-            "Method Not Allowed");
+        await context.Response.WriteAsync( "Method Not Allowed");
 
 
         return;
@@ -81,11 +79,7 @@ app.Use(async (context, next) =>
         bool validContentType =
             contentType != null &&
             (
-                contentType.StartsWith(
-                    "application/x-www-form-urlencoded")
-                ||
-                contentType.StartsWith(
-                    "multipart/form-data")
+                contentType.StartsWith( "application/x-www-form-urlencoded") ||  contentType.StartsWith( "multipart/form-data")
             );
 
 
@@ -95,8 +89,7 @@ app.Use(async (context, next) =>
             context.Response.StatusCode = 415;
 
 
-            await context.Response.WriteAsync(
-                "Unsupported Media Type");
+            await context.Response.WriteAsync( "Unsupported Media Type");
 
 
             return;
