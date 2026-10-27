@@ -4,7 +4,7 @@ using Obligatorisk_opgave.Infrastructure.Repositories;
 var builder = WebApplication.CreateBuilder(args);
 
 
-// Gør Razor Pages klar
+// Gï¿½r Razor Pages klar
 builder.Services.AddRazorPages();
 
 
@@ -19,7 +19,7 @@ builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
 var app = builder.Build();
 
 
-// Hvis vi ikke kører i development
+// Hvis vi ikke kï¿½rer i development
 if (!app.Environment.IsDevelopment())
 {
     // Viser vores error side ved fejl
@@ -65,7 +65,7 @@ app.Use(async (context, next) =>
 
 
 
-// Tjekker Content-Type på POST requests
+// Tjekker Content-Type pï¿½ POST requests
 app.Use(async (context, next) =>
 {
     // Vi tjekker kun POST fordi GET ikke sender form-data i body
@@ -102,16 +102,16 @@ app.Use(async (context, next) =>
 
 
 
-// Tilføjer sikkerhedsheaders
+// TilfÃ¸jer sikkerhedsheaders
 app.Use(async (context, next) =>
 {
-    // Stopper browseren fra selv at gætte MIME-type
+    // Stopper browseren fra selv at gï¿½tte MIME-type
     context.Response.Headers.Append(
         "X-Content-Type-Options",
         "nosniff");
 
 
-    // CSP bestemmer hvilke ressourcer browseren må bruge
+    // CSP bestemmer hvilke ressourcer browseren mï¿½ bruge
     context.Response.Headers.Append(
         "Content-Security-Policy",
         "default-src 'self'; " +
@@ -130,15 +130,15 @@ app.Use(async (context, next) =>
 
 
 
-// Gør routing klar
+// Gï¿½r routing klar
 app.UseRouting();
 
 
-// Gør authorization klar
+// Gï¿½r authorization klar
 app.UseAuthorization();
 
 
-// Gør statiske filer klar
+// Gï¿½r statiske filer klar
 app.MapStaticAssets();
 
 

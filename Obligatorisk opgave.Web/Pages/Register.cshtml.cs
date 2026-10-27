@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Obligatoris.opgave.Domain.Interfaces;
 using Obligatoris.opgave.Domain.Models;
+using Obligatorisk_opgave.Security;
 
 namespace Obligatorisk_opgave.Pages;
 
@@ -17,30 +18,24 @@ public class Register : PageModel
     }
 
 
-    // Kører når siden åbnes
+    // KÃ¸rer nÃ¥r siden Ã¥bnes
     public void OnGet()
     {
     }
-
-
-    // Kører når formularen sendes
+    
+    // KÃ¸rer nÃ¥r formularen sendes
     public IActionResult OnPost()
     {
         // Henter data fra formularen
-        string name =
-            Request.Form["name"].ToString();
+        string name = Request.Form["name"].ToString();
 
-        string email =
-            Request.Form["email"].ToString();
+        string email = Request.Form["email"].ToString();
 
-        string address =
-            Request.Form["address"].ToString();
+        string address = Request.Form["address"].ToString();
 
-        string password =
-            Request.Form["password"].ToString();
+        string password = Request.Form["password"].ToString();
 
-        string confirmPassword =
-            Request.Form["confirmPassword"].ToString();
+        string confirmPassword = Request.Form["confirmPassword"].ToString();
 
 
         // Tjekker at alle felter er udfyldt
@@ -50,19 +45,24 @@ public class Register : PageModel
             string.IsNullOrWhiteSpace(password) ||
             string.IsNullOrWhiteSpace(confirmPassword))
         {
-            TempData["ErrorMessage"] =
-                "Please fill out all fields.";
-
+            TempData["ErrorMessage"] = "Please fill out all fields.";
             return Page();
         }
-
-
+        
         // Tjekker at passwords er ens
         if (password != confirmPassword)
         {
-            TempData["ErrorMessage"] =
-                "Passwords do not match.";
-
+            TempData["ErrorMessage"] = "Passwords do not match.";
+            return Page();
+        }
+        
+        // Kontrollerer om passwordet fÃ¸lger vores password policy.
+        string? passwordError = PasswordValidator.Validate(password, name, email);
+        
+        // Hvis passwordet ikke er gyldigt, vises fejlbeskeden.
+        if (passwordError != null)
+        {
+            TempData["ErrorMessage"] = passwordError;
             return Page();
         }
 
@@ -70,9 +70,7 @@ public class Register : PageModel
         // Tjekker om email allerede findes
         if (_userRepository.EmailExists(email))
         {
-            TempData["ErrorMessage"] =
-                "An account with this email already exists.";
-
+            TempData["ErrorMessage"] = "An account with this email already exists.";
             return Page();
         }
 
