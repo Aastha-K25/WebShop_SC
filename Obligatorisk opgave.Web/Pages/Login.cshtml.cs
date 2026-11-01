@@ -1,79 +1,55 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Obligatoris.opgave.Domain.Interfaces;
-using Obligatoris.opgave.Domain.Models;
+using Obligatorisk_opgave.Services;
 
 namespace Obligatorisk_opgave.Pages;
 
 public class Login : PageModel
 {
-    private readonly IUserRepository _userRepository;
+    private readonly AuthenticationService _authenticationService;
 
-
-    // Henter user repository
-    public Login(IUserRepository userRepository)
+    public Login(AuthenticationService authenticationService)
     {
-        _userRepository = userRepository;
+        _authenticationService = authenticationService;
     }
 
-
-    // Kører når siden åbnes
-    public void OnGet()
+    // KÃ¸rer nÃ¥r login-siden Ã¥bnes
+    public IActionResult OnGet()
     {
+        // En bruger, der allerede er logget ind,
+        // sendes tilbage til forsiden
+        if (_authenticationService.IsAuthenticated())
+        {
+            return RedirectToPage("/Index");
+        }
+
+        return Page();
     }
 
-
-    // Kører når formularen sendes
+    // KÃ¸rer nÃ¥r login-formularen sendes
     public IActionResult OnPost()
     {
-        // Henter data fra formularen
         string email =
             Request.Form["email"].ToString();
 
         string password =
             Request.Form["password"].ToString();
 
+        // AuthenticationService finder brugeren,
+        // kontrollerer passwordet og opretter sessionen
+        string? errorMessage =
+            _authenticationService.Login(
+                email,
+                password);
 
-        // Tjekker at felterne er udfyldt
-        if (string.IsNullOrWhiteSpace(email) ||
-            string.IsNullOrWhiteSpace(password))
+        // Login mislykkedes
+        if (errorMessage != null)
         {
-            TempData["ErrorMessage"] =
-                "Please enter email and password.";
-
+            TempData["ErrorMessage"] = errorMessage;
             return Page();
         }
 
-
-        // Finder brugeren ud fra email
-        User? user =
-            _userRepository.GetByEmail(email);
-
-
-        // Tjekker om brugeren findes
-        if (user == null)
-        {
-            TempData["ErrorMessage"] =
-                "Invalid email or password.";
-
-            return Page();
-        }
-
-
-        // Tjekker om brugeren er aktiv
-        if (!user.IsActive)
-        {
-            TempData["ErrorMessage"] =
-                "Invalid email or password.";
-
-            return Page();
-        }
-
-
-        // Password verification mangler stadig
-        TempData["ErrorMessage"] =
-            "Password verification is not connected yet.";
-
-        return Page();
+        // Login lykkedes
+        return RedirectToPage("/Index");
     }
 }

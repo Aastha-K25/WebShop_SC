@@ -6,9 +6,5 @@
         <Nullable>enable</Nullable>
         <RootNamespace>Obligatoris.opgave.Domain</RootNamespace>
     </PropertyGroup>
-
-    <ItemGroup>
-      <Folder Include="Services\" />
-    </ItemGroup>
     
 </Project>

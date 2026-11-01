@@ -1,6 +1,12 @@
-﻿@{
+﻿@using Obligatorisk_opgave.Services
+@inject SessionService SessionService
+
+@{
     var isHomePage =
         ViewContext.RouteData.Values["page"]?.ToString() == "/Index";
+    
+    //burges til at vise den rigtige knap i navigationen 
+    bool isLoggedIn = SessionService.IsLoggedIn();
 }
 
 <!DOCTYPE html>
@@ -105,24 +111,15 @@
 
                         <li class="nav-item">
 
-                            <a class="nav-link text-dark"
-                               asp-page="/Products">
-
+                            <a class="nav-link text-dark" asp-page="/Products">
                                 Bouquets
-
                             </a>
-
                         </li>
 
 
                         <li class="nav-item">
-
-                            <a class="nav-link text-dark"
-                               asp-page="/Index"
-                               asp-fragment="how-it-works">
-
+                            <a class="nav-link text-dark" asp-page="/Index" asp-fragment="how-it-works">
                                 How It Works
-
                             </a>
 
                         </li>
@@ -130,12 +127,8 @@
 
                         <li class="nav-item">
 
-                            <a class="nav-link text-dark"
-                               asp-page="/Index"
-                               asp-fragment="about">
-
+                            <a class="nav-link text-dark" asp-page="/Index" asp-fragment="about">
                                 About Us
-
                             </a>
 
                         </li>
@@ -143,10 +136,7 @@
 
                         <li class="nav-item">
 
-                            <a class="nav-link text-dark"
-                               asp-page="/Index"
-                               asp-fragment="contact">
-
+                            <a class="nav-link text-dark" asp-page="/Index" asp-fragment="contact">
                                 Contact
 
                             </a>
@@ -163,29 +153,31 @@
 
 
                         @* Søgefunktion bliver lavet senere *@
-                        <a asp-page="/Products"
-                           aria-label="Browse bouquets">
-
-                            <img src="~/Images/search-icon.png"
-                                 alt="Browse bouquets" />
+                        <a asp-page="/Products" aria-label="Browse bouquets">
+                            <img src="~/Images/search-icon.png" alt="Browse bouquets" />
 
                         </a>
 
+                        @* Viser login eller logout afhængigt af sessionen *@
+                        @if (isLoggedIn)
+                        {
+                            <a asp-page="/Logout" aria-label="Log out">
+                                <img src="~/Images/user-icon.png"alt="Log out" />
 
-                        <a asp-page="/Login"
-                           aria-label="Login">
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-page="/Login" aria-label="Log in">
+                                <img src="~/Images/user-icon.png" alt="Log in" />
 
-                            <img src="~/Images/user-icon.png"
-                                 alt="User" />
-
-                        </a>
+                            </a>
+                        }
 
 
-                        <a asp-page="/Cart"
-                           aria-label="View shopping bag">
+                        <a asp-page="/Cart" aria-label="View shopping bag">
 
-                            <img src="~/Images/cart-icon.png"
-                                 alt="Shopping bag" />
+                            <img src="~/Images/cart-icon.png" alt="Shopping bag" />
 
                         </a>
 

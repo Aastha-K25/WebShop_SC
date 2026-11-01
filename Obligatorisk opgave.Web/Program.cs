@@ -1,12 +1,29 @@
 using Obligatoris.opgave.Domain.Interfaces;
+using Obligatorisk_opgave.Security;
+using Obligatorisk_opgave.Services;
+using Microsoft.AspNetCore.Http;
 using Obligatorisk_opgave.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
-// G�r Razor Pages klar
+// Gør Razor Pages klar
 builder.Services.AddRazorPages();
 
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddSession(options =>
+{
+    options.Cookie.Name = "PaperAndPetales.Session";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+});
+
+builder.Services.AddMemoryCache(); //Bruges til midlertidigt at registere fejlede loginforsøg
 
 // Dependency Injection
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -14,12 +31,15 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
+builder.Services.AddScoped<PasswordHasher>(); //Bruges til sikre hashin og kontorl af passwords
+builder.Services.AddScoped<SessionService>(); //håndtere loginoplysninger i ASP.NET session
+builder.Services.AddScoped<AuthenticationService>(); //Samler registration login og loyout et sted
 
 
 var app = builder.Build();
 
 
-// Hvis vi ikke k�rer i development
+// Hvis vi ikke kører i development
 if (!app.Environment.IsDevelopment())
 {
     // Viser vores error side ved fejl
@@ -65,7 +85,7 @@ app.Use(async (context, next) =>
 
 
 
-// Tjekker Content-Type p� POST requests
+// Tjekker Content-Type på POST requests
 app.Use(async (context, next) =>
 {
     // Vi tjekker kun POST fordi GET ikke sender form-data i body
@@ -130,17 +150,16 @@ app.Use(async (context, next) =>
 
 
 
-// G�r routing klar
+// Gør routing klar
 app.UseRouting();
 
+app.UseSession();
 
-// G�r authorization klar
+// Gør authorization klar
 app.UseAuthorization();
 
-
-// G�r statiske filer klar
+// Gør statiske filer klar
 app.MapStaticAssets();
-
 
 // Finder Razor Pages
 app.MapRazorPages()

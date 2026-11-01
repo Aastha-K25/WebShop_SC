@@ -1,0 +1,49 @@
+@page
+@model Logout
+
+@{
+    ViewData["Title"] = "Log Out";
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/css/Logout.css" asp-append-version="true" />
+}
+
+
+<div class="logout-page">
+
+
+    @* Logout box *@
+    <section class="logout-section">
+
+        <div class="logout-container">
+
+            <div class="logout-content">
+
+                <p class="logout-eyebrow">
+                    PAPER & PETALS
+                </p>
+                
+                <h1>
+                    Log Out
+                </h1>
+                
+                <p class="logout-description">
+                    Are you sure you want to log out of your account?
+                </p>
+                
+                @* Logout bruger POST, så sessionen afsluttes sikkert *@
+                <form method="post" class="logout-form">
+                    <button type="submit" class="logout-button">
+
+                        Log Out
+                    </button>
+                    <a class="cancel-button" asp-page="/Index">
+                        Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
