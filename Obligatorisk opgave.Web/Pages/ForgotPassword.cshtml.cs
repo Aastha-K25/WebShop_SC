@@ -38,9 +38,7 @@ public class ForgotPassword : PageModel
 
         // Samme besked vises, uanset om e-mailadressen findes.
         // Det forhindrer andre i at undersøge, hvilke kunder der findes.
-        TempData["SuccessMessage"] =
-            "If an account exists with this email, " +
-            "a password reset link has been created.";
+        TempData["SuccessMessage"] = "Password reset by email is not available right now.";
 
         return Page();
     }

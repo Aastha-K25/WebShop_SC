@@ -1,99 +1,68 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Obligatoris.opgave.Domain.Interfaces;
-using Obligatoris.opgave.Domain.Models;
-using Obligatorisk_opgave.Security;
+using Obligatorisk_opgave.Services;
 
 namespace Obligatorisk_opgave.Pages;
 
 public class Register : PageModel
 {
-    private readonly IUserRepository _userRepository;
+    private readonly AuthenticationService _authenticationService;
 
-
-    // Henter user repository
-    public Register(IUserRepository userRepository)
+    public Register(AuthenticationService authenticationService)
     {
-        _userRepository = userRepository;
+        _authenticationService = authenticationService;
     }
 
-
-    // Kører når siden åbnes
-    public void OnGet()
+    // Viser registreringssiden.
+    public IActionResult OnGet()
     {
+        // En bruger, der allerede er logget ind,
+        // sendes tilbage til forsiden.
+        if (_authenticationService.IsAuthenticated())
+        {
+            return RedirectToPage("/Index");
+        }
+
+        return Page();
     }
-    
-    // Kører når formularen sendes
+
+    // Opretter en ny kundekonto.
     public IActionResult OnPost()
     {
-        // Henter data fra formularen
         string name = Request.Form["name"].ToString();
-
         string email = Request.Form["email"].ToString();
-
         string address = Request.Form["address"].ToString();
-
         string password = Request.Form["password"].ToString();
+        string confirmPassword =
+            Request.Form["confirmPassword"].ToString();
 
-        string confirmPassword = Request.Form["confirmPassword"].ToString();
-
-
-        // Tjekker at alle felter er udfyldt
-        if (string.IsNullOrWhiteSpace(name) ||
-            string.IsNullOrWhiteSpace(email) ||
-            string.IsNullOrWhiteSpace(address) ||
-            string.IsNullOrWhiteSpace(password) ||
-            string.IsNullOrWhiteSpace(confirmPassword))
-        {
-            TempData["ErrorMessage"] = "Please fill out all fields.";
-            return Page();
-        }
-        
-        // Tjekker at passwords er ens
+        // Passwordet skal skrives ens begge gange.
         if (password != confirmPassword)
         {
-            TempData["ErrorMessage"] = "Passwords do not match.";
-            return Page();
-        }
-        
-        // Kontrollerer om passwordet følger vores password policy.
-        string? passwordError = PasswordValidator.Validate(password, name, email);
-        
-        // Hvis passwordet ikke er gyldigt, vises fejlbeskeden.
-        if (passwordError != null)
-        {
-            TempData["ErrorMessage"] = passwordError;
+            TempData["ErrorMessage"] =
+                "Passwords do not match.";
+
             return Page();
         }
 
+        // Servicen validerer passwordet, hasher det
+        // og gemmer kunden gennem repositoryet.
+        string? errorMessage =
+            _authenticationService.RegisterCustomer(
+                name,
+                email,
+                password,
+                address);
 
-        // Tjekker om email allerede findes
-        if (_userRepository.EmailExists(email))
+        if (errorMessage != null)
         {
-            TempData["ErrorMessage"] = "An account with this email already exists.";
+            TempData["ErrorMessage"] = errorMessage;
             return Page();
         }
 
+        TempData["SuccessMessage"] =
+            "Your account has been created. You can now log in.";
 
-        // Opretter en kunde
-        Customer customer = new Customer
-        {
-            Name = name,
-            Email = email,
-            Address = address,
-
-            // Password hashing mangler stadig
-            PasswordHash = password,
-
-            IsActive = true
-        };
-
-
-        // Gemmer kunden i databasen
-        _userRepository.Add(customer);
-
-
-        // Sender videre til login
         return RedirectToPage("/Login");
     }
 }

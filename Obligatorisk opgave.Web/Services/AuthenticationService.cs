@@ -111,6 +111,14 @@ public class AuthenticationService
             RegisterFailedLogin(normalizedEmail);
             return "Invalid email or password.";
         }
+        
+        // MFA er forberedt, men ikke implementeret i skoleprojektet.
+        // En Admin med aktiveret MFA må derfor ikke få en almindelig
+        // session uden først at gennemføre en MFA-kontrol.
+        if (user is Admin admin && admin.MfaEnabled)
+        {
+            return "MFA is required for this account, but the MFA flow is not available yet.";
+        }
 
         // Et korrekt login nulstiller fejltælleren
         _memoryCache.Remove(GetLoginAttemptKey(normalizedEmail));
