@@ -58,13 +58,22 @@
 
                 <input type="password"
                        id="password"
-                       name="password" />
+                       name="password"
+                       autocomplete="current-password"
+                       required />
 
             </div>
 
 
-            <button type="submit"
-                    class="login-button">
+            <div class="forgot-password-link">
+                <a asp-page="/ForgotPassword">
+                    Forgot Password?
+                </a>
+
+            </div>
+
+
+            <button type="submit"class="login-button">
 
                 Login
 

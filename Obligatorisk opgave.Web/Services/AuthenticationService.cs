@@ -1,7 +1,9 @@
+using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using Obligatoris.opgave.Domain.Models;
 using Obligatoris.opgave.Domain.Interfaces;
 using Obligatorisk_opgave.Security;
+using System.Security.Cryptography;
 
 namespace Obligatorisk_opgave.Services;
 
@@ -11,13 +13,15 @@ public class AuthenticationService
     private readonly PasswordHasher _passwordHasher;
     private readonly SessionService _sessionService;
     private readonly IMemoryCache _memoryCache;
+    private readonly IPasswordResetTokenRepository _passwordResetTokenRepository;
     
     private const int MaximumLoginAttempts = 5;
 
-    public AuthenticationService(IUserRepository userRepository, PasswordHasher passwordHasher,
+    public AuthenticationService(IUserRepository userRepository, IPasswordResetTokenRepository passwordResetTokenRepository, PasswordHasher passwordHasher,
         SessionService sessionService, IMemoryCache memoryCache)
     {
         _userRepository = userRepository;
+        _passwordResetTokenRepository = passwordResetTokenRepository;
         _passwordHasher = passwordHasher;
         _sessionService = sessionService;
         _memoryCache = memoryCache;
@@ -136,12 +140,9 @@ public class AuthenticationService
     }
     
     // Ændrer passwordet for den kunde, der er logget ind. Null betyder, at passwordet blev ændret
-    public string? ChangePassword(
-        string currentPassword,
-        string newPassword)
+    public string? ChangePassword( string currentPassword, string newPassword)
     {
-        User? currentUser =
-            _sessionService.GetCurrentUser();
+        User? currentUser =  _sessionService.GetCurrentUser();
 
         // Brugeren skal være logget ind som Customer
         if (currentUser is not Customer customer)
@@ -150,8 +151,7 @@ public class AuthenticationService
         }
 
         // Det nuværende password skal være korrekt
-        bool currentPasswordIsCorrect =
-            _passwordHasher.VerifyPassword(
+        bool currentPasswordIsCorrect = _passwordHasher.VerifyPassword(
                 currentPassword,
                 customer.PasswordHash);
 
@@ -161,10 +161,7 @@ public class AuthenticationService
         }
 
         // Det nye password må ikke være det samme som det gamle
-        bool passwordIsUnchanged =
-            _passwordHasher.VerifyPassword(
-                newPassword,
-                customer.PasswordHash);
+        bool passwordIsUnchanged = _passwordHasher.VerifyPassword(newPassword, customer.PasswordHash);
 
         if (passwordIsUnchanged)
         {
@@ -184,30 +181,152 @@ public class AuthenticationService
         }
 
         // Det nye password hashes før opdatering
-        customer.PasswordHash =
-            _passwordHasher.HashPassword(newPassword);
+        customer.PasswordHash = _passwordHasher.HashPassword(newPassword);
 
         _userRepository.Update(customer);
 
         return null;
     }
+    
+    // Opretter et sikkert token til nulstilling af password
+// Det oprindelige token skal senere sendes til kunden
+    public string? RequestPasswordReset(string email)
+    {
+        string normalizedEmail =
+            email.Trim().ToLowerInvariant();
 
+        User? user =
+            _userRepository.GetByEmail(normalizedEmail);
+
+        // Kun aktive kunder må bruge customer password reset.
+        // Admin bruger ikke dette flow.
+        if (user is not Customer || !user.IsActive)
+        {
+            return null;
+        }
+
+        // Fjerner gamle eller allerede anvendte tokens
+        _passwordResetTokenRepository.DeleteExpiredTokens();
+
+        // Opretter et kryptografisk sikkert token
+        string token =
+            Convert.ToHexString(
+                RandomNumberGenerator.GetBytes(32));
+
+        // Kun tokenets hash gemmes i databasen
+        string tokenHash =
+            HashResetToken(token);
+
+        PasswordResetToken passwordResetToken =
+            new PasswordResetToken
+            {
+                UserId = user.Id,
+                TokenHash = tokenHash,
+
+                // Tokenet kan bruges i 30 minutter
+                ExpiresAt = DateTime.UtcNow.AddMinutes(30),
+
+                // Null betyder, at tokenet ikke er brugt endnu
+                UsedAt = null
+            };
+
+        _passwordResetTokenRepository.Add(
+            passwordResetToken);
+
+        // Det oprindelige token gemmes aldrig i databasen.
+        // Det skal bruges i det reset-link, som sendes til kunden.
+        return token;
+    }
+    
+    // Nulstiller kundens password ved hjælp af et gyldigt token
+// Null betyder, at passwordet blev nulstillet
+    public string? ResetPassword( string token, string newPassword)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return "The password reset link is invalid or has expired.";
+        }
+
+        string tokenHash = HashResetToken(token);
+
+        PasswordResetToken? passwordResetToken = _passwordResetTokenRepository.GetByTokenHash(tokenHash);
+
+        // Tokenet skal eksistere, ikke være udløbet
+        // og må ikke tidligere være blevet brugt
+        if (passwordResetToken == null || !passwordResetToken.IsValid())
+        {
+            return "The password reset link is invalid or has expired.";
+        }
+
+        User? user = _userRepository.GetById(passwordResetToken.UserId);
+
+        // Kun aktive kunder må bruge dette reset-flow
+        if (user is not Customer customer || !customer.IsActive)
+        {
+            return "The password reset link is invalid or has expired.";
+        }
+
+        string? passwordError =
+            PasswordValidator.Validate(
+                newPassword,
+                customer.Name,
+                customer.Email);
+
+        if (passwordError != null)
+        {
+            return passwordError;
+        }
+
+        // Det nye password må ikke være det samme som det gamle
+        bool passwordIsUnchanged =
+            _passwordHasher.VerifyPassword(
+                newPassword,
+                customer.PasswordHash);
+
+        if (passwordIsUnchanged)
+        {
+            return "The new password must be different from the previous password.";
+        }
+
+        // Gemmer kun det nye password som en hash
+        customer.PasswordHash = _passwordHasher.HashPassword(newPassword);
+
+        _userRepository.Update(customer);
+
+        // Markerer tokenet som brugt, så det ikke kan genbruges
+        passwordResetToken.UsedAt = DateTime.UtcNow;
+        _passwordResetTokenRepository.Update(passwordResetToken);
+
+        return null;
+    }
+
+    // Laver en SHA-256-hash af reset-tokenet
+    private static string HashResetToken(string token)
+    {
+        byte[] tokenBytes =
+            Encoding.UTF8.GetBytes(token);
+
+        byte[] tokenHash =
+            SHA256.HashData(tokenBytes);
+
+        return Convert.ToHexString(tokenHash);
+    }
+    
     // Registrerer et fejlet loginforsøg
     private void RegisterFailedLogin(string email)
     {
         string cacheKey = GetLoginAttemptKey(email);
 
-        LoginAttempt loginAttempt =
+        LoginAttempt loginAttempt = 
             _memoryCache.Get<LoginAttempt>(cacheKey)
-            ?? new LoginAttempt();
+                                    ?? new LoginAttempt();
 
         loginAttempt.NumberOfAttempts++;
 
         // Kontoens login begrænses midlertidigt efter fem forsøg
         if (loginAttempt.NumberOfAttempts >= MaximumLoginAttempts)
         {
-            loginAttempt.BlockedUntil =
-                DateTime.UtcNow.AddMinutes(15);
+            loginAttempt.BlockedUntil = DateTime.UtcNow.AddMinutes(15);
         }
 
         // Oplysningerne fjernes automatisk efter 15 minutter
@@ -220,8 +339,7 @@ public class AuthenticationService
     // Kontrollerer om login er midlertidigt blokeret
     private bool IsLoginBlocked(string email)
     {
-        LoginAttempt? loginAttempt =
-            _memoryCache.Get<LoginAttempt>(
+        LoginAttempt? loginAttempt = _memoryCache.Get<LoginAttempt>(
                 GetLoginAttemptKey(email));
 
         if (loginAttempt?.BlockedUntil == null)
