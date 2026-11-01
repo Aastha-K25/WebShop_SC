@@ -1,12 +1,15 @@
 ﻿@using Obligatorisk_opgave.Services
+@using Obligatoris.opgave.Domain.Models
 @inject SessionService SessionService
 
 @{
     var isHomePage =
         ViewContext.RouteData.Values["page"]?.ToString() == "/Index";
+
+    User? currentUser = SessionService.GetCurrentUser();
     
     //burges til at vise den rigtige knap i navigationen 
-    bool isLoggedIn = SessionService.IsLoggedIn();
+    bool isLoggedIn = currentUser != null;
 }
 
 <!DOCTYPE html>
@@ -146,51 +149,73 @@
 
                     </ul>
 
-
-
+                    
                     @* Ikoner *@
                     <div class="navbar-icons">
-
-
-                        @* Søgefunktion bliver lavet senere *@
+                        
+                        @* Søgeikon *@
                         <a asp-page="/Products" aria-label="Browse bouquets">
+
                             <img src="~/Images/search-icon.png" alt="Browse bouquets" />
 
                         </a>
 
-                        @* Viser login eller logout afhængigt af sessionen *@
+
+                        @* Brugermenu *@
                         @if (isLoggedIn)
                         {
-                            <a asp-page="/Logout" aria-label="Log out">
-                                <img src="~/Images/user-icon.png"alt="Log out" />
+                            <div class="dropdown user-menu">
 
-                            </a>
+                                <button class="user-menu-button"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                        aria-label="Open user menu">
+
+                                    <img src="~/Images/user-icon.png" alt="User menu" />
+
+                                </button>
+
+
+                                <ul class="dropdown-menu dropdown-menu-end">
+
+                                    @* Kun Customer kan ændre password *@
+                                    @if (currentUser is Customer)
+                                    {
+                                        <li>
+
+                                            <a class="dropdown-item" asp-page="/ChangePassword">
+
+                                                Change Password
+
+                                            </a>
+
+                                        </li>
+                                    }
+                                    <li>
+                                        <a class="dropdown-item" asp-page="/Logout">
+
+                                            Log Out
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         }
                         else
                         {
                             <a asp-page="/Login" aria-label="Log in">
                                 <img src="~/Images/user-icon.png" alt="Log in" />
-
                             </a>
                         }
-
-
+                        
+                        @* Kurveikon *@
                         <a asp-page="/Cart" aria-label="View shopping bag">
 
                             <img src="~/Images/cart-icon.png" alt="Shopping bag" />
-
                         </a>
-
-
                     </div>
-
-
                 </div>
-
-
             </div>
-
-
         </nav>
 
 

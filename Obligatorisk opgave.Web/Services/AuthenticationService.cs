@@ -134,6 +134,63 @@ public class AuthenticationService
     {
         _sessionService.Logout();
     }
+    
+    // Ændrer passwordet for den kunde, der er logget ind. Null betyder, at passwordet blev ændret
+    public string? ChangePassword(
+        string currentPassword,
+        string newPassword)
+    {
+        User? currentUser =
+            _sessionService.GetCurrentUser();
+
+        // Brugeren skal være logget ind som Customer
+        if (currentUser is not Customer customer)
+        {
+            return "You must be logged in as a customer.";
+        }
+
+        // Det nuværende password skal være korrekt
+        bool currentPasswordIsCorrect =
+            _passwordHasher.VerifyPassword(
+                currentPassword,
+                customer.PasswordHash);
+
+        if (!currentPasswordIsCorrect)
+        {
+            return "The current password is incorrect.";
+        }
+
+        // Det nye password må ikke være det samme som det gamle
+        bool passwordIsUnchanged =
+            _passwordHasher.VerifyPassword(
+                newPassword,
+                customer.PasswordHash);
+
+        if (passwordIsUnchanged)
+        {
+            return "The new password must be different from the current password.";
+        }
+
+        // Det nye password skal følge den samme password policy
+        string? passwordError =
+            PasswordValidator.Validate(
+                newPassword,
+                customer.Name,
+                customer.Email);
+
+        if (passwordError != null)
+        {
+            return passwordError;
+        }
+
+        // Det nye password hashes før opdatering
+        customer.PasswordHash =
+            _passwordHasher.HashPassword(newPassword);
+
+        _userRepository.Update(customer);
+
+        return null;
+    }
 
     // Registrerer et fejlet loginforsøg
     private void RegisterFailedLogin(string email)
