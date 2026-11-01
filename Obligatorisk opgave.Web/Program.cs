@@ -12,6 +12,10 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddMemoryCache(); //Bruges til midlertidigt at registere fejlede loginforsøg
+
+builder.Services.AddDistributedMemoryCache(); //Gemmer sessionsdata midlertidigt i servens hukommelse
+
 builder.Services.AddSession(options =>
 {
     options.Cookie.Name = "PaperAndPetales.Session";
@@ -22,8 +26,6 @@ builder.Services.AddSession(options =>
     
     options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
-
-builder.Services.AddMemoryCache(); //Bruges til midlertidigt at registere fejlede loginforsøg
 
 // Dependency Injection
 builder.Services.AddScoped<IProductRepository, ProductRepository>();

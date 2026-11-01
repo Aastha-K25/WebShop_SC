@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using System.Text.Json;
 using Obligatoris.opgave.Domain.Interfaces;
 using Obligatoris.opgave.Domain.Models;
 
@@ -12,6 +13,7 @@ public class SessionService
     // Nøglerne bruges til at finde værdierne i sessionen
     private const string UserIdKey = "UserId";
     private const string UserTypeKey = "UserType";
+    private const string GuestCartKey = "GuestCart";
 
     public SessionService(
         IHttpContextAccessor httpContextAccessor,
@@ -85,7 +87,120 @@ public class SessionService
     {
         GetSession().Clear();
     }
+        
+    // Henter gæstens indkøbskurv fra sessionen
+    public List<ShoppingCartProduct> GetGuestCart()
+    {
+        string? cartJson = GetSession().GetString(GuestCartKey);
 
+        // Hvis der ikke findes en kurv endnu, returneres en tom liste
+        if (string.IsNullOrWhiteSpace(cartJson))
+        {
+            return new List<ShoppingCartProduct>();
+        }
+
+        List<ShoppingCartProduct>? cart =
+            JsonSerializer.Deserialize<List<ShoppingCartProduct>>(
+                cartJson);
+
+        return cart ?? new List<ShoppingCartProduct>();
+    }
+
+
+    // Tilføjer et produkt til gæstens kurv
+    public void AddToGuestCart( int productId, int quantity)
+    {
+        // Ugyldige værdier bliver ikke gemt
+        if (productId <= 0 || quantity <= 0)
+        {
+            return;
+        }
+
+        List<ShoppingCartProduct> cart = GetGuestCart();
+
+        ShoppingCartProduct? existingProduct = cart.FirstOrDefault(
+                product => product.ProductId == productId);
+
+        if (existingProduct == null)
+        {
+            // Produktet findes ikke i kurven endnu
+            cart.Add(
+                new ShoppingCartProduct
+                {
+                    ProductId = productId,
+                    Quantity = quantity
+                });
+        }
+        else
+        {
+            // Produktet findes allerede, så antallet bliver lagt sammen
+            existingProduct.Quantity += quantity;
+        }
+
+        SaveGuestCart(cart);
+    }
+
+
+    // Ændrer antallet af et produkt i gæstens kurv
+    public void UpdateGuestCartQuantity( int productId, int quantity)
+    {
+        List<ShoppingCartProduct> cart = GetGuestCart();
+
+        ShoppingCartProduct? product = 
+            cart.FirstOrDefault(item => item.ProductId == productId);
+
+        if (product == null)
+        {
+            return;
+        }
+
+        // Et antal på 0 eller mindre fjerner produktet
+        if (quantity <= 0)
+        {
+            cart.Remove(product);
+        }
+        else
+        {
+            product.Quantity = quantity;
+        }
+
+        SaveGuestCart(cart);
+    }
+
+
+    // Fjerner et produkt fra gæstens kurv
+    public void RemoveFromGuestCart(int productId)
+    {
+        List<ShoppingCartProduct> cart = GetGuestCart();
+
+        ShoppingCartProduct? product =
+            cart.FirstOrDefault(item => item.ProductId == productId);
+
+        if (product == null)
+        {
+            return;
+        }
+        cart.Remove(product);
+        SaveGuestCart(cart);
+    }
+    
+    // Fjerner hele gæstens kurv
+    public void ClearGuestCart()
+    {
+        GetSession().Remove(GuestCartKey);
+    }
+
+
+    // Gemmer gæstens kurv som JSON i sessionen
+    private void SaveGuestCart(List<ShoppingCartProduct> cart)
+    {
+        string cartJson = JsonSerializer.Serialize(cart);
+
+        GetSession().SetString(GuestCartKey, cartJson);
+    }
+
+        
+    
     // Henter sessionen fra den aktuelle HTTP-request
     private ISession GetSession()
     {
@@ -93,8 +208,7 @@ public class SessionService
 
         if (session == null)
         {
-            throw new InvalidOperationException(
-                "Sessionen er ikke tilgængelig.");
+            throw new InvalidOperationException("Sessionen er ikke tilgængelig.");
         }
 
         return session;
