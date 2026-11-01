@@ -25,6 +25,14 @@
         </p>
 
 
+        @* Viser success-besked *@
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <p class="login-success">
+                @TempData["SuccessMessage"]
+            </p>
+        }
+
         @* Viser fejlbesked *@
         @if (TempData["ErrorMessage"] != null)
         {
@@ -32,7 +40,6 @@
                 @TempData["ErrorMessage"]
             </p>
         }
-
 
         @* Login formular *@
         <form method="post">

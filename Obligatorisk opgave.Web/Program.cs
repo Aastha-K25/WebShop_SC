@@ -37,7 +37,6 @@ builder.Services.AddScoped<PasswordHasher>(); //Bruges til sikre hashin og konto
 builder.Services.AddScoped<SessionService>(); //håndtere loginoplysninger i ASP.NET session
 builder.Services.AddScoped<AuthenticationService>(); //Samler registration login og loyout et sted
 
-
 var app = builder.Build();
 
 
