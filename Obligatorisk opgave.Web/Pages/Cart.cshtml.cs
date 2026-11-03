@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Obligatoris.opgave.Domain.Interfaces;
 using Obligatoris.opgave.Domain.Models;
+using Obligatorisk_opgave.Services;
 
 namespace Obligatorisk_opgave.Pages;
 
@@ -9,25 +10,31 @@ public class Cart : PageModel
 {
     private readonly IShoppingCartRepository _shoppingCartRepository;
     private readonly IProductRepository _productRepository;
+    private readonly SessionService _sessionService;
 
 
-    // Henter repositories
     public Cart(
         IShoppingCartRepository shoppingCartRepository,
-        IProductRepository productRepository)
+        IProductRepository productRepository,
+        SessionService sessionService)
     {
         _shoppingCartRepository = shoppingCartRepository;
         _productRepository = productRepository;
+        _sessionService = sessionService;
     }
 
 
-    // Kundens kurv
+    // Kundens database-kurv
     public ShoppingCart? ShoppingCart { get; set; }
 
 
-    // Produkterne i kurven
+    // Produkterne der skal vises
     public List<Product> Products { get; set; }
         = new List<Product>();
+
+
+    // Bruges til at vide om kurven tilhører en Guest
+    public bool IsGuest { get; set; }
 
 
     // Fast leveringspris
@@ -47,16 +54,104 @@ public class Cart : PageModel
         int productId,
         int quantity)
     {
-        // Midlertidigt customer id indtil login er lavet
-        int customerId = 1;
+        User? user =
+            _sessionService.GetCurrentUser();
 
 
-        // Finder kundens kurv
+        // -------------------------
+        // GUEST CART
+        // -------------------------
+        if (user == null)
+        {
+            // Fjerner et produkt
+            if (action == "remove")
+            {
+                _sessionService.RemoveFromGuestCart(
+                    productId);
+
+                return RedirectToPage("/Cart");
+            }
+
+
+            // Tømmer hele kurven
+            if (action == "clear")
+            {
+                _sessionService.ClearGuestCart();
+
+                return RedirectToPage("/Cart");
+            }
+
+
+            // Opdaterer antal
+            if (action == "update")
+            {
+                // Fjerner produktet hvis antal er 0
+                if (quantity <= 0)
+                {
+                    _sessionService.RemoveFromGuestCart(
+                        productId);
+
+                    return RedirectToPage("/Cart");
+                }
+
+
+                Product? product =
+                    _productRepository.GetById(
+                        productId);
+
+
+                if (product == null)
+                {
+                    return RedirectToPage("/Cart");
+                }
+
+
+                // Antal må ikke overstige lageret
+                if (quantity > product.StockQuantity)
+                {
+                    quantity =
+                        product.StockQuantity;
+                }
+
+
+                _sessionService.UpdateGuestCartQuantity(
+                    productId,
+                    quantity);
+            }
+
+
+            return RedirectToPage("/Cart");
+        }
+
+
+        // -------------------------
+        // ADMIN
+        // -------------------------
+        // Admin må ikke bruge customer cart
+        if (user is Admin)
+        {
+            return RedirectToPage("/Products");
+        }
+
+
+        // -------------------------
+        // CUSTOMER CART
+        // -------------------------
+        if (user is not Customer customer)
+        {
+            return RedirectToPage("/Products");
+        }
+
+
+        int customerId =
+            customer.Id;
+
+
         ShoppingCart? shoppingCart =
-            _shoppingCartRepository.GetByCustomerId(customerId);
+            _shoppingCartRepository.GetByCustomerId(
+                customerId);
 
 
-        // Stopper hvis kunden ikke har en kurv
         if (shoppingCart == null)
         {
             return RedirectToPage("/Cart");
@@ -89,7 +184,6 @@ public class Cart : PageModel
         // Opdaterer antal
         if (action == "update")
         {
-            // Fjerner produktet hvis antal er 0
             if (quantity <= 0)
             {
                 _shoppingCartRepository.RemoveProduct(
@@ -101,9 +195,9 @@ public class Cart : PageModel
             }
 
 
-            // Finder produktet
             Product? product =
-                _productRepository.GetById(productId);
+                _productRepository.GetById(
+                    productId);
 
 
             if (product == null)
@@ -112,10 +206,10 @@ public class Cart : PageModel
             }
 
 
-            // Antallet må ikke være større end lageret
             if (quantity > product.StockQuantity)
             {
-                quantity = product.StockQuantity;
+                quantity =
+                    product.StockQuantity;
             }
 
 
@@ -130,18 +224,70 @@ public class Cart : PageModel
     }
 
 
-    // Henter kundens kurv og produkter
+    // Henter den rigtige kurv
     private void LoadCart()
     {
-        // Midlertidigt customer id indtil login er lavet
-        int customerId = 1;
+        User? user =
+            _sessionService.GetCurrentUser();
+
+
+        // -------------------------
+        // GUEST
+        // -------------------------
+        if (user == null)
+        {
+            IsGuest = true;
+
+
+            List<ShoppingCartProduct> guestCart =
+                _sessionService.GetGuestCart();
+
+
+            foreach (ShoppingCartProduct cartProduct in guestCart)
+            {
+                Product? product =
+                    _productRepository.GetById(
+                        cartProduct.ProductId);
+
+
+                if (product != null)
+                {
+                    Products.Add(
+                        product);
+                }
+            }
+
+
+            return;
+        }
+
+
+        // -------------------------
+        // ADMIN
+        // -------------------------
+        if (user is Admin)
+        {
+            return;
+        }
+
+
+        // -------------------------
+        // CUSTOMER
+        // -------------------------
+        if (user is not Customer customer)
+        {
+            return;
+        }
+
+
+        IsGuest = false;
 
 
         ShoppingCart =
-            _shoppingCartRepository.GetByCustomerId(customerId);
+            _shoppingCartRepository.GetByCustomerId(
+                customer.Id);
 
 
-        // Stopper hvis kunden ikke har en kurv
         if (ShoppingCart == null)
         {
             return;
@@ -157,6 +303,29 @@ public class Cart : PageModel
     // Henter antal af et produkt
     public int GetQuantity(int productId)
     {
+        // Guest bruger session cart
+        if (IsGuest)
+        {
+            List<ShoppingCartProduct> guestCart =
+                _sessionService.GetGuestCart();
+
+
+            ShoppingCartProduct? cartProduct =
+                guestCart.FirstOrDefault(
+                    item => item.ProductId == productId);
+
+
+            if (cartProduct == null)
+            {
+                return 0;
+            }
+
+
+            return cartProduct.Quantity;
+        }
+
+
+        // Customer bruger database cart
         if (ShoppingCart == null)
         {
             return 0;
@@ -173,7 +342,8 @@ public class Cart : PageModel
     public decimal GetProductTotal(Product product)
     {
         int quantity =
-            GetQuantity(product.Id);
+            GetQuantity(
+                product.Id);
 
 
         return product.Price * quantity;
@@ -189,7 +359,8 @@ public class Cart : PageModel
         foreach (Product product in Products)
         {
             decimal productTotal =
-                GetProductTotal(product);
+                GetProductTotal(
+                    product);
 
 
             subtotal =
@@ -210,6 +381,7 @@ public class Cart : PageModel
         }
 
 
-        return GetSubtotal() + ShippingPrice;
+        return GetSubtotal()
+            + ShippingPrice;
     }
 }

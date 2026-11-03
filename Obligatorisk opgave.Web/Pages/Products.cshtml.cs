@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Obligatoris.opgave.Domain.Interfaces;
 using Obligatoris.opgave.Domain.Models;
+using Obligatorisk_opgave.Services;
 
 namespace Obligatorisk_opgave.Pages;
 
@@ -9,15 +10,18 @@ public class Products : PageModel
 {
     private readonly IProductRepository _productRepository;
     private readonly IShoppingCartRepository _shoppingCartRepository;
+    private readonly SessionService _sessionService;
 
 
-    // Henter repositories
+    // Henter repositories og session service
     public Products(
         IProductRepository productRepository,
-        IShoppingCartRepository shoppingCartRepository)
+        IShoppingCartRepository shoppingCartRepository,
+        SessionService sessionService)
     {
         _productRepository = productRepository;
         _shoppingCartRepository = shoppingCartRepository;
+        _sessionService = sessionService;
     }
 
 
@@ -83,15 +87,13 @@ public class Products : PageModel
     public IActionResult OnPost(
         int productId)
     {
-        // Midlertidigt customer id indtil login er lavet
-        int customerId = 1;
-
-
+        // Finder produktet
         Product? product =
             _productRepository.GetById(
                 productId);
 
 
+        // Stopper hvis produktet ikke findes
         if (product == null)
         {
             return RedirectToPage(
@@ -99,11 +101,69 @@ public class Products : PageModel
         }
 
 
+        // Stopper hvis produktet er udsolgt
         if (product.StockQuantity <= 0)
         {
             return RedirectToPage(
                 "/Products");
         }
+
+
+        // Finder den bruger der er logget ind
+        User? user =
+            _sessionService.GetCurrentUser();
+
+
+        // GUEST
+        // En gæst har ingen bruger i sessionen
+        if (user == null)
+        {
+            List<ShoppingCartProduct> guestCart =
+                _sessionService.GetGuestCart();
+
+
+            ShoppingCartProduct? existingProduct =
+                guestCart.FirstOrDefault(
+                    item => item.ProductId == productId);
+
+
+            int currentQuantity =
+                existingProduct?.Quantity ?? 0;
+
+
+            // Må ikke lægge flere i kurven end der er på lager
+            if (currentQuantity < product.StockQuantity)
+            {
+                _sessionService.AddToGuestCart(
+                    productId,
+                    1);
+            }
+
+
+            return RedirectToPage(
+                "/Cart");
+        }
+
+
+        // ADMIN
+        // Admin må ikke bruge customer cart
+        if (user is Admin)
+        {
+            return RedirectToPage(
+                "/Products");
+        }
+
+
+        // CUSTOMER
+        if (user is not Customer customer)
+        {
+            return RedirectToPage(
+                "/Products");
+        }
+
+
+        int customerId =
+            customer.Id;
 
 
         ShoppingCart? shoppingCart =
@@ -134,6 +194,7 @@ public class Products : PageModel
                 productId);
 
 
+        // Produktet findes ikke i kurven endnu
         if (quantity == 0)
         {
             _shoppingCartRepository.AddProduct(
@@ -143,6 +204,7 @@ public class Products : PageModel
         }
         else
         {
+            // Må ikke overstige lageret
             if (quantity < product.StockQuantity)
             {
                 quantity =
@@ -160,7 +222,6 @@ public class Products : PageModel
         return RedirectToPage(
             "/Cart");
     }
-
 
     // Finder billede til collection
     public string GetCollectionImage(

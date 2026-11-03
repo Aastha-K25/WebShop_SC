@@ -1,0 +1,525 @@
+﻿@page
+@model Obligatorisk_opgave.Pages.AdminProducts
+@using Obligatoris.opgave.Domain.Models
+
+@{
+    ViewData["Title"] = "Manage Products";
+}
+
+@section Styles
+{
+    <link rel="stylesheet"
+          href="~/css/AdminProducts.css"
+          asp-append-version="true" />
+}
+
+
+<section class="admin-products-page">
+
+    <div class="admin-products-container">
+
+
+        @* Overskrift til admin produktsiden *@
+        <div class="admin-products-header">
+
+            <p class="admin-products-eyebrow">
+                PAPER & PETALS
+            </p>
+
+            <h1>
+                Product Management
+            </h1>
+
+            <p>
+                Create and manage the bouquets in the shop.
+            </p>
+
+        </div>
+
+
+        @* Formular til at oprette en ny buket *@
+        <div class="create-product-card">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-label">
+                        NEW PRODUCT
+                    </p>
+
+                    <h2>
+                        Create New Bouquet
+                    </h2>
+                </div>
+
+                <p>
+                    Add a new bouquet to the collection.
+                </p>
+
+            </div>
+
+
+            <form method="post"
+                  asp-page-handler="Create"
+                  class="create-product-form">
+
+
+                <div class="form-group">
+                    <label asp-for="Bouquet.Name">
+                        Name
+                    </label>
+
+                    <input asp-for="Bouquet.Name" />
+                </div>
+
+
+                <div class="form-group">
+                    <label asp-for="Bouquet.FlowerType">
+                        Flower Type
+                    </label>
+
+                    <input asp-for="Bouquet.FlowerType" />
+                </div>
+
+
+                <div class="form-group form-wide">
+                    <label asp-for="Bouquet.Description">
+                        Description
+                    </label>
+
+                    <textarea asp-for="Bouquet.Description"
+                              rows="3"></textarea>
+                </div>
+
+
+                <div class="form-group">
+                    <label asp-for="Bouquet.Price">
+                        Price
+                    </label>
+
+                    <input asp-for="Bouquet.Price"
+                           type="number"
+                           step="0.01" />
+                </div>
+
+
+                <div class="form-group">
+                    <label asp-for="Bouquet.StockQuantity">
+                        Stock Quantity
+                    </label>
+
+                    <input asp-for="Bouquet.StockQuantity"
+                           type="number" />
+                </div>
+
+
+                <div class="form-group">
+                    <label asp-for="Bouquet.BouquetSize">
+                        Bouquet Size
+                    </label>
+
+                    <select asp-for="Bouquet.BouquetSize"
+                            asp-items="Html.GetEnumSelectList<BouquetSize>()">
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label asp-for="Bouquet.BookGenre">
+                        Book Genre
+                    </label>
+
+                    <select asp-for="Bouquet.BookGenre"
+                            asp-items="Html.GetEnumSelectList<BookGenre>()">
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label asp-for="Bouquet.ImagePath">
+                        Image Path
+                    </label>
+
+                    <input asp-for="Bouquet.ImagePath" />
+                </div>
+
+
+                <div class="form-group">
+                    <label asp-for="Bouquet.ImageDescription">
+                        Image Description
+                    </label>
+
+                    <input asp-for="Bouquet.ImageDescription" />
+                </div>
+
+
+                <div class="form-check-group form-wide">
+
+                    <input asp-for="Bouquet.IsPopular"
+                           type="checkbox" />
+
+                    <label asp-for="Bouquet.IsPopular">
+                        Popular bouquet
+                    </label>
+
+                </div>
+
+
+                <div class="form-wide">
+
+                    <button type="submit"
+                            class="btn-paper-primary create-button">
+
+                        Create Bouquet
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+
+        @* Eksisterende buketter vises som cards *@
+        <div class="existing-products-section">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-label">
+                        PRODUCTS
+                    </p>
+
+                    <h2>
+                        Existing Bouquets
+                    </h2>
+                </div>
+
+                <p>
+                    @Model.Products.Count bouquet(s)
+                </p>
+
+            </div>
+
+
+            @if (Model.Products.Count == 0)
+            {
+                <div class="empty-products">
+
+                    <p>
+                        No bouquets have been created yet.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <div class="product-card-grid">
+
+                    @foreach (Product product in Model.Products)
+                    {
+                        Bouquet bouquet = (Bouquet)product;
+
+
+                        <article class="product-card">
+
+
+                            @* Billedet ligger øverst på kortet *@
+                            <div class="product-card-image">
+
+                                @if (!string.IsNullOrWhiteSpace(bouquet.ImagePath))
+                                {
+                                    <img src="@bouquet.ImagePath"
+                                         alt="@bouquet.ImageDescription" />
+                                }
+                                else
+                                {
+                                    <div class="no-product-image">
+                                        No image
+                                    </div>
+                                }
+
+                            </div>
+
+
+                            <div class="product-card-body">
+
+
+                                <div class="product-card-heading">
+
+                                    <div>
+
+                                        <p class="product-genre">
+                                            @bouquet.BookGenre
+                                        </p>
+
+                                        <h3>
+                                            @bouquet.Name
+                                        </h3>
+
+                                    </div>
+
+
+                                    @if (bouquet.IsPopular)
+                                    {
+                                        <span class="popular-badge">
+                                            Popular
+                                        </span>
+                                    }
+
+                                </div>
+
+
+                                <p class="product-description">
+                                    @bouquet.Description
+                                </p>
+
+
+                                <div class="product-information">
+
+                                    <div>
+                                        <span>Size</span>
+                                        <strong>@bouquet.BouquetSize</strong>
+                                    </div>
+
+                                    <div>
+                                        <span>Flowers</span>
+                                        <strong>@bouquet.FlowerType</strong>
+                                    </div>
+
+                                    <div>
+                                        <span>Stock</span>
+                                        <strong>@bouquet.StockQuantity</strong>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="product-card-footer">
+
+                                    <p class="product-price">
+                                        @bouquet.Price.ToString("0.00") kr.
+                                    </p>
+
+
+                                    <div class="product-actions">
+
+                                        @* Edit-formularen åbnes kun når der er brug for den *@
+                                        <details class="edit-product">
+
+                                            <summary class="btn-paper-secondary">
+                                                Edit
+                                            </summary>
+
+
+                                            <div class="edit-product-panel">
+
+                                                <h4>
+                                                    Edit @bouquet.Name
+                                                </h4>
+
+
+                                                <form method="post"
+                                                      asp-page-handler="Update"
+                                                      class="edit-product-form">
+
+
+                                                    <input type="hidden"
+                                                           name="Bouquet.Id"
+                                                           value="@bouquet.Id" />
+
+
+                                                    <div class="form-group">
+                                                        <label>Name</label>
+
+                                                        <input name="Bouquet.Name"
+                                                               value="@bouquet.Name" />
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label>Flower Type</label>
+
+                                                        <input name="Bouquet.FlowerType"
+                                                               value="@bouquet.FlowerType" />
+                                                    </div>
+
+
+                                                    <div class="form-group form-wide">
+                                                        <label>Description</label>
+
+                                                        <textarea name="Bouquet.Description"
+                                                                  rows="3">@bouquet.Description</textarea>
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label>Price</label>
+
+                                                        <input name="Bouquet.Price"
+                                                               type="number"
+                                                               step="0.01"
+                                                               value="@bouquet.Price" />
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label>Stock Quantity</label>
+
+                                                        <input name="Bouquet.StockQuantity"
+                                                               type="number"
+                                                               value="@bouquet.StockQuantity" />
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label>Bouquet Size</label>
+
+                                                        <select name="Bouquet.BouquetSize">
+
+                                                            @foreach (BouquetSize size in Enum.GetValues(typeof(BouquetSize)))
+                                                            {
+                                                                if (bouquet.BouquetSize == size)
+                                                                {
+                                                                    <option value="@size"
+                                                                            selected>
+                                                                        @size
+                                                                    </option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@size">
+                                                                        @size
+                                                                    </option>
+                                                                }
+                                                            }
+
+                                                        </select>
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label>Book Genre</label>
+
+                                                        <select name="Bouquet.BookGenre">
+
+                                                            @foreach (BookGenre genre in Enum.GetValues(typeof(BookGenre)))
+                                                            {
+                                                                if (bouquet.BookGenre == genre)
+                                                                {
+                                                                    <option value="@genre"
+                                                                            selected>
+                                                                        @genre
+                                                                    </option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@genre">
+                                                                        @genre
+                                                                    </option>
+                                                                }
+                                                            }
+
+                                                        </select>
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label>Image Path</label>
+
+                                                        <input name="Bouquet.ImagePath"
+                                                               value="@bouquet.ImagePath" />
+                                                    </div>
+
+
+                                                    <div class="form-group">
+                                                        <label>Image Description</label>
+
+                                                        <input name="Bouquet.ImageDescription"
+                                                               value="@bouquet.ImageDescription" />
+                                                    </div>
+
+
+                                                    <div class="form-check-group form-wide">
+
+                                                        <input type="hidden"
+                                                               name="Bouquet.IsPopular"
+                                                               value="false" />
+
+
+                                                        @if (bouquet.IsPopular)
+                                                        {
+                                                            <input type="checkbox"
+                                                                   name="Bouquet.IsPopular"
+                                                                   value="true"
+                                                                   checked />
+                                                        }
+                                                        else
+                                                        {
+                                                            <input type="checkbox"
+                                                                   name="Bouquet.IsPopular"
+                                                                   value="true" />
+                                                        }
+
+
+                                                        <label>
+                                                            Popular bouquet
+                                                        </label>
+
+                                                    </div>
+
+
+                                                    <div class="form-wide edit-save">
+
+                                                        <button type="submit"
+                                                                class="btn-paper-primary">
+
+                                                            Save Changes
+
+                                                        </button>
+
+                                                    </div>
+
+                                                </form>
+
+                                            </div>
+
+                                        </details>
+
+
+                                        @* Sletter det valgte produkt *@
+                                        <form method="post"
+                                              asp-page-handler="Delete">
+
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="@bouquet.Id" />
+
+                                            <button type="submit"
+                                                    class="btn-paper-danger">
+
+                                                Delete
+
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</section>

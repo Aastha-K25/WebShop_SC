@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Obligatoris.opgave.Domain.Models;
 using Obligatorisk_opgave.Services;
 
 namespace Obligatorisk_opgave.Pages;
@@ -7,18 +8,33 @@ namespace Obligatorisk_opgave.Pages;
 public class ResetPassword : PageModel
 {
     private readonly AuthenticationService _authenticationService;
+    private readonly SessionService _sessionService;
+    private readonly AuthorizationService _authorizationService;
 
     // Tokenet bruges i det skjulte felt på Razor-siden
     public string Token { get; private set; } = string.Empty;
 
-    public ResetPassword(AuthenticationService authenticationService)
+    public ResetPassword(
+        AuthenticationService authenticationService,
+        SessionService sessionService,
+        AuthorizationService authorizationService)
     {
         _authenticationService = authenticationService;
+        _sessionService = sessionService;
+        _authorizationService = authorizationService;
     }
 
     // Henter tokenet fra reset-linket
     public IActionResult OnGet(string? token)
     {
+        User? user = _sessionService.GetCurrentUser();
+
+        // Admin må ikke bruge Customer password reset.
+        if (!_authorizationService.CanUseCustomerPasswordReset(user))
+        {
+            return Forbid();
+        }
+
         if (string.IsNullOrWhiteSpace(token))
         {
             TempData["ErrorMessage"] =
@@ -35,6 +51,14 @@ public class ResetPassword : PageModel
     // Kører når kunden sender det nye password
     public IActionResult OnPost()
     {
+        User? user = _sessionService.GetCurrentUser();
+
+        // Admin må ikke bruge Customer password reset.
+        if (!_authorizationService.CanUseCustomerPasswordReset(user))
+        {
+            return Forbid();
+        }
+
         Token = Request.Form["token"].ToString();
 
         string newPassword = Request.Form["newPassword"].ToString();
@@ -60,11 +84,16 @@ public class ResetPassword : PageModel
             return Page();
         }
 
-        string? errorMessage = _authenticationService.ResetPassword(Token, newPassword);
+        string? errorMessage =
+            _authenticationService.ResetPassword(
+                Token,
+                newPassword);
 
         if (errorMessage != null)
         {
-            TempData["ErrorMessage"] = errorMessage; 
+            TempData["ErrorMessage"] =
+                errorMessage;
+
             return Page();
         }
 

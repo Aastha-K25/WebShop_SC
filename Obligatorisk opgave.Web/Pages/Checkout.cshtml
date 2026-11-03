@@ -7,217 +7,299 @@
 
 <section class="checkout-page">
 
-    <div class="checkout-header">
-
-        <p class="checkout-eyebrow">
-            PAPER & PETALS
-        </p>
-
-        <h1>
-            Checkout
-        </h1>
-
-        <p>
-            Almost there. Your stories and blooms are ready.
-        </p>
-
-    </div>
+    <div class="container py-5">
 
 
-    <div class="checkout-layout">
+        @* HEADER *@
+        <div class="checkout-header text-center mb-5">
 
+            <p class="checkout-eyebrow mb-2">
+                PAPER & PETALS
+            </p>
 
-        @* Leveringsoplysninger *@
-        <div class="checkout-information">
+            <h1 class="display-6 mb-3">
+                Checkout
+            </h1>
 
-            <section class="checkout-box">
-
-                <p class="checkout-box-label">
-                    DELIVERY
-                </p>
-
-                <h2>
-                    Delivery Details
-                </h2>
-
-
-                @if (Model.Customer != null)
-                {
-                    <div class="customer-information">
-
-                        <div>
-                            <span>Name</span>
-
-                            <p>
-                                @Model.Customer.Name
-                            </p>
-                        </div>
-
-
-                        <div>
-                            <span>Email</span>
-
-                            <p>
-                                @Model.Customer.Email
-                            </p>
-                        </div>
-
-
-                        <div>
-                            <span>Address</span>
-
-                            <p>
-                                @Model.Customer.Address
-                            </p>
-                        </div>
-
-                    </div>
-                }
-
-            </section>
-
-
-
-            @* Produkterne *@
-            <section class="checkout-box">
-
-                <p class="checkout-box-label">
-                    YOUR BOUQUETS
-                </p>
-
-                <h2>
-                    Order Items
-                </h2>
-
-
-                @foreach (var product in Model.Products)
-                {
-                    <div class="checkout-product">
-
-                        <div class="checkout-product-image">
-
-                            @if (!string.IsNullOrEmpty(product.ImagePath))
-                            {
-                                <img src="@product.ImagePath"
-                                     alt="@product.ImageDescription" />
-                            }
-
-                        </div>
-
-
-                        <div class="checkout-product-info">
-
-                            <h3>
-                                @product.Name
-                            </h3>
-
-                            <p>
-                                Quantity:
-                                @Model.GetQuantity(product.Id)
-                            </p>
-
-                            <p>
-                                @product.Price.ToString("0.00") kr. each
-                            </p>
-
-                        </div>
-
-
-                        <div class="checkout-product-total">
-
-                            @Model.GetProductTotal(product).ToString("0.00") kr.
-
-                        </div>
-
-                    </div>
-                }
-
-            </section>
+            <p class="text-muted">
+                Almost there. Your stories and blooms are ready.
+            </p>
 
         </div>
 
 
-
-        @* Ordreoversigt *@
-        <aside class="checkout-summary">
-
-            <p class="summary-eyebrow">
-                ORDER SUMMARY
-            </p>
-
-            <h2>
-                Your Order
-            </h2>
+        <div class="row g-4">
 
 
-            <div class="summary-row">
+            @* VENSTRE SIDE *@
+            <div class="col-lg-8">
 
-                <span>
-                    Items
-                </span>
 
-                <span>
-                    @Model.GetSubtotal().ToString("0.00") kr.
-                </span>
+                @* DELIVERY DETAILS *@
+                <section class="card border-0 shadow-sm mb-4">
+
+                    <div class="card-body p-4 p-md-5">
+
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+
+                            <div>
+
+                                <p class="checkout-box-label mb-1">
+                                    DELIVERY
+                                </p>
+
+                                <h2 class="h3 mb-0">
+                                    Delivery Details
+                                </h2>
+
+                            </div>
+
+
+                            <a asp-page="/Account"
+                               class="btn btn-outline-secondary btn-sm">
+
+                                Edit Details
+
+                            </a>
+
+                        </div>
+
+
+                        @if (Model.Customer != null)
+                        {
+                            <div class="row g-4">
+
+                                <div class="col-md-6">
+
+                                    <p class="text-muted mb-1">
+                                        Name
+                                    </p>
+
+                                    <strong>
+                                        @Model.Customer.Name @Model.Customer.Surname
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="col-md-6">
+
+                                    <p class="text-muted mb-1">
+                                        Email
+                                    </p>
+
+                                    <strong>
+                                        @Model.Customer.Email
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="col-12">
+
+                                    <p class="text-muted mb-1">
+                                        Delivery Address
+                                    </p>
+
+                                    <strong>
+                                        @Model.Customer.Address
+                                    </strong>
+
+                                </div>
+
+                            </div>
+                        }
+
+                    </div>
+
+                </section>
+
+
+
+                @* ORDER ITEMS *@
+                <section class="card border-0 shadow-sm">
+
+                    <div class="card-body p-4 p-md-5">
+
+                        <div class="mb-4">
+
+                            <p class="checkout-box-label mb-1">
+                                YOUR BOUQUETS
+                            </p>
+
+                            <h2 class="h3 mb-0">
+                                Order Items
+                            </h2>
+
+                        </div>
+
+
+                        @foreach (var product in Model.Products)
+                        {
+                            int quantity =
+                            Model.GetQuantity(product.Id);
+
+                            decimal productTotal =
+                            Model.GetProductTotal(product);
+
+
+                            <div class="row align-items-center py-4">
+
+
+                                @* PRODUCT IMAGE *@
+                                <div class="col-4 col-md-3">
+
+                                    @if (!string.IsNullOrEmpty(product.ImagePath))
+                                    {
+                                        <img src="@product.ImagePath"
+                                             alt="@product.ImageDescription"
+                                             class="img-fluid rounded-3" />
+                                    }
+
+                                </div>
+
+
+                                @* PRODUCT INFO *@
+                                <div class="col-8 col-md-5">
+
+                                    <h3 class="h5 mb-2">
+                                        @product.Name
+                                    </h3>
+
+                                    <p class="text-muted mb-1">
+                                        Quantity:
+                                        @quantity
+                                    </p>
+
+                                    <p class="text-muted mb-0">
+                                        @product.Price.ToString("0.00") kr. each
+                                    </p>
+
+                                </div>
+
+
+                                @* PRODUCT TOTAL *@
+                                <div class="col-12 col-md-4 text-md-end mt-3 mt-md-0">
+
+                                    <p class="text-muted mb-1">
+                                        Item Total
+                                    </p>
+
+                                    <strong class="fs-5">
+                                        @productTotal.ToString("0.00") kr.
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            @if (product != Model.Products.Last())
+                            {
+                                <hr class="my-0" />
+                            }
+                        }
+
+                    </div>
+
+                </section>
 
             </div>
 
 
-            <div class="summary-row">
 
-                <span>
-                    Shipping
-                </span>
+            @* HØJRE SIDE - SUMMARY *@
+            <div class="col-lg-4">
 
-                <span>
-                    @Model.ShippingPrice.ToString("0.00") kr.
-                </span>
+                <aside class="card border-0 shadow-sm checkout-summary">
+
+                    <div class="card-body p-4">
+
+                        <p class="summary-eyebrow mb-1">
+                            ORDER SUMMARY
+                        </p>
+
+                        <h2 class="h3 mb-4">
+                            Your Order
+                        </h2>
+
+
+                        <div class="d-flex justify-content-between mb-3">
+
+                            <span class="text-muted">
+                                Items
+                            </span>
+
+                            <span>
+                                @Model.GetSubtotal().ToString("0.00") kr.
+                            </span>
+
+                        </div>
+
+
+                        <div class="d-flex justify-content-between mb-4">
+
+                            <span class="text-muted">
+                                Shipping
+                            </span>
+
+                            <span>
+                                @Model.ShippingPrice.ToString("0.00") kr.
+                            </span>
+
+                        </div>
+
+
+                        <hr />
+
+
+                        <div class="d-flex justify-content-between align-items-center my-4">
+
+                            <strong class="fs-5">
+                                Total
+                            </strong>
+
+                            <strong class="fs-4">
+                                @Model.GetTotalPrice().ToString("0.00") kr.
+                            </strong>
+
+                        </div>
+
+
+                        <form method="post">
+
+                            <button type="submit"
+                                    class="btn btn-dark w-100 py-3">
+
+                                Place Order
+
+                            </button>
+
+                        </form>
+
+
+                        <div class="text-center mt-4">
+
+                            <p class="text-muted small mb-3">
+                                Carefully packed and prepared with love.
+                            </p>
+
+                            <a asp-page="/Cart"
+                               class="text-decoration-none">
+
+                                ← Back to Bag
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </aside>
 
             </div>
 
-
-            <hr />
-
-
-            <div class="summary-row checkout-total">
-
-                <strong>
-                    Total
-                </strong>
-
-                <strong>
-                    @Model.GetTotalPrice().ToString("0.00") kr.
-                </strong>
-
-            </div>
-
-
-
-            <form method="post">
-
-                <button type="submit"
-                        class="place-order-button">
-
-                    Place Order
-
-                </button>
-
-            </form>
-
-
-            <p class="checkout-note">
-                Carefully packed and prepared with love.
-            </p>
-
-
-            <a asp-page="/Cart"
-               class="back-to-cart">
-
-                Back to Bag
-
-            </a>
-
-        </aside>
+        </div>
 
     </div>
 

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Obligatoris.opgave.Domain.Interfaces;
 using Obligatoris.opgave.Domain.Models;
+using Obligatorisk_opgave.Services;
 
 namespace Obligatorisk_opgave.Pages;
 
@@ -9,21 +10,24 @@ public class Checkout : PageModel
 {
     private readonly IShoppingCartRepository _shoppingCartRepository;
     private readonly IProductRepository _productRepository;
-    private readonly IUserRepository _userRepository;
     private readonly IOrderRepository _orderRepository;
+    private readonly SessionService _sessionService;
+    private readonly AuthorizationService _authorizationService;
 
 
-    // Henter repositories
+    // Henter repositories og services
     public Checkout(
         IShoppingCartRepository shoppingCartRepository,
         IProductRepository productRepository,
-        IUserRepository userRepository,
-        IOrderRepository orderRepository)
+        IOrderRepository orderRepository,
+        SessionService sessionService,
+        AuthorizationService authorizationService)
     {
         _shoppingCartRepository = shoppingCartRepository;
         _productRepository = productRepository;
-        _userRepository = userRepository;
         _orderRepository = orderRepository;
+        _sessionService = sessionService;
+        _authorizationService = authorizationService;
     }
 
 
@@ -47,34 +51,52 @@ public class Checkout : PageModel
     // Kører når Checkout siden åbnes
     public IActionResult OnGet()
     {
-        // Midlertidigt customer id indtil login er lavet
-        int customerId = 1;
-
-
-        // Finder kunden
+        // Finder den bruger der er logget ind
         User? user =
-            _userRepository.GetById(customerId);
+            _sessionService.GetCurrentUser();
 
 
-        if (user is Customer customer)
-        {
-            Customer = customer;
-        }
-        else
+        // Kun en logget ind Customer må gå til checkout
+        if (user is not Customer customer)
         {
             return RedirectToPage("/Login");
         }
 
 
+        // Kontrollerer adgang ud fra ACM
+        if (!_authorizationService.CanCheckout(user))
+        {
+            return Forbid();
+        }
+
+
+        Customer =
+            customer;
+
+
+        int customerId =
+            customer.Id;
+
+
         // Finder kundens kurv
         ShoppingCart =
-            _shoppingCartRepository.GetByCustomerId(customerId);
+            _shoppingCartRepository.GetByCustomerId(
+                customerId);
 
 
         // Sender tilbage hvis kurven ikke findes
         if (ShoppingCart == null)
         {
             return RedirectToPage("/Cart");
+        }
+
+
+        // Kontrollerer at kurven faktisk tilhører kunden
+        if (!_authorizationService.OwnsCart(
+                customer,
+                ShoppingCart))
+        {
+            return Forbid();
         }
 
 
@@ -98,18 +120,47 @@ public class Checkout : PageModel
     // Kører når Place Order trykkes
     public IActionResult OnPost()
     {
-        // Midlertidigt customer id indtil login er lavet
-        int customerId = 1;
+        // Finder den bruger der er logget ind
+        User? user =
+            _sessionService.GetCurrentUser();
+
+
+        // Kun en logget ind Customer må oprette en ordre
+        if (user is not Customer customer)
+        {
+            return RedirectToPage("/Login");
+        }
+
+
+        // Kontrollerer adgang ud fra ACM
+        if (!_authorizationService.CanCheckout(user))
+        {
+            return Forbid();
+        }
+
+
+        int customerId =
+            customer.Id;
 
 
         // Finder kundens kurv
         ShoppingCart? shoppingCart =
-            _shoppingCartRepository.GetByCustomerId(customerId);
+            _shoppingCartRepository.GetByCustomerId(
+                customerId);
 
 
         if (shoppingCart == null)
         {
             return RedirectToPage("/Cart");
+        }
+
+
+        // Kontrollerer at kurven faktisk tilhører kunden
+        if (!_authorizationService.OwnsCart(
+                customer,
+                shoppingCart))
+        {
+            return Forbid();
         }
 
 
@@ -135,6 +186,13 @@ public class Checkout : PageModel
                 _shoppingCartRepository.GetProductQuantity(
                     shoppingCart.Id,
                     product.Id);
+
+
+            // Stopper hvis antal er ugyldigt
+            if (quantity <= 0)
+            {
+                return RedirectToPage("/Cart");
+            }
 
 
             // Stopper hvis der ikke er nok på lager
@@ -165,7 +223,8 @@ public class Checkout : PageModel
 
         // Gemmer ordren
         int orderId =
-            _orderRepository.Add(order);
+            _orderRepository.Add(
+                order);
 
 
         // Gemmer produkterne på ordren
@@ -189,7 +248,8 @@ public class Checkout : PageModel
                 product.StockQuantity - quantity;
 
 
-            _productRepository.Update(product);
+            _productRepository.Update(
+                product);
         }
 
 
@@ -224,7 +284,8 @@ public class Checkout : PageModel
     public decimal GetProductTotal(Product product)
     {
         int quantity =
-            GetQuantity(product.Id);
+            GetQuantity(
+                product.Id);
 
 
         return product.Price * quantity;
@@ -240,7 +301,8 @@ public class Checkout : PageModel
         foreach (Product product in Products)
         {
             decimal productTotal =
-                GetProductTotal(product);
+                GetProductTotal(
+                    product);
 
 
             subtotal =
@@ -255,6 +317,7 @@ public class Checkout : PageModel
     // Beregner den samlede pris
     public decimal GetTotalPrice()
     {
-        return GetSubtotal() + ShippingPrice;
+        return GetSubtotal()
+            + ShippingPrice;
     }
 }

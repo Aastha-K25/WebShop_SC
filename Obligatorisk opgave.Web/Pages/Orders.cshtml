@@ -1,0 +1,155 @@
+﻿@page
+@model Obligatorisk_opgave.Pages.Orders
+
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<section class="orders-page">
+
+    <div class="container py-5">
+
+        <div class="orders-header text-center mb-5">
+
+            <p class="orders-eyebrow">
+                PAPER & PETALS
+            </p>
+
+            <h1>
+                My Orders
+            </h1>
+
+            <p class="text-muted">
+                View your previous orders and follow their status.
+            </p>
+
+        </div>
+
+
+        @if (Model.CustomerOrders.Count == 0)
+        {
+            <div class="empty-orders text-center">
+
+                <div class="card border-0 shadow-sm p-5">
+
+                    <h2 class="mb-3">
+                        You have no orders yet
+                    </h2>
+
+                    <p class="text-muted mb-4">
+                        Your future orders will appear here.
+                        Explore our bouquets and find your next story.
+                    </p>
+
+                    <div>
+                        <a asp-page="/Products"
+                           class="btn-paper-primary">
+
+                            Explore Bouquets
+
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+        }
+        else
+        {
+            <div class="orders-list">
+
+                @foreach (var order in Model.CustomerOrders)
+                {
+                    <article class="order-card card border-0 shadow-sm mb-4">
+
+                        <div class="card-body p-4">
+
+                            <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+
+                                <div>
+
+                                    <p class="order-number mb-1">
+                                        Order #@order.Id
+                                    </p>
+
+                                    <p class="text-muted mb-0">
+                                        Placed on
+                                        @order.OrderDate.ToString("dd MMMM yyyy")
+                                    </p>
+
+                                </div>
+
+
+                                <div class="text-md-end">
+
+                                    <span class="order-status">
+                                        @order.Status
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <hr class="my-4" />
+
+
+                            <div class="row align-items-center">
+
+                                <div class="col-md-6 mb-3 mb-md-0">
+
+                                    <p class="text-muted mb-1">
+                                        Order Total
+                                    </p>
+
+                                    <p class="order-total mb-0">
+                                        @order.TotalPrice.ToString("0.00") kr.
+                                    </p>
+
+                                </div>
+
+
+                                <div class="col-md-6 text-md-end">
+
+                                    <a asp-page="/OrderConfirmation"
+                                       asp-route-id="@order.Id"
+                                       class="btn-paper-secondary">
+
+                                        View Order
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+                }
+
+            </div>
+        }
+
+
+        <div class="orders-bottom-actions text-center mt-5">
+
+            <a asp-page="/Products"
+               class="btn-paper-primary">
+
+                Continue Shopping
+
+            </a>
+
+            <a asp-page="/Account"
+               class="btn-paper-outline">
+
+                Back to My Account
+
+            </a>
+
+        </div>
+
+    </div>
+
+</section>

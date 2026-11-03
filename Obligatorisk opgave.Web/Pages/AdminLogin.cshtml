@@ -1,0 +1,102 @@
+﻿@page
+@model Obligatorisk_opgave.Pages.AdminLoginModel
+
+@{
+    ViewData["Title"] = "Admin Login";
+}
+
+<section class="container py-5">
+
+    <div class="mx-auto"
+         style="max-width: 500px;">
+
+        <div class="text-center mb-4">
+
+            <p class="mb-2"
+               style="letter-spacing: 3px;
+                      color: #667558;
+                      font-size: 0.7rem;
+                      font-weight: 700;">
+
+                PAPER & PETALS
+
+            </p>
+
+            <h1 style="font-family: Georgia, 'Times New Roman', serif;">
+
+                Admin Login
+
+            </h1>
+
+            <p class="text-muted">
+
+                Sign in to access the administration area.
+
+            </p>
+
+        </div>
+
+
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger"
+                 role="alert">
+
+                @Model.ErrorMessage
+
+            </div>
+        }
+
+
+        <form method="post">
+
+
+            <div class="mb-3">
+
+                <label asp-for="Email"
+                       class="form-label">
+
+                    Email
+
+                </label>
+
+                <input asp-for="Email"
+                       class="form-control"
+                       type="email"
+                       autocomplete="username"
+                       required />
+
+            </div>
+
+
+            <div class="mb-4">
+
+                <label asp-for="Password"
+                       class="form-label">
+
+                    Password
+
+                </label>
+
+                <input asp-for="Password"
+                       class="form-control"
+                       type="password"
+                       autocomplete="current-password"
+                       required />
+
+            </div>
+
+
+            <button type="submit"
+                    class="btn-paper-primary w-100">
+
+                Log In as Admin
+
+            </button>
+
+
+        </form>
+
+    </div>
+
+</section>

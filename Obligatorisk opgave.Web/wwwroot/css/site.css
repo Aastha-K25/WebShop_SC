@@ -1,11 +1,183 @@
 /* ================================================== */
-/* NAVBAR - POLISH */
+/* PAPER & PETALS - GLOBAL STYLES */
+/* ================================================== */
+
+
+/* ================================================== */
+/* COLORS */
+/* ================================================== */
+
+:root {
+    --background-color: #fbfaf8;
+    --soft-background-color: #f6f2eb;
+    --hero-background-color: #f1ebe5;
+    --card-background-color: #ffffff;
+    --primary-text-color: #292b27;
+    --secondary-text-color: #60635c;
+    --muted-text-color: #777267;
+    --primary-green-color: #667558;
+    --dark-green-color: #506047;
+    --border-color: #e5e1db;
+    --danger-color: #8a655f;
+    --danger-dark-color: #694944;
+    --danger-background-color: #f8e9e7;
+}
+
+
+/* ================================================== */
+/* GLOBAL */
+/* ================================================== */
+
+html {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--primary-text-color);
+}
+
+
+/* ================================================== */
+/* LINKS */
+/* ================================================== */
+
+a {
+    color: var(--primary-green-color);
+}
+
+    a:hover {
+        color: var(--dark-green-color);
+    }
+
+
+/* ================================================== */
+/* SHARED PAPER & PETALS BUTTONS */
+/* ================================================== */
+
+.btn-paper-primary,
+.btn-paper-secondary,
+.btn-paper-outline,
+.btn-paper-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 20px;
+    border-radius: 3px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+/* Primary */
+
+.btn-paper-primary {
+    border: 1px solid var(--primary-green-color);
+    background-color: var(--primary-green-color);
+    color: #ffffff;
+}
+
+    .btn-paper-primary:hover {
+        border-color: var(--dark-green-color);
+        background-color: var(--dark-green-color);
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 7px 16px rgba(52, 65, 46, 0.15);
+    }
+
+
+/* Secondary */
+
+.btn-paper-secondary {
+    border: 1px solid #d6d1c9;
+    background-color: var(--soft-background-color);
+    color: var(--primary-text-color);
+}
+
+    .btn-paper-secondary:hover {
+        border-color: #c9c2b8;
+        background-color: #ebe5dc;
+        color: var(--primary-text-color);
+        transform: translateY(-2px);
+    }
+
+
+/* Outline */
+
+.btn-paper-outline {
+    border: 1px solid var(--primary-green-color);
+    background-color: transparent;
+    color: var(--primary-green-color);
+}
+
+    .btn-paper-outline:hover {
+        background-color: var(--primary-green-color);
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+
+/* Danger */
+
+.btn-paper-danger {
+    border: 1px solid var(--danger-color);
+    background-color: transparent;
+    color: var(--danger-color);
+}
+
+    .btn-paper-danger:hover {
+        border-color: var(--danger-dark-color);
+        background-color: var(--danger-color);
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+
+/* ================================================== */
+/* BOOTSTRAP PRIMARY BUTTON */
+/* ================================================== */
+
+.btn-primary {
+    border-color: var(--primary-green-color);
+    background-color: var(--primary-green-color);
+    color: #ffffff;
+}
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+        border-color: var(--dark-green-color);
+        background-color: var(--dark-green-color);
+        color: #ffffff;
+    }
+
+
+/* ================================================== */
+/* NAV PILLS */
+/* ================================================== */
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    border-color: var(--primary-green-color);
+    background-color: var(--primary-green-color);
+    color: #ffffff;
+}
+
+
+/* ================================================== */
+/* NAVBAR */
 /* ================================================== */
 
 .navbar {
     min-height: 82px;
-    background-color: rgba(255, 255, 255, 0.98) !important;
     border-bottom: 1px solid #ece7df;
+    background-color: rgba(255, 255, 255, 0.98) !important;
     box-shadow: 0 2px 12px rgba(55, 48, 40, 0.035);
 }
 
@@ -19,7 +191,10 @@
     }
 
 
-/* Logo + navn */
+/* ================================================== */
+/* BRAND */
+/* ================================================== */
+
 .navbar-brand {
     display: flex;
     align-items: center;
@@ -39,8 +214,6 @@
         transform: translateY(-1px);
     }
 
-
-/* Logo */
 .navbar-logo {
     width: 50px;
     height: 46px;
@@ -48,7 +221,10 @@
 }
 
 
-/* Navigation */
+/* ================================================== */
+/* NAVIGATION */
+/* ================================================== */
+
 .navbar-nav {
     display: flex;
     align-items: center;
@@ -67,8 +243,6 @@
         transition: color 0.2s ease, transform 0.2s ease;
     }
 
-
-        /* Elegant lille linje under menu */
         .navbar-nav .nav-link::after {
             content: "";
             position: absolute;
@@ -91,7 +265,10 @@
             }
 
 
-/* Ikoner */
+/* ================================================== */
+/* NAVBAR ICONS */
+/* ================================================== */
+
 .navbar-icons {
     display: flex;
     align-items: center;
@@ -128,73 +305,60 @@
 
 
 /* ================================================== */
-/* BENEFITS - POLISH */
+/* USER MENU */
 /* ================================================== */
 
-.benefits-section {
-    width: 100%;
-    padding: 14px 0;
-    background-color: #fffefa;
-    border-top: 1px solid #ebe6df;
-    border-bottom: 1px solid #ebe6df;
-}
-
-.benefits-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    padding: 0;
-}
-
-.benefit {
-    min-height: 76px;
-    display: flex;
+.user-menu-button {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 16px;
-    padding: 12px 24px;
-    border: 1px solid transparent;
-    border-radius: 8px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
     background-color: transparent;
-    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-
-/* Fjern de gamle hårde lodrette streger */
-.benefit {
-    border-right: none;
-}
-
-    .benefit:hover {
-        background-color: #faf7f2;
-        border-color: #ece5dc;
+    .user-menu-button:hover {
+        background-color: #f4f1ec;
         transform: translateY(-2px);
-        box-shadow: 0 7px 18px rgba(64, 55, 45, 0.05);
     }
 
+    .user-menu-button img {
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+        opacity: 0.68;
+    }
 
-/* Ikoner */
-.benefit-icon {
-    width: 42px;
-    height: 42px;
-    flex-shrink: 0;
-    object-fit: contain;
-    opacity: 0.72;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+.user-menu .dropdown-menu {
+    min-width: 190px;
+    padding: 8px 0;
+    border: 1px solid #e1ddd5;
+    border-radius: 3px;
+    background-color: #ffffff;
+    box-shadow: 0 10px 25px rgba(43, 49, 39, 0.12);
 }
 
-.benefit:hover .benefit-icon {
-    transform: translateY(-2px) scale(1.04);
-    opacity: 0.95;
+.navbar-icons .user-menu .dropdown-item {
+    width: 100%;
+    height: auto;
+    display: block;
+    padding: 10px 18px;
+    border-radius: 0;
+    color: #343932;
+    font-size: 0.88rem;
+    text-decoration: none;
 }
 
-.benefit p {
-    margin: 0;
-    color: #4f554d;
-    font-size: 0.89rem;
-    font-weight: 600;
-    line-height: 1.45;
-}
+    .navbar-icons .user-menu .dropdown-item:hover {
+        background-color: #f4f1ec;
+        color: #343932;
+        transform: none;
+    }
 
 
 /* ================================================== */
@@ -210,15 +374,11 @@
     .navbar-nav {
         gap: 20px;
     }
-
-    .benefits-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 
 
 /* ================================================== */
-/* MOBIL */
+/* MOBILE */
 /* ================================================== */
 
 @media (max-width: 575px) {
@@ -264,81 +424,36 @@
         margin-left: 0;
         padding: 12px 0 2px;
     }
+}
 
-    .benefits-section {
-        padding: 10px 0;
+
+/* ================================================== */
+/* REDUCED MOTION */
+/* ================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .btn-paper-primary,
+    .btn-paper-secondary,
+    .btn-paper-outline,
+    .btn-paper-danger,
+    .navbar-brand,
+    .navbar-nav .nav-link,
+    .navbar-nav .nav-link::after,
+    .navbar-icons a,
+    .navbar-icons img,
+    .user-menu-button {
+        transition: none;
     }
 
-    .benefits-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-
-    .benefit {
-        min-height: 82px;
-        justify-content: flex-start;
-        padding: 10px 12px;
-    }
-
-    .benefit-icon {
-        width: 34px;
-        height: 34px;
-    }
-
-    .benefit p {
-        font-size: 0.78rem;
-    }
-}
-
-/* Brugermenu i navigationen */
-.user-menu-button {
-    width: 38px;
-    height: 38px;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-    background-color: transparent;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background-color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.user-menu-button:hover {
-    background-color: #f4f1ec;
-    transform: translateY(-2px);
-}
-
-.user-menu-button img {
-    width: 22px;
-    height: 22px;
-    object-fit: contain;
-    opacity: 0.68;
-}
-
-.user-menu .dropdown-menu {
-    min-width: 190px;
-    padding: 8px 0;
-    border: 1px solid #e1ddd5;
-    border-radius: 0;
-    box-shadow: 0 10px 25px rgba(43, 49, 39, 0.12);
-}
-
-/* Overskriver den normale styling af navigationens ikon-links */
-.navbar-icons .user-menu .dropdown-item {
-    width: 100%;
-    height: auto;
-    display: block;
-    padding: 10px 18px;
-    color: #343932;
-    border-radius: 0;
-    font-size: 14px;
-    text-decoration: none;
-}
-
-.navbar-icons .user-menu .dropdown-item:hover {
-    background-color: #f4f1ec;
-    transform: none;
+        .btn-paper-primary:hover,
+        .btn-paper-secondary:hover,
+        .btn-paper-outline:hover,
+        .btn-paper-danger:hover,
+        .navbar-brand:hover,
+        .navbar-nav .nav-link:hover,
+        .navbar-icons a:hover,
+        .user-menu-button:hover {
+            transform: none;
+        }
 }

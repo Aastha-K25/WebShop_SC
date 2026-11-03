@@ -1,0 +1,137 @@
+﻿@page
+@model Obligatorisk_opgave.Pages.AdminUsers
+
+@{
+    ViewData["Title"] = "Admin Users";
+}
+
+<section class="admin-users-page">
+
+    <div class="admin-users-header">
+
+        <p class="admin-users-eyebrow">
+            PAPER & PETALS
+        </p>
+
+        <h1>
+            Customer Management
+        </h1>
+
+        <p>
+            View and manage customer accounts.
+        </p>
+
+    </div>
+
+
+    @if (Model.Customers.Count == 0)
+    {
+        <div class="empty-customers">
+
+            <h2>
+                No customers found
+            </h2>
+
+            <p>
+                There are currently no customer accounts to manage.
+            </p>
+
+        </div>
+    }
+    else
+    {
+        <div class="admin-users-list">
+
+            @foreach (var customer in Model.Customers)
+            {
+                <article class="admin-user-card">
+
+                    <div class="admin-user-information">
+
+                        <h2>
+                            @customer.Name
+                        </h2>
+
+                        <p>
+                            Customer ID:
+                            @customer.Id
+                        </p>
+
+                        <p>
+                            Email:
+                            @customer.Email
+                        </p>
+
+                        <p>
+                            Address:
+                            @customer.Address
+                        </p>
+
+                        <p>
+                            Status:
+
+                            @if (customer.IsActive)
+                            {
+                                <strong>
+                                    Active
+                                </strong>
+                            }
+                            else
+                            {
+                                <strong>
+                                    Inactive
+                                </strong>
+                            }
+                        </p>
+
+                    </div>
+
+
+                    <div class="admin-user-actions">
+
+                        @if (customer.IsActive)
+                        {
+                            <form method="post"
+                                  asp-page-handler="Deactivate">
+
+                                <input type="hidden"
+                                       name="id"
+                                       value="@customer.Id" />
+
+                                <button type="submit"
+                                        class="deactivate-user-button">
+
+                                    Deactivate Customer
+
+                                </button>
+
+                            </form>
+                        }
+                        else
+                        {
+                            <form method="post"
+                                  asp-page-handler="Activate">
+
+                                <input type="hidden"
+                                       name="id"
+                                       value="@customer.Id" />
+
+                                <button type="submit"
+                                        class="activate-user-button">
+
+                                    Activate Customer
+
+                                </button>
+
+                            </form>
+                        }
+
+                    </div>
+
+                </article>
+            }
+
+        </div>
+    }
+
+</section>

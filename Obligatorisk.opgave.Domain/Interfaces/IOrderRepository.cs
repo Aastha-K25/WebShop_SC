@@ -12,6 +12,12 @@ public interface IOrderRepository
     // Henter alle ordrer, der tilhører en bestemt kunde
     List<Order> GetByCustomerId(int customerId);
 
+    // Henter alle ordrer
+    List<Order> GetAll();
+
+    // Henter de produkter, der tilhører en bestemt ordre
+    List<OrderProduct> GetOrderProducts(int orderId);
+
     // Gemmer en ny ordre og returnerer det nye ordre-id
     int Add(Order order);
 
@@ -23,5 +29,7 @@ public interface IOrderRepository
         decimal priceAtPurchase);
 
     // Opdaterer ordrens status
-    void UpdateStatus(int orderId, OrderStatus status);
+    void UpdateStatus(
+        int orderId,
+        OrderStatus status);
 }

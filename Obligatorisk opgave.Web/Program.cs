@@ -1,4 +1,5 @@
 using Obligatoris.opgave.Domain.Interfaces;
+using Obligatoris.opgave.Domain.Models;
 using Obligatorisk_opgave.Security;
 using Obligatorisk_opgave.Services;
 using Microsoft.AspNetCore.Http;
@@ -12,33 +13,204 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddMemoryCache(); //Bruges til midlertidigt at registere fejlede loginforsøg
 
-builder.Services.AddDistributedMemoryCache(); //Gemmer sessionsdata midlertidigt i servens hukommelse
+// Bruges til midlertidigt at registrere fejlede loginforsøg
+builder.Services.AddMemoryCache();
+
+
+// Gemmer sessionsdata midlertidigt i serverens hukommelse
+builder.Services.AddDistributedMemoryCache();
+
 
 builder.Services.AddSession(options =>
 {
-    options.Cookie.Name = "PaperAndPetales.Session";
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.SameSite = SameSiteMode.Strict;
-    
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.Name =
+        "PaperAndPetals.Session";
+
+    options.Cookie.HttpOnly =
+        true;
+
+    options.Cookie.IsEssential =
+        true;
+
+    options.Cookie.SecurePolicy =
+        CookieSecurePolicy.Always;
+
+    options.Cookie.SameSite =
+        SameSiteMode.Strict;
+
+    options.IdleTimeout =
+        TimeSpan.FromMinutes(30);
 });
 
-// Dependency Injection
+
+// ==================================================
+// DEPENDENCY INJECTION
+// ==================================================
+
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+
+builder.Services.AddScoped<
+    IPasswordResetTokenRepository,
+    PasswordResetTokenRepository>();
+
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
-builder.Services.AddScoped<PasswordHasher>(); //Bruges til sikre hashin og kontorl af passwords
-builder.Services.AddScoped<SessionService>(); //håndtere loginoplysninger i ASP.NET session
-builder.Services.AddScoped<AuthenticationService>(); //Samler registration login og loyout et sted
+
+builder.Services.AddScoped<
+    IShoppingCartRepository,
+    ShoppingCartRepository>();
+
+
+// Bruges til sikker hashing og kontrol af passwords
+builder.Services.AddScoped<PasswordHasher>();
+
+
+// Håndterer loginoplysninger i ASP.NET Session
+builder.Services.AddScoped<SessionService>();
+
+
+// Samler registration, login og logout ét sted
+builder.Services.AddScoped<AuthenticationService>();
+
+
+// Håndterer roller, adgangskontrol og ownership
+builder.Services.AddScoped<AuthorizationService>();
+
 
 var app = builder.Build();
 
+
+// ==================================================
+// ADMIN SEED
+// ==================================================
+
+// Admin oprettes kun automatisk i Development.
+// Passwordet hentes fra User Secrets og ligger derfor
+// ikke hardcoded i kildekoden.
+if (app.Environment.IsDevelopment())
+{
+    using IServiceScope scope =
+        app.Services.CreateScope();
+
+
+    IConfiguration configuration =
+        scope.ServiceProvider
+            .GetRequiredService<IConfiguration>();
+
+
+    IUserRepository userRepository =
+        scope.ServiceProvider
+            .GetRequiredService<IUserRepository>();
+
+
+    PasswordHasher passwordHasher =
+        scope.ServiceProvider
+            .GetRequiredService<PasswordHasher>();
+
+
+    string? name =
+        configuration["AdminSeed:Name"];
+
+    string? surname =
+        configuration["AdminSeed:Surname"];
+
+    string? email =
+        configuration["AdminSeed:Email"];
+
+    string? password =
+        configuration["AdminSeed:Password"];
+
+    string? employeeNumber =
+        configuration["AdminSeed:EmployeeNumber"];
+
+
+    // Seeder kører kun, hvis alle nødvendige
+    // admin-oplysninger findes i User Secrets.
+    if (!string.IsNullOrWhiteSpace(name) &&
+        !string.IsNullOrWhiteSpace(surname) &&
+        !string.IsNullOrWhiteSpace(email) &&
+        !string.IsNullOrWhiteSpace(password) &&
+        !string.IsNullOrWhiteSpace(employeeNumber))
+    {
+        string normalizedEmail =
+            email.Trim().ToLowerInvariant();
+
+
+        // Kontrollerer om admin-brugeren allerede findes.
+        User? existingUser =
+            userRepository.GetByEmail(
+                normalizedEmail);
+
+
+        // Admin oprettes kun én gang.
+        if (existingUser == null)
+        {
+            // Admin-passwordet skal følge samme
+            // password policy som resten af systemet.
+            string? passwordError =
+                PasswordValidator.Validate(
+                    password,
+                    name,
+                    normalizedEmail);
+
+
+            if (passwordError != null)
+            {
+                throw new InvalidOperationException(
+                    "Admin password does not satisfy the password policy: "
+                    + passwordError);
+            }
+
+
+            // Passwordet hashes før Admin-objektet
+            // sendes videre til repository.
+            string passwordHash =
+                passwordHasher.HashPassword(
+                    password);
+
+
+            Admin admin =
+                new Admin
+                {
+                    Name =
+                        name.Trim(),
+
+                    Surname =
+                        surname.Trim(),
+
+                    Email =
+                        normalizedEmail,
+
+                    PasswordHash =
+                        passwordHash,
+
+                    IsActive =
+                        true,
+
+                    EmployeeNumber =
+                        employeeNumber.Trim(),
+
+                    // MFA er forberedt i modellen,
+                    // men selve MFA-flowet er ikke implementeret endnu.
+                    MfaEnabled =
+                        false
+                };
+
+
+            // Repository gemmer Admin i både
+            // Users og Admins i samme transaction.
+            userRepository.Add(
+                admin);
+        }
+    }
+}
+
+
+// ==================================================
+// ERROR HANDLING
+// ==================================================
 
 // Hvis vi ikke kører i development
 if (!app.Environment.IsDevelopment())
@@ -57,10 +229,15 @@ app.UseHttpsRedirection();
 
 
 
+// ==================================================
+// ALLOWED HTTP METHODS
+// ==================================================
+
 // Tillader kun de HTTP metoder vi bruger
 app.Use(async (context, next) =>
 {
-    HashSet<string> allowedMethods = new HashSet<string>
+    HashSet<string> allowedMethods =
+        new HashSet<string>
         {
             "GET",
             "POST",
@@ -69,12 +246,15 @@ app.Use(async (context, next) =>
 
 
     // Blokerer andre HTTP-metoder
-    if (!allowedMethods.Contains(context.Request.Method))
+    if (!allowedMethods.Contains(
+            context.Request.Method))
     {
-        context.Response.StatusCode = 405;
+        context.Response.StatusCode =
+            405;
 
 
-        await context.Response.WriteAsync( "Method Not Allowed");
+        await context.Response.WriteAsync(
+            "Method Not Allowed");
 
 
         return;
@@ -86,10 +266,15 @@ app.Use(async (context, next) =>
 
 
 
+// ==================================================
+// CONTENT TYPE VALIDATION
+// ==================================================
+
 // Tjekker Content-Type på POST requests
 app.Use(async (context, next) =>
 {
-    // Vi tjekker kun POST fordi GET ikke sender form-data i body
+    // Vi tjekker kun POST fordi GET
+    // ikke sender form-data i body
     if (context.Request.Method == "POST")
     {
         string? contentType =
@@ -100,17 +285,24 @@ app.Use(async (context, next) =>
         bool validContentType =
             contentType != null &&
             (
-                contentType.StartsWith( "application/x-www-form-urlencoded") ||  contentType.StartsWith( "multipart/form-data")
+                contentType.StartsWith(
+                    "application/x-www-form-urlencoded")
+                ||
+                contentType.StartsWith(
+                    "multipart/form-data")
             );
 
 
-        // Stopper requesten hvis Content-Type ikke er tilladt
+        // Stopper requesten hvis Content-Type
+        // ikke er tilladt
         if (!validContentType)
         {
-            context.Response.StatusCode = 415;
+            context.Response.StatusCode =
+                415;
 
 
-            await context.Response.WriteAsync( "Unsupported Media Type");
+            await context.Response.WriteAsync(
+                "Unsupported Media Type");
 
 
             return;
@@ -123,16 +315,20 @@ app.Use(async (context, next) =>
 
 
 
+// ==================================================
+// SECURITY HEADERS
+// ==================================================
+
 // Tilføjer sikkerhedsheaders
 app.Use(async (context, next) =>
 {
-    // Stopper browseren fra selv at g�tte MIME-type
+    // Stopper browseren fra selv at gætte MIME-type
     context.Response.Headers.Append(
         "X-Content-Type-Options",
         "nosniff");
 
 
-    // CSP bestemmer hvilke ressourcer browseren m� bruge
+    // CSP bestemmer hvilke ressourcer browseren må bruge
     context.Response.Headers.Append(
         "Content-Security-Policy",
         "default-src 'self'; " +
@@ -151,16 +347,25 @@ app.Use(async (context, next) =>
 
 
 
+// ==================================================
+// ROUTING OG SESSION
+// ==================================================
+
 // Gør routing klar
 app.UseRouting();
 
+
+// Gør Session tilgængelig
 app.UseSession();
+
 
 // Gør authorization klar
 app.UseAuthorization();
 
+
 // Gør statiske filer klar
 app.MapStaticAssets();
+
 
 // Finder Razor Pages
 app.MapRazorPages()

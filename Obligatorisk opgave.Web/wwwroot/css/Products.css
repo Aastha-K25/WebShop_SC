@@ -10,7 +10,6 @@
 }
 
 
-
 /* ================================================== */
 /* HEADINGS */
 /* ================================================== */
@@ -23,7 +22,6 @@
     margin-bottom: 22px;
 }
 
-
 .section-eyebrow {
     margin: 0 0 7px;
     color: #737b6d;
@@ -31,7 +29,6 @@
     font-weight: 600;
     letter-spacing: 3px;
 }
-
 
 .section-heading h1,
 .all-products-heading h2 {
@@ -41,11 +38,9 @@
     font-weight: 500;
 }
 
-
 .section-heading h1 {
     font-size: 2.25rem;
 }
-
 
 .view-all-link {
     margin-bottom: 7px;
@@ -53,13 +48,13 @@
     font-size: 0.78rem;
     font-weight: 600;
     text-decoration: none;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
-
 
     .view-all-link:hover {
         color: #424d3d;
+        transform: translateX(3px);
     }
-
 
 
 /* ================================================== */
@@ -70,45 +65,38 @@
     margin-bottom: 68px;
 }
 
-
 .popular-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 20px;
 }
 
-
 .collection-card {
     overflow: hidden;
     border: 1px solid #e5e1da;
-    border-radius: 3px;
+    border-radius: 4px;
     background-color: #ffffff;
     box-shadow: 0 3px 12px rgba(45, 49, 41, 0.05);
 }
-
 
 .collection-image-link {
     display: block;
     overflow: hidden;
 }
 
-
 .collection-image {
-    width: 100%;
     display: block;
+    width: 100%;
     transition: transform 0.3s ease;
 }
-
 
 .collection-card:hover .collection-image {
     transform: scale(1.02);
 }
 
-
 .collection-content {
     padding: 16px 17px 17px;
 }
-
 
 .collection-genre {
     margin: 0 0 4px;
@@ -119,7 +107,6 @@
     text-transform: uppercase;
 }
 
-
 .collection-content h2 {
     margin: 0 0 6px;
     color: #292d27;
@@ -127,7 +114,6 @@
     font-size: 1.05rem;
     font-weight: 500;
 }
-
 
 .collection-text {
     min-height: 38px;
@@ -137,7 +123,6 @@
     line-height: 1.5;
 }
 
-
 .collection-bottom {
     display: flex;
     align-items: flex-end;
@@ -146,7 +131,6 @@
     margin-top: 15px;
 }
 
-
 .from-text {
     display: block;
     margin-bottom: 2px;
@@ -154,29 +138,34 @@
     font-size: 0.65rem;
 }
 
-
 .collection-bottom strong {
     font-size: 0.95rem;
 }
 
 
+/* ================================================== */
+/* COLLECTION BUTTON */
+/* ================================================== */
+
 .collection-button {
     padding: 9px 13px;
-    border-radius: 2px;
+    border: 1px solid #65725d;
+    border-radius: 3px;
     background-color: #65725d;
     color: #ffffff;
     font-size: 0.65rem;
     font-weight: 600;
     letter-spacing: 0.5px;
     text-decoration: none;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
-
 
     .collection-button:hover {
         background-color: #505d49;
         color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 7px 16px rgba(52, 65, 46, 0.13);
     }
-
 
 
 /* ================================================== */
@@ -187,24 +176,20 @@
     padding-top: 8px;
 }
 
-
 .all-products-heading {
     margin-bottom: 19px;
     text-align: center;
 }
 
-
     .all-products-heading h2 {
         font-size: 2.2rem;
     }
-
 
     .all-products-heading > p:last-child {
         margin: 7px 0 0;
         color: #7f827a;
         font-size: 0.82rem;
     }
-
 
 
 /* ================================================== */
@@ -220,7 +205,6 @@
     margin-bottom: 32px;
 }
 
-
 .filter-button {
     padding: 8px 17px;
     border: 1px solid #dcd7cf;
@@ -230,8 +214,8 @@
     font-size: 0.75rem;
     font-weight: 600;
     text-decoration: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
-
 
     .filter-button:first-child {
         border-color: #68755f;
@@ -239,13 +223,11 @@
         color: #ffffff;
     }
 
-
     .filter-button:hover {
         border-color: #68755f;
         background-color: #68755f;
         color: #ffffff;
     }
-
 
 
 /* ================================================== */
@@ -258,27 +240,23 @@
     gap: 20px;
 }
 
-
 .product-card {
     overflow: hidden;
     border: 1px solid #e6e1da;
-    border-radius: 3px;
+    border-radius: 4px;
     background-color: #ffffff;
     box-shadow: 0 3px 11px rgba(46, 50, 43, 0.05);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
 
     .product-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 24px rgba(46, 50, 43, 0.09);
     }
 
-
 .product-image-link {
     display: block;
 }
-
 
 .product-image-container {
     width: 100%;
@@ -287,20 +265,17 @@
     background-color: #f7f3ed;
 }
 
-
 .product-image {
+    display: block;
     width: 100%;
     height: 100%;
-    display: block;
     object-fit: cover;
     transition: transform 0.3s ease;
 }
 
-
 .product-card:hover .product-image {
     transform: scale(1.025);
 }
-
 
 
 /* ================================================== */
@@ -311,7 +286,6 @@
     padding: 14px 15px 15px;
 }
 
-
 .product-genre {
     margin: 0 0 5px;
     color: #7f8679;
@@ -321,17 +295,15 @@
     text-transform: uppercase;
 }
 
-
 .product-name-link {
     color: #292c27;
     text-decoration: none;
+    transition: color 0.2s ease;
 }
-
 
     .product-name-link:hover {
         color: #4f5d47;
     }
-
 
 .product-content h3 {
     margin: 0 0 6px;
@@ -340,18 +312,15 @@
     font-weight: 500;
 }
 
-
 .product-meta {
     margin: 0;
     color: #858980;
     font-size: 0.72rem;
 }
 
-
     .product-meta span {
         margin: 0 4px;
     }
-
 
 .product-bottom {
     display: flex;
@@ -361,7 +330,6 @@
     margin-top: 15px;
 }
 
-
 .product-price {
     margin: 0;
     color: #252a23;
@@ -369,52 +337,54 @@
     font-weight: 700;
 }
 
-
 .product-stock {
     margin: 3px 0 0;
     color: #718069;
     font-size: 0.66rem;
 }
 
-
     .product-stock.sold-out {
         color: #925e5e;
     }
 
 
+/* ================================================== */
+/* VIEW PRODUCT BUTTON */
+/* ================================================== */
+
 .product-view-button {
     padding: 8px 13px;
     border: 1px solid #68755f;
-    border-radius: 2px;
+    border-radius: 3px;
     background-color: #68755f;
     color: #ffffff;
     font-size: 0.68rem;
     font-weight: 600;
     text-decoration: none;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
-
 
     .product-view-button:hover {
         background-color: #505d49;
         color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 7px 16px rgba(52, 65, 46, 0.13);
     }
 
 
-
 /* ================================================== */
-/* EMPTY */
+/* EMPTY STATE */
 /* ================================================== */
 
 .empty-products {
     padding: 50px;
-    text-align: center;
     color: #777b73;
+    text-align: center;
 }
 
 
-
 /* ================================================== */
-/* RESPONSIVE */
+/* TABLET */
 /* ================================================== */
 
 @media (max-width: 1100px) {
@@ -426,27 +396,56 @@
 }
 
 
+/* ================================================== */
+/* MOBILE */
+/* ================================================== */
+
 @media (max-width: 650px) {
 
     .products-page {
         width: 92%;
     }
 
-
     .section-heading {
         align-items: flex-start;
         flex-direction: column;
     }
-
 
     .popular-grid,
     .products-grid {
         grid-template-columns: 1fr;
     }
 
-
     .section-heading h1,
     .all-products-heading h2 {
         font-size: 1.8rem;
     }
+}
+
+
+/* ================================================== */
+/* REDUCED MOTION */
+/* ================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .view-all-link,
+    .collection-image,
+    .collection-button,
+    .filter-button,
+    .product-card,
+    .product-image,
+    .product-name-link,
+    .product-view-button {
+        transition: none;
+    }
+
+        .view-all-link:hover,
+        .collection-card:hover .collection-image,
+        .collection-button:hover,
+        .product-card:hover,
+        .product-card:hover .product-image,
+        .product-view-button:hover {
+            transform: none;
+        }
 }

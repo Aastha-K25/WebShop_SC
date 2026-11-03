@@ -1,0 +1,109 @@
+﻿@page
+
+@{
+    ViewData["Title"] = "Contact";
+}
+
+@section Styles
+{
+    <link rel="stylesheet"
+          href="~/css/InformationPages.css"
+          asp-append-version="true" />
+}
+
+<section class="contact-page">
+
+    <div class="contact-page-container">
+
+        <div class="contact-page-header">
+
+            <p class="contact-page-eyebrow">
+                CONTACT
+            </p>
+
+            <h1>
+                How can we help?
+            </h1>
+
+            <p>
+                Questions about a bouquet, your order or your account?
+                You are always welcome to contact Paper & Petals.
+            </p>
+
+        </div>
+
+
+        <div class="contact-page-grid">
+
+            <div class="contact-page-card">
+
+                <p class="contact-card-label">
+                    EMAIL
+                </p>
+
+                <h2>
+                    Customer Support
+                </h2>
+
+                <p>
+                    For questions about orders,
+                    bouquets or your account.
+                </p>
+
+                <a href="mailto:support@paperandpetals.dk">
+                    support@paperandpetals.dk
+                </a>
+
+            </div>
+
+
+            <div class="contact-page-card">
+
+                <p class="contact-card-label">
+                    OPENING HOURS
+                </p>
+
+                <h2>
+                    Customer Service
+                </h2>
+
+                <p>
+                    Monday – Friday
+                </p>
+
+                <p class="contact-card-detail">
+                    We answer enquiries during normal business hours.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="contact-page-note">
+
+            <p class="contact-page-eyebrow">
+                ORDER QUESTIONS
+            </p>
+
+            <h2>
+                Already placed an order?
+            </h2>
+
+            <p>
+                You can view your current and previous orders
+                from your account.
+            </p>
+
+            <a asp-page="/Orders"
+               class="btn-paper-primary">
+
+                View My Orders
+
+            </a>
+
+        </div>
+
+    </div>
+
+</section>

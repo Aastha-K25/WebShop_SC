@@ -31,6 +31,7 @@ public class UserRepository : IUserRepository
             SELECT
                 u.Id,
                 u.Name,
+                u.Surname,
                 u.Email,
                 u.PasswordHash,
                 u.IsActive,
@@ -42,7 +43,7 @@ public class UserRepository : IUserRepository
                 ON u.Id = c.UserId
             LEFT JOIN paperpetals.Admins a
                 ON u.Id = a.UserId
-            ORDER BY u.Name;
+            ORDER BY u.Name, u.Surname;
             """;
 
         using SqlConnection connection =
@@ -53,16 +54,18 @@ public class UserRepository : IUserRepository
 
         connection.Open();
 
-        using SqlDataReader reader = command.ExecuteReader();
+        using SqlDataReader reader =
+            command.ExecuteReader();
 
-        // Løkken kører én gang for hver bruger,
-        // som databasen returnerer.
+
         while (reader.Read())
         {
-            User user = CreateUser(reader);
+            User user =
+                CreateUser(reader);
 
             users.Add(user);
         }
+
 
         return users;
     }
@@ -75,6 +78,7 @@ public class UserRepository : IUserRepository
             SELECT
                 u.Id,
                 u.Name,
+                u.Surname,
                 u.Email,
                 u.PasswordHash,
                 u.IsActive,
@@ -95,32 +99,42 @@ public class UserRepository : IUserRepository
         using SqlCommand command =
             new SqlCommand(sql, connection);
 
-        // Id sendes som en SQL-parameter.
-        // Det beskytter mod SQL Injection.
-        command.Parameters.AddWithValue("@Id", id);
+
+        command.Parameters.AddWithValue(
+            "@Id",
+            id);
+
 
         connection.Open();
 
-        using SqlDataReader reader = command.ExecuteReader();
+        using SqlDataReader reader =
+            command.ExecuteReader();
+
 
         if (reader.Read())
         {
             return CreateUser(reader);
         }
 
-        // Hvis brugeren ikke findes, returnerer vi null.
+
         return null;
     }
 
 
     // Finder en bruger ud fra e-mailadressen.
-    // Metoden skal senere bruges ved login.
     public User? GetByEmail(string email)
     {
+        string normalizedEmail =
+            email
+                .Trim()
+                .ToLowerInvariant();
+
+
         string sql = """
             SELECT
                 u.Id,
                 u.Name,
+                u.Surname,
                 u.Email,
                 u.PasswordHash,
                 u.IsActive,
@@ -132,7 +146,7 @@ public class UserRepository : IUserRepository
                 ON u.Id = c.UserId
             LEFT JOIN paperpetals.Admins a
                 ON u.Id = a.UserId
-            WHERE u.Email = @Email;
+            WHERE LOWER(u.Email) = @Email;
             """;
 
         using SqlConnection connection =
@@ -141,31 +155,41 @@ public class UserRepository : IUserRepository
         using SqlCommand command =
             new SqlCommand(sql, connection);
 
+
         command.Parameters.AddWithValue(
             "@Email",
-            email.Trim());
+            normalizedEmail);
+
 
         connection.Open();
 
-        using SqlDataReader reader = command.ExecuteReader();
+        using SqlDataReader reader =
+            command.ExecuteReader();
+
 
         if (reader.Read())
         {
             return CreateUser(reader);
         }
 
+
         return null;
     }
 
 
     // Kontrollerer om e-mailadressen allerede findes.
-    // Det bruges, når en kunde forsøger at oprette en konto.
     public bool EmailExists(string email)
     {
+        string normalizedEmail =
+            email
+                .Trim()
+                .ToLowerInvariant();
+
+
         string sql = """
             SELECT COUNT(1)
             FROM paperpetals.Users
-            WHERE Email = @Email;
+            WHERE LOWER(Email) = @Email;
             """;
 
         using SqlConnection connection =
@@ -174,16 +198,20 @@ public class UserRepository : IUserRepository
         using SqlCommand command =
             new SqlCommand(sql, connection);
 
+
         command.Parameters.AddWithValue(
             "@Email",
-            email.Trim());
+            normalizedEmail);
+
 
         connection.Open();
 
-        int numberOfUsers =
-            Convert.ToInt32(command.ExecuteScalar());
 
-        // Hvis resultatet er større end 0, findes e-mailadressen allerede.
+        int numberOfUsers =
+            Convert.ToInt32(
+                command.ExecuteScalar());
+
+
         return numberOfUsers > 0;
     }
 
@@ -196,12 +224,10 @@ public class UserRepository : IUserRepository
 
         connection.Open();
 
-        // Brugerens data skal gemmes i to tabeller.
-        // En Customer gemmes i Users og Customers.
-        // En Admin gemmes i Users og Admins.
-        // En transaction sikrer, at begge handlinger lykkes. Hvis den ene fejler, bliver den anden rullet tilbage.
+
         using SqlTransaction transaction =
             connection.BeginTransaction();
+
 
         try
         {
@@ -209,6 +235,7 @@ public class UserRepository : IUserRepository
                 INSERT INTO paperpetals.Users
                 (
                     Name,
+                    Surname,
                     Email,
                     PasswordHash,
                     IsActive
@@ -217,11 +244,13 @@ public class UserRepository : IUserRepository
                 VALUES
                 (
                     @Name,
+                    @Surname,
                     @Email,
                     @PasswordHash,
                     @IsActive
                 );
                 """;
+
 
             using SqlCommand userCommand =
                 new SqlCommand(
@@ -229,29 +258,41 @@ public class UserRepository : IUserRepository
                     connection,
                     transaction);
 
+
             userCommand.Parameters.AddWithValue(
                 "@Name",
                 user.Name.Trim());
 
+
+            userCommand.Parameters.AddWithValue(
+                "@Surname",
+                user.Surname.Trim());
+
+
             userCommand.Parameters.AddWithValue(
                 "@Email",
-                user.Email.Trim());
+                user.Email
+                    .Trim()
+                    .ToLowerInvariant());
 
-            // Vi gemmer kun passwordets hash. Et password må aldrig gemmes i klartekst.
+
+            // Vi gemmer kun passwordets hash.
+            // Password må aldrig gemmes i klartekst.
             userCommand.Parameters.AddWithValue(
                 "@PasswordHash",
                 user.PasswordHash);
+
 
             userCommand.Parameters.AddWithValue(
                 "@IsActive",
                 user.IsActive);
 
-            // SQL Server opretter brugerens id.
+
             int userId =
-                Convert.ToInt32(userCommand.ExecuteScalar());
+                Convert.ToInt32(
+                    userCommand.ExecuteScalar());
 
 
-            // Hvis brugeren er en Customer, gemmes adressen i Customers-tabellen.
             if (user is Customer customer)
             {
                 AddCustomer(
@@ -260,7 +301,6 @@ public class UserRepository : IUserRepository
                     connection,
                     transaction);
             }
-            // Hvis brugeren er en Admin, gemmes administratoroplysningerne i Admins-tabellen.
             else if (user is Admin admin)
             {
                 AddAdmin(
@@ -275,15 +315,13 @@ public class UserRepository : IUserRepository
                     "The user must be a customer or an admin.");
             }
 
-            // Begge INSERT-statements lykkedes.
+
             transaction.Commit();
 
-            // Det nye id gemmes også på User-objektet.
             user.Id = userId;
         }
         catch
         {
-            // Hvis noget fejler, bliver begge ændringer fortrudt.
             transaction.Rollback();
 
             throw;
@@ -299,9 +337,10 @@ public class UserRepository : IUserRepository
 
         connection.Open();
 
-        // Både den fælles tabel og undertabellen skal opdateres samlet.
+
         using SqlTransaction transaction =
             connection.BeginTransaction();
+
 
         try
         {
@@ -309,11 +348,13 @@ public class UserRepository : IUserRepository
                 UPDATE paperpetals.Users
                 SET
                     Name = @Name,
+                    Surname = @Surname,
                     Email = @Email,
                     PasswordHash = @PasswordHash,
                     IsActive = @IsActive
                 WHERE Id = @Id;
                 """;
+
 
             using SqlCommand userCommand =
                 new SqlCommand(
@@ -321,25 +362,38 @@ public class UserRepository : IUserRepository
                     connection,
                     transaction);
 
+
             userCommand.Parameters.AddWithValue(
                 "@Id",
                 user.Id);
+
 
             userCommand.Parameters.AddWithValue(
                 "@Name",
                 user.Name.Trim());
 
+
+            userCommand.Parameters.AddWithValue(
+                "@Surname",
+                user.Surname.Trim());
+
+
             userCommand.Parameters.AddWithValue(
                 "@Email",
-                user.Email.Trim());
+                user.Email
+                    .Trim()
+                    .ToLowerInvariant());
+
 
             userCommand.Parameters.AddWithValue(
                 "@PasswordHash",
                 user.PasswordHash);
 
+
             userCommand.Parameters.AddWithValue(
                 "@IsActive",
                 user.IsActive);
+
 
             userCommand.ExecuteNonQuery();
 
@@ -353,22 +407,27 @@ public class UserRepository : IUserRepository
                     WHERE UserId = @UserId;
                     """;
 
+
                 using SqlCommand customerCommand =
                     new SqlCommand(
                         customerSql,
                         connection,
                         transaction);
 
+
                 customerCommand.Parameters.AddWithValue(
                     "@UserId",
                     customer.Id);
 
+
                 customerCommand.Parameters.AddWithValue(
                     "@Address",
-                    customer.Address);
+                    customer.Address.Trim());
+
 
                 customerCommand.ExecuteNonQuery();
             }
+
             // Opdater Admin-oplysninger.
             else if (user is Admin admin)
             {
@@ -380,23 +439,28 @@ public class UserRepository : IUserRepository
                     WHERE UserId = @UserId;
                     """;
 
+
                 using SqlCommand adminCommand =
                     new SqlCommand(
                         adminSql,
                         connection,
                         transaction);
 
+
                 adminCommand.Parameters.AddWithValue(
                     "@UserId",
                     admin.Id);
+
 
                 adminCommand.Parameters.AddWithValue(
                     "@EmployeeNumber",
                     admin.EmployeeNumber);
 
+
                 adminCommand.Parameters.AddWithValue(
                     "@MfaEnabled",
                     admin.MfaEnabled);
+
 
                 adminCommand.ExecuteNonQuery();
             }
@@ -405,6 +469,7 @@ public class UserRepository : IUserRepository
                 throw new ArgumentException(
                     "The user must be a customer or an admin.");
             }
+
 
             transaction.Commit();
         }
@@ -417,7 +482,8 @@ public class UserRepository : IUserRepository
     }
 
 
-    // Deaktiverer en bruger uden at slette brugerens data. Det er vigtigt, fordi brugerens gamle ordrer stadig skal kunne findes i databasen.
+    // Deaktiverer en bruger uden at slette data.
+    // Gamle ordrer skal stadig kunne findes.
     public void Deactivate(int id)
     {
         string sql = """
@@ -426,13 +492,20 @@ public class UserRepository : IUserRepository
             WHERE Id = @Id;
             """;
 
+
         using SqlConnection connection =
             new SqlConnection(_connectionString);
 
         using SqlCommand command =
-            new SqlCommand(sql, connection);
+            new SqlCommand(
+                sql,
+                connection);
 
-        command.Parameters.AddWithValue("@Id", id);
+
+        command.Parameters.AddWithValue(
+            "@Id",
+            id);
+
 
         connection.Open();
 
@@ -460,19 +533,23 @@ public class UserRepository : IUserRepository
             );
             """;
 
+
         using SqlCommand command =
             new SqlCommand(
                 sql,
                 connection,
                 transaction);
 
+
         command.Parameters.AddWithValue(
             "@UserId",
             userId);
 
+
         command.Parameters.AddWithValue(
             "@Address",
-            customer.Address);
+            customer.Address.Trim());
+
 
         command.ExecuteNonQuery();
     }
@@ -500,74 +577,95 @@ public class UserRepository : IUserRepository
             );
             """;
 
+
         using SqlCommand command =
             new SqlCommand(
                 sql,
                 connection,
                 transaction);
 
+
         command.Parameters.AddWithValue(
             "@UserId",
             userId);
+
 
         command.Parameters.AddWithValue(
             "@EmployeeNumber",
             admin.EmployeeNumber);
 
+
         command.Parameters.AddWithValue(
             "@MfaEnabled",
             admin.MfaEnabled);
+
 
         command.ExecuteNonQuery();
     }
 
 
-    // Denne hjælpemetode omdanner én række fra databasen til enten et Customer- eller Admin-objekt.
+    // Omdanner én række fra databasen
+    // til enten Customer eller Admin.
     private static User CreateUser(
         SqlDataReader reader)
     {
-        // Først læses oplysningerne fra Users-tabellen.
-        int id = reader.GetInt32(0);
-        string name = reader.GetString(1);
-        string email = reader.GetString(2);
-        string passwordHash = reader.GetString(3);
-        bool isActive = reader.GetBoolean(4);
+        int id =
+            reader.GetInt32(0);
+
+        string name =
+            reader.GetString(1);
+
+        string surname =
+            reader.GetString(2);
+
+        string email =
+            reader.GetString(3);
+
+        string passwordHash =
+            reader.GetString(4);
+
+        bool isActive =
+            reader.GetBoolean(5);
 
 
-        // Address ligger på plads nummer 5. Hvis Address ikke er null, er brugeren en Customer.
-        if (!reader.IsDBNull(5))
+        // Address ligger på plads nummer 6.
+        // Hvis Address ikke er null, er brugeren Customer.
+        if (!reader.IsDBNull(6))
         {
             return new Customer
             {
                 Id = id,
                 Name = name,
+                Surname = surname,
                 Email = email,
                 PasswordHash = passwordHash,
                 IsActive = isActive,
-                Address = reader.GetString(5)
+                Address = reader.GetString(6)
             };
         }
 
 
-        // EmployeeNumber ligger på plads nummer 6. Hvis den ikke er null, er brugeren en Admin.
-        if (!reader.IsDBNull(6))
+        // EmployeeNumber ligger på plads nummer 7.
+        // Hvis den ikke er null, er brugeren Admin.
+        if (!reader.IsDBNull(7))
         {
             return new Admin
             {
                 Id = id,
                 Name = name,
+                Surname = surname,
                 Email = email,
                 PasswordHash = passwordHash,
                 IsActive = isActive,
-                EmployeeNumber = reader.GetString(6),
+                EmployeeNumber = reader.GetString(7),
 
-                // MfaEnabled ligger på plads nummer 7.
-                MfaEnabled = reader.GetBoolean(7)
+                // MfaEnabled ligger på plads nummer 8.
+                MfaEnabled =
+                    reader.GetBoolean(8)
             };
         }
 
 
-        // En bruger skal findes i enten Customers eller Admins. Hvis ikke, er dataene i databasen ugyldige.
         throw new InvalidOperationException(
             "The user has no customer or admin information.");
     }

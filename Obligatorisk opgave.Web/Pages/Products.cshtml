@@ -383,7 +383,8 @@
 
 
                         @* Produktbillede *@
-                        <a href="/Product?id=@bouquet.Id"
+                        <a asp-page="/ProductDetails"
+                           asp-route-id="@bouquet.Id"
                            class="product-image-link">
 
                             <div class="product-image-container">
@@ -424,7 +425,8 @@
 
 
                             @* Produktnavn *@
-                            <a href="/Product?id=@bouquet.Id"
+                            <a asp-page="/ProductDetails"
+                               asp-route-id="@bouquet.Id"
                                class="product-name-link">
 
                                 <h3>
@@ -476,7 +478,8 @@
 
 
 
-                                <a href="/Product?id=@bouquet.Id"
+                                <a asp-page="/ProductDetails"
+                                   asp-route-id="@bouquet.Id"
                                    class="product-view-button">
 
                                     View
@@ -500,3 +503,4 @@
 
 
 </div>
+

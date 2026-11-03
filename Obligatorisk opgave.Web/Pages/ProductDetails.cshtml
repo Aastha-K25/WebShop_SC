@@ -1,0 +1,213 @@
+﻿@page
+@model Obligatorisk_opgave.Pages.ProductDetails
+@using Obligatoris.opgave.Domain.Models
+@using Obligatorisk_opgave.Services
+
+@inject SessionService SessionService
+
+@{
+    ViewData["Title"] = Model.Bouquet.Name;
+
+    User? currentUser =
+        SessionService.GetCurrentUser();
+
+    bool isAdmin =
+        currentUser is Admin;
+
+    Bouquet? smallBouquet =
+        Model.Sizes.FirstOrDefault(
+            b => b.BouquetSize == BouquetSize.Small);
+
+    Bouquet? mediumBouquet =
+        Model.Sizes.FirstOrDefault(
+            b => b.BouquetSize == BouquetSize.Medium);
+
+    Bouquet? largeBouquet =
+        Model.Sizes.FirstOrDefault(
+            b => b.BouquetSize == BouquetSize.Large);
+}
+
+
+<div class="container py-5">
+
+
+    <div class="row g-5">
+
+
+        <div class="col-lg-6">
+
+            @if (!string.IsNullOrEmpty(Model.Bouquet.ImagePath))
+            {
+                <img src="@Model.Bouquet.ImagePath"
+                     alt="@Model.Bouquet.ImageDescription"
+                     class="img-fluid rounded" />
+            }
+
+        </div>
+
+
+
+        <div class="col-lg-6">
+
+
+            <p class="text-muted mb-2">
+                @Model.Bouquet.BookGenre
+            </p>
+
+
+            <h1>
+                @Model.Bouquet.Name
+            </h1>
+
+
+            @if (!string.IsNullOrEmpty(Model.Bouquet.Description))
+            {
+                <p class="lead">
+                    @Model.Bouquet.Description
+                </p>
+            }
+
+
+            <h2 class="h4 mt-4">
+                @Model.Bouquet.Price.ToString("0.00") kr.
+            </h2>
+
+
+
+            <hr />
+
+
+            <h3 class="h5">
+                Choose Size
+            </h3>
+
+
+            <div class="d-flex gap-2 mb-4">
+
+
+                @if (smallBouquet != null)
+                {
+                    <a asp-page="/ProductDetails"
+                       asp-route-id="@smallBouquet.Id"
+                       class="btn @(Model.Bouquet.BouquetSize == BouquetSize.Small ? "btn-success" : "btn-outline-success")">
+
+                        Small
+
+                    </a>
+                }
+
+
+                @if (mediumBouquet != null)
+                {
+                    <a asp-page="/ProductDetails"
+                       asp-route-id="@mediumBouquet.Id"
+                       class="btn @(Model.Bouquet.BouquetSize == BouquetSize.Medium ? "btn-success" : "btn-outline-success")">
+
+                        Medium
+
+                    </a>
+                }
+
+
+                @if (largeBouquet != null)
+                {
+                    <a asp-page="/ProductDetails"
+                       asp-route-id="@largeBouquet.Id"
+                       class="btn @(Model.Bouquet.BouquetSize == BouquetSize.Large ? "btn-success" : "btn-outline-success")">
+
+                        Large
+
+                    </a>
+                }
+
+
+            </div>
+
+
+
+            <div class="mb-4">
+
+                <p>
+                    <strong>Flowers:</strong>
+                    @Model.Bouquet.FlowerType
+                </p>
+
+                <p>
+                    <strong>Size:</strong>
+                    @Model.Bouquet.BouquetSize
+                </p>
+
+                <p>
+                    <strong>Books included:</strong>
+                    @Model.Bouquet.NumberOfBooks
+                </p>
+
+                <p>
+                    <strong>Genre:</strong>
+                    @Model.Bouquet.BookGenre
+                </p>
+
+            </div>
+
+
+
+            @if (Model.Bouquet.StockQuantity > 0)
+            {
+                <p class="text-success">
+                    In stock
+                </p>
+            }
+            else
+            {
+                <p class="text-danger">
+                    Out of stock
+                </p>
+            }
+
+
+
+            @if (!isAdmin && Model.Bouquet.StockQuantity > 0)
+            {
+                <form method="post"
+                      asp-page="/Products">
+
+                    <input type="hidden"
+                           name="productId"
+                           value="@Model.Bouquet.Id" />
+
+                    <button type="submit"
+                            class="btn btn-success btn-lg">
+
+                        Add to Bag
+
+                    </button>
+
+                </form>
+            }
+
+
+            @if (isAdmin)
+            {
+                <p class="text-muted">
+                    Admin accounts cannot use the shopping bag.
+                </p>
+            }
+
+
+            <div class="mt-4">
+
+                <a asp-page="/Products"
+                   class="btn btn-outline-secondary">
+
+                    Back to Bouquets
+
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>

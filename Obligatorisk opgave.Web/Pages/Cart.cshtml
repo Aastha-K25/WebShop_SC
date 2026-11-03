@@ -5,6 +5,13 @@
     ViewData["Title"] = "Cart";
 }
 
+@section Styles
+{
+    <link rel="stylesheet"
+          href="~/css/Cart.css"
+          asp-append-version="true" />
+}
+
 <section class="cart-page">
 
     <div class="cart-header">
@@ -100,12 +107,13 @@
                                        value="@product.Id" />
 
 
-                                <label>
+                                <label for="quantity-@product.Id">
                                     Quantity
                                 </label>
 
 
-                                <input type="number"
+                                <input id="quantity-@product.Id"
+                                       type="number"
                                        name="quantity"
                                        value="@Model.GetQuantity(product.Id)"
                                        min="1"
@@ -254,12 +262,24 @@
                 </div>
 
 
-                <button type="button"
-                        class="checkout-button">
+                @if (Model.IsGuest)
+                {
+                    <a asp-page="/Login"
+                       class="checkout-button">
 
-                    Proceed to Checkout
+                        Login to Checkout
 
-                </button>
+                    </a>
+                }
+                else
+                {
+                    <a asp-page="/Checkout"
+                       class="checkout-button">
+
+                        Proceed to Checkout
+
+                    </a>
+                }
 
 
                 <p class="summary-note">

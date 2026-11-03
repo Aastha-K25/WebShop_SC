@@ -1,0 +1,169 @@
+﻿@page
+@model Obligatorisk_opgave.Pages.AdminOrders
+
+@{
+    ViewData["Title"] = "Admin Orders";
+}
+
+<section class="admin-orders-page">
+
+    <div class="admin-orders-header">
+
+        <p class="admin-orders-eyebrow">
+            PAPER & PETALS
+        </p>
+
+        <h1>
+            Order Management
+        </h1>
+
+        <p>
+            View orders and update their status.
+        </p>
+
+    </div>
+
+
+    @if (Model.Orders.Count == 0)
+    {
+        <div class="empty-orders">
+
+            <h2>
+                No orders found
+            </h2>
+
+            <p>
+                There are currently no orders to manage.
+            </p>
+
+        </div>
+    }
+    else
+    {
+        <div class="admin-orders-list">
+
+            @foreach (var order in Model.Orders)
+            {
+                <article class="admin-order-card">
+
+                    <div class="admin-order-information">
+
+                        <h2>
+                            Order #@order.Id
+                        </h2>
+
+                        <p>
+                            Customer ID:
+                            @order.CustomerId
+                        </p>
+
+                        <p>
+                            Date:
+                            @order.OrderDate.ToString("dd/MM/yyyy HH:mm")
+                        </p>
+
+                        <p>
+                            Total:
+                            @order.TotalPrice.ToString("0.00") kr.
+                        </p>
+
+                        <p>
+                            Current status:
+                            <strong>
+                                @order.Status
+                            </strong>
+                        </p>
+
+                    </div>
+
+
+                    @if (order.Status != OrderStatus.Completed &&
+                         order.Status != OrderStatus.Cancelled)
+                    {
+                        <form method="post"
+                              asp-page-handler="UpdateStatus"
+                              class="order-status-form">
+
+                            <input type="hidden"
+                                   name="orderId"
+                                   value="@order.Id" />
+
+
+                            <label for="status-@order.Id">
+                                New status
+                            </label>
+
+
+                            <select id="status-@order.Id"
+                                    name="newStatus">
+
+                                @if (order.Status == OrderStatus.Pending)
+                                {
+                                    <option value="@OrderStatus.Paid">
+                                        Paid
+                                    </option>
+
+                                    <option value="@OrderStatus.Cancelled">
+                                        Cancelled
+                                    </option>
+                                }
+
+
+                                @if (order.Status == OrderStatus.Paid)
+                                {
+                                    <option value="@OrderStatus.Processing">
+                                        Processing
+                                    </option>
+
+                                    <option value="@OrderStatus.Cancelled">
+                                        Cancelled
+                                    </option>
+                                }
+
+
+                                @if (order.Status == OrderStatus.Processing)
+                                {
+                                    <option value="@OrderStatus.Shipped">
+                                        Shipped
+                                    </option>
+
+                                    <option value="@OrderStatus.Cancelled">
+                                        Cancelled
+                                    </option>
+                                }
+
+
+                                @if (order.Status == OrderStatus.Shipped)
+                                {
+                                    <option value="@OrderStatus.Completed">
+                                        Completed
+                                    </option>
+                                }
+
+                            </select>
+
+
+                            <button type="submit"
+                                    class="update-status-button">
+
+                                Update Status
+
+                            </button>
+
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="final-order-status">
+                            This order is in a final state.
+                        </p>
+                    }
+
+                </article>
+            }
+
+        </div>
+    }
+
+</section>
+

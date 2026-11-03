@@ -5,9 +5,11 @@
     ViewData["Title"] = "Login";
 }
 
-@section styles
+@section Styles
 {
-    <link rel="stylesheet"href="~/css/Login.css" asp-append-version="true" />
+    <link rel="stylesheet"
+          href="~/css/Login.css"
+          asp-append-version="true" />
 }
 
 <section class="login-page">
@@ -18,14 +20,15 @@
             PAPER & PETALS
         </p>
 
-        <h1>Welcome Back</h1>
+        <h1>
+            Welcome Back
+        </h1>
 
         <p class="login-description">
             Login to continue your Paper & Petals story.
         </p>
 
 
-        @* Viser success-besked *@
         @if (TempData["SuccessMessage"] != null)
         {
             <p class="login-success">
@@ -33,7 +36,7 @@
             </p>
         }
 
-        @* Viser fejlbesked *@
+
         @if (TempData["ErrorMessage"] != null)
         {
             <p class="login-error">
@@ -41,7 +44,7 @@
             </p>
         }
 
-        @* Login formular *@
+
         <form method="post">
 
             <div class="form-group">
@@ -52,7 +55,9 @@
 
                 <input type="email"
                        id="email"
-                       name="email" />
+                       name="email"
+                       autocomplete="email"
+                       required />
 
             </div>
 
@@ -73,6 +78,7 @@
 
 
             <div class="forgot-password-link">
+
                 <a asp-page="/ForgotPassword">
                     Forgot Password?
                 </a>
@@ -80,7 +86,8 @@
             </div>
 
 
-            <button type="submit"class="login-button">
+            <button type="submit"
+                    class="login-button">
 
                 Login
 

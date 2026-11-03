@@ -1,0 +1,110 @@
+﻿@page
+@model Obligatorisk_opgave.Pages.Account
+
+@{
+    ViewData["Title"] = "My Account";
+}
+
+<section class="account-page">
+
+    <div class="account-header">
+
+        <p class="account-eyebrow">
+            PAPER & PETALS
+        </p>
+
+        <h1>
+            My Account
+        </h1>
+
+        <p>
+            View and update your account information.
+        </p>
+
+    </div>
+
+
+    <form method="post"
+          class="account-form">
+
+        <div asp-validation-summary="ModelOnly"></div>
+
+
+        <div>
+
+            <label asp-for="Name">
+                First Name
+            </label>
+
+            <input asp-for="Name" />
+
+        </div>
+
+
+        <div>
+
+            <label asp-for="Surname">
+                Surname
+            </label>
+
+            <input asp-for="Surname" />
+
+        </div>
+
+
+        <div>
+
+            <label asp-for="Email">
+                Email
+            </label>
+
+            <input asp-for="Email"
+                   type="email" />
+
+        </div>
+
+
+        <div>
+
+            <label asp-for="Address">
+                Address
+            </label>
+
+            <input asp-for="Address" />
+
+        </div>
+
+
+        <button type="submit"
+                class="update-account-button">
+
+            Update Account
+
+        </button>
+
+    </form>
+
+
+    <div class="account-actions">
+
+        <a asp-page="/ChangePassword">
+
+            Change Password
+
+        </a>
+
+        <a asp-page="/Orders">
+
+            My Orders
+
+        </a>
+
+        <a asp-page="/Logout">
+
+            Log Out
+
+        </a>
+
+    </div>
+
+</section>

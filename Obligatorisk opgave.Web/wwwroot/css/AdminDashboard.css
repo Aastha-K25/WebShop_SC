@@ -1,0 +1,160 @@
+﻿/* ================================================== */
+/* ADMIN DASHBOARD */
+/* ================================================== */
+
+.admin-dashboard-page {
+    min-height: 75vh;
+    padding: 70px 0 90px;
+    background-color: #fbfaf8;
+    color: #292b27;
+}
+
+.admin-dashboard-container {
+    width: min(1150px, 92%);
+    margin: 0 auto;
+}
+
+
+/* ================================================== */
+/* HEADER */
+/* ================================================== */
+
+.admin-dashboard-header {
+    max-width: 700px;
+    margin: 0 auto 50px;
+    text-align: center;
+}
+
+.admin-dashboard-eyebrow {
+    margin: 0 0 12px;
+    color: #667558;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.admin-dashboard-header h1 {
+    margin: 0 0 15px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 3rem;
+    font-weight: 500;
+}
+
+.admin-dashboard-header > p:last-child {
+    margin: 0;
+    color: #60635c;
+    line-height: 1.7;
+}
+
+
+/* ================================================== */
+/* DASHBOARD CARDS */
+/* ================================================== */
+
+.admin-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.admin-dashboard-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 270px;
+    padding: 34px 30px;
+    border: 1px solid #e5e1db;
+    border-radius: 4px;
+    background-color: #ffffff;
+    color: #292b27;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(49, 57, 44, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+    .admin-dashboard-card:hover {
+        border-color: #cfd5c9;
+        color: #292b27;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(49, 57, 44, 0.10);
+    }
+
+.admin-card-label {
+    margin: 0 0 15px;
+    color: #667558;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+}
+
+.admin-dashboard-card h2 {
+    margin: 0 0 14px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.admin-dashboard-card > p:not(.admin-card-label) {
+    margin: 0 0 25px;
+    color: #60635c;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+.admin-dashboard-card span {
+    margin-top: auto;
+    color: #667558;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+
+/* ================================================== */
+/* TABLET */
+/* ================================================== */
+
+@media (max-width: 900px) {
+
+    .admin-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-dashboard-card {
+        min-height: auto;
+    }
+}
+
+
+/* ================================================== */
+/* MOBILE */
+/* ================================================== */
+
+@media (max-width: 600px) {
+
+    .admin-dashboard-page {
+        padding: 45px 0 65px;
+    }
+
+    .admin-dashboard-header h1 {
+        font-size: 2.3rem;
+    }
+
+    .admin-dashboard-card {
+        padding: 28px 24px;
+    }
+}
+
+
+/* ================================================== */
+/* REDUCED MOTION */
+/* ================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .admin-dashboard-card {
+        transition: none;
+    }
+
+        .admin-dashboard-card:hover {
+            transform: none;
+        }
+}

@@ -2,111 +2,291 @@
 @model Obligatorisk_opgave.Pages.OrderConfirmation
 
 @{
-    ViewData["Title"] = "Order Confirmation";
+    ViewData["Title"] =
+        Model.IsHistory
+            ? "Order Details"
+            : "Order Confirmation";
 }
 
 <section class="confirmation-page">
 
-    @if (Model.Order == null)
-    {
-        <div class="confirmation-box">
+    <div class="container py-5">
 
-            <h1>
-                Order not found
-            </h1>
+        @if (Model.Order == null)
+        {
+            <div class="confirmation-box text-center">
 
-            <a asp-page="/Products">
-                Back to Bouquets
-            </a>
+                <p class="confirmation-eyebrow">
+                    PAPER & PETALS
+                </p>
 
-        </div>
-    }
-    else
-    {
-        <div class="confirmation-box">
+                <h1>
+                    Order not found
+                </h1>
 
-            <p class="confirmation-eyebrow">
-                PAPER & PETALS
-            </p>
+                <p class="text-muted mb-4">
+                    We could not find the order you were looking for.
+                </p>
 
-            <h1>
-                Thank You
-            </h1>
+                <a asp-page="/Orders"
+                   class="btn-paper-primary">
 
-            <p class="confirmation-text">
-                Your order has been placed successfully.
-            </p>
+                    Back to My Orders
 
+                </a>
 
-            <div class="confirmation-details">
+            </div>
+        }
+        else
+        {
+            <div class="confirmation-box">
 
-                <div>
+                <div class="text-center mb-5">
 
-                    <span>
-                        Order Number
-                    </span>
-
-                    <strong>
-                        #@Model.Order.Id
-                    </strong>
-
-                </div>
+                    <p class="confirmation-eyebrow">
+                        PAPER & PETALS
+                    </p>
 
 
-                <div>
+                    @if (Model.IsHistory)
+                    {
+                        <h1>
+                            Order Details
+                        </h1>
 
-                    <span>
-                        Order Date
-                    </span>
+                        <p class="confirmation-text">
+                            Review the details of your previous order.
+                        </p>
+                    }
+                    else
+                    {
+                        <h1>
+                            Thank You for Your Order
+                        </h1>
 
-                    <strong>
-                        @Model.Order.OrderDate.ToString("dd/MM/yyyy")
-                    </strong>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        Total
-                    </span>
-
-                    <strong>
-                        @Model.Order.TotalPrice.ToString("0.00") kr.
-                    </strong>
+                        <p class="confirmation-text">
+                            Your order has been placed successfully.
+                        </p>
+                    }
 
                 </div>
 
 
-                <div>
+                <div class="card border-0 shadow-sm mb-4">
 
-                    <span>
-                        Status
-                    </span>
+                    <div class="card-body p-4 p-md-5">
 
-                    <strong>
-                        @Model.Order.Status
-                    </strong>
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+
+                            <div>
+
+                                <p class="text-muted mb-1">
+                                    Order Number
+                                </p>
+
+                                <h2 class="mb-0">
+                                    #@Model.Order.Id
+                                </h2>
+
+                            </div>
+
+
+                            <span class="order-status">
+                                @Model.Order.Status
+                            </span>
+
+                        </div>
+
+
+                        <hr />
+
+
+                        <div class="row g-4 py-3">
+
+                            <div class="col-md-6">
+
+                                <p class="text-muted mb-1">
+                                    Order Date
+                                </p>
+
+                                <strong>
+                                    @Model.Order.OrderDate.ToString("dd MMMM yyyy")
+                                </strong>
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <p class="text-muted mb-1">
+                                    Total
+                                </p>
+
+                                <strong class="order-total">
+                                    @Model.Order.TotalPrice.ToString("0.00") kr.
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body p-4 p-md-5">
+
+                        <h2 class="mb-4">
+                            Items
+                        </h2>
+
+
+                        @foreach (var orderProduct in Model.OrderProducts)
+                        {
+                            if (Model.Products.ContainsKey(orderProduct.ProductId))
+                            {
+                                var product =
+                                Model.Products[orderProduct.ProductId];
+
+
+                                <div class="row align-items-center py-3">
+
+                                    <div class="col-3 col-md-2">
+
+                                        <img src="@product.ImagePath"
+                                             alt="@product.ImageDescription"
+                                             class="img-fluid rounded" />
+
+                                    </div>
+
+
+                                    <div class="col-9 col-md-5">
+
+                                        <h3 class="h5 mb-1">
+                                            @product.Name
+                                        </h3>
+
+                                        <p class="text-muted mb-0">
+                                            Quantity:
+                                            @orderProduct.Quantity
+                                        </p>
+
+                                    </div>
+
+
+                                    <div class="col-md-3 mt-3 mt-md-0">
+
+                                        <p class="text-muted mb-1">
+                                            Price
+                                        </p>
+
+                                        <strong>
+                                            @orderProduct.PriceAtPurchase.ToString("0.00") kr.
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div class="col-md-2 mt-3 mt-md-0 text-md-end">
+
+                                        <p class="text-muted mb-1">
+                                            Subtotal
+                                        </p>
+
+                                        <strong>
+                                            @(
+                                                                            (orderProduct.PriceAtPurchase *
+                                                                            orderProduct.Quantity)
+                                                                            .ToString("0.00")
+                                                                            )
+                                kr.
+                            </strong>
+
+                                    </div>
+
+                                </div>
+
+
+                                <hr />
+                                        }
+                        }
+
+
+                        <div class="text-end pt-3">
+
+                            <p class="text-muted mb-1">
+                                Order Total
+                            </p>
+
+                            <h3>
+                                @Model.Order.TotalPrice.ToString("0.00") kr.
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                @if (!Model.IsHistory)
+                {
+                    <div class="confirmation-note mt-4">
+
+                        <p class="mb-0">
+                            Your bouquet will be carefully prepared and packed.
+                            You can follow your order from My Orders.
+                        </p>
+
+                    </div>
+                }
+
+
+                <div class="confirmation-actions text-center mt-5">
+
+                    @if (Model.IsHistory)
+                    {
+                        <a asp-page="/Orders"
+                           class="btn-paper-primary">
+
+                            Back to My Orders
+
+                        </a>
+
+
+                        <a asp-page="/Products"
+                           class="btn-paper-outline">
+
+                            Continue Shopping
+
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-page="/Orders"
+                           class="btn-paper-primary">
+
+                            View My Orders
+
+                        </a>
+
+
+                        <a asp-page="/Products"
+                           class="btn-paper-outline">
+
+                            Continue Shopping
+
+                        </a>
+                    }
 
                 </div>
 
             </div>
+        }
 
-
-            <p class="confirmation-note">
-                Your bouquet will be carefully prepared and packed.
-            </p>
-
-
-            <a asp-page="/Products"
-               class="confirmation-button">
-
-                Continue Shopping
-
-            </a>
-
-        </div>
-    }
+    </div>
 
 </section>

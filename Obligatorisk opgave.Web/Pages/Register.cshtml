@@ -7,7 +7,9 @@
 
 @section Styles
 {
-    <link rel="stylesheet" href="~/css/Register.css" asp-append-version="true" />
+    <link rel="stylesheet"
+          href="~/css/Register.css"
+          asp-append-version="true" />
 }
 
 <section class="register-page">
@@ -18,14 +20,14 @@
             PAPER & PETALS
         </p>
 
-        <h1>Create Account</h1>
+        <h1>
+            Create Account
+        </h1>
 
         <p class="register-description">
             Create an account and keep your favourite stories and blooms close.
         </p>
 
-
-        @* Viser fejlbesked *@
         @if (TempData["ErrorMessage"] != null)
         {
             <p class="register-error">
@@ -33,19 +35,34 @@
             </p>
         }
 
-
-        @* Register formular *@
         <form method="post">
 
             <div class="form-group">
 
                 <label for="name">
-                    Name
+                    First Name
                 </label>
 
                 <input type="text"
                        id="name"
-                       name="name" />
+                       name="name"
+                       autocomplete="given-name"
+                       required />
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="surname">
+                    Surname
+                </label>
+
+                <input type="text"
+                       id="surname"
+                       name="surname"
+                       autocomplete="family-name"
+                       required />
 
             </div>
 
@@ -58,12 +75,14 @@
 
                 <input type="email"
                        id="email"
-                       name="email" />
+                       name="email"
+                       autocomplete="email"
+                       required />
 
             </div>
 
 
-            <div class="form-group">
+            <div class="form-group full-width">
 
                 <label for="address">
                     Address
@@ -71,7 +90,9 @@
 
                 <input type="text"
                        id="address"
-                       name="address" />
+                       name="address"
+                       autocomplete="street-address"
+                       required />
 
             </div>
 
@@ -84,7 +105,9 @@
 
                 <input type="password"
                        id="password"
-                       name="password" />
+                       name="password"
+                       autocomplete="new-password"
+                       required />
 
             </div>
 
@@ -97,7 +120,9 @@
 
                 <input type="password"
                        id="confirmPassword"
-                       name="confirmPassword" />
+                       name="confirmPassword"
+                       autocomplete="new-password"
+                       required />
 
             </div>
 

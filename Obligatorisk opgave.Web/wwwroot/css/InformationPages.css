@@ -1,0 +1,253 @@
+﻿/* ================================================== */
+/* INFORMATION PAGES */
+/* ================================================== */
+
+.about-page,
+.contact-page {
+    min-height: 75vh;
+    padding: 70px 0 90px;
+    background-color: #fbfaf8;
+    color: #292b27;
+}
+
+.about-page-container,
+.contact-page-container {
+    width: min(1150px, 92%);
+    margin: 0 auto;
+}
+
+
+/* ================================================== */
+/* HEADERS */
+/* ================================================== */
+
+.about-page-header,
+.contact-page-header {
+    max-width: 720px;
+    margin: 0 auto 55px;
+    text-align: center;
+}
+
+.about-page-eyebrow,
+.contact-page-eyebrow,
+.contact-card-label {
+    margin: 0 0 12px;
+    color: #667558;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.about-page-header h1,
+.contact-page-header h1 {
+    margin: 0 0 18px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 3rem;
+    font-weight: 500;
+}
+
+.about-page-header > p:last-child,
+.contact-page-header > p:last-child {
+    margin: 0;
+    color: #60635c;
+    font-size: 1rem;
+    line-height: 1.8;
+}
+
+
+/* ================================================== */
+/* ABOUT */
+/* ================================================== */
+
+.about-page-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    margin-bottom: 65px;
+}
+
+.about-page-card {
+    padding: 34px 30px;
+    border: 1px solid #e5e1db;
+    border-radius: 4px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 14px rgba(49, 57, 44, 0.05);
+}
+
+.about-card-number {
+    margin: 0 0 18px;
+    color: #9ba393;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.4rem;
+    font-style: italic;
+}
+
+.about-page-card h2 {
+    margin: 0 0 14px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.45rem;
+    font-weight: 500;
+}
+
+.about-page-card p:last-child {
+    margin: 0;
+    color: #60635c;
+    line-height: 1.7;
+}
+
+.about-page-story {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 70px;
+    padding: 55px;
+    border: 1px solid #e5e1db;
+    border-radius: 4px;
+    background-color: #f1ebe5;
+}
+
+    .about-page-story h2 {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 2.2rem;
+        font-weight: 500;
+    }
+
+    .about-page-story p {
+        color: #60635c;
+        line-height: 1.8;
+    }
+
+        .about-page-story p:last-child {
+            margin-bottom: 0;
+        }
+
+.about-page-actions {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 40px;
+}
+
+
+/* ================================================== */
+/* CONTACT */
+/* ================================================== */
+
+.contact-page-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-bottom: 45px;
+}
+
+.contact-page-card {
+    padding: 38px;
+    border: 1px solid #e5e1db;
+    border-radius: 4px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 14px rgba(49, 57, 44, 0.05);
+}
+
+    .contact-page-card h2 {
+        margin: 0 0 14px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.55rem;
+        font-weight: 500;
+    }
+
+    .contact-page-card p {
+        color: #60635c;
+        line-height: 1.7;
+    }
+
+    .contact-page-card a {
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+        .contact-page-card a:hover {
+            text-decoration: underline;
+        }
+
+.contact-card-detail {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.contact-page-note {
+    padding: 45px;
+    border: 1px solid #e5e1db;
+    border-radius: 4px;
+    background-color: #f1ebe5;
+    text-align: center;
+}
+
+    .contact-page-note h2 {
+        margin: 0 0 12px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 2rem;
+        font-weight: 500;
+    }
+
+    .contact-page-note > p:not(.contact-page-eyebrow) {
+        margin: 0 auto 24px;
+        max-width: 550px;
+        color: #60635c;
+        line-height: 1.7;
+    }
+
+
+/* ================================================== */
+/* TABLET */
+/* ================================================== */
+
+@media (max-width: 900px) {
+
+    .about-page-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-page-story {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+}
+
+
+/* ================================================== */
+/* MOBILE */
+/* ================================================== */
+
+@media (max-width: 650px) {
+
+    .about-page,
+    .contact-page {
+        padding: 45px 0 65px;
+    }
+
+    .about-page-header h1,
+    .contact-page-header h1 {
+        font-size: 2.25rem;
+    }
+
+    .contact-page-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-page-story {
+        padding: 32px 24px;
+    }
+
+    .contact-page-card,
+    .contact-page-note {
+        padding: 30px 24px;
+    }
+
+    .about-page-actions {
+        flex-direction: column;
+    }
+
+        .about-page-actions a {
+            width: 100%;
+        }
+}

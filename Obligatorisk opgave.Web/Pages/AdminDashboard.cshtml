@@ -1,0 +1,117 @@
+﻿@page
+@model Obligatorisk_opgave.Pages.AdminDashboardModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+@section Styles
+{
+    <link rel="stylesheet"
+          href="~/css/AdminDashboard.css"
+          asp-append-version="true" />
+}
+
+
+<section class="admin-dashboard-page">
+
+    <div class="admin-dashboard-container">
+
+
+        <div class="admin-dashboard-header">
+
+            <p class="admin-dashboard-eyebrow">
+                PAPER & PETALS
+            </p>
+
+            <h1>
+                Admin Dashboard
+            </h1>
+
+            <p>
+                Manage products, orders and customers.
+            </p>
+
+        </div>
+
+
+        <div class="admin-dashboard-grid">
+
+
+            @* PRODUCTS *@
+            <a asp-page="/AdminProducts"
+               class="admin-dashboard-card">
+
+                <p class="admin-card-label">
+                    PRODUCTS
+                </p>
+
+                <h2>
+                    Manage Products
+                </h2>
+
+                <p>
+                    Create bouquets and update prices,
+                    stock and product information.
+                </p>
+
+                <span>
+                    Manage Products →
+                </span>
+
+            </a>
+
+
+            @* ORDERS *@
+            <a asp-page="/AdminOrders"
+               class="admin-dashboard-card">
+
+                <p class="admin-card-label">
+                    ORDERS
+                </p>
+
+                <h2>
+                    Manage Orders
+                </h2>
+
+                <p>
+                    View customer orders and update
+                    their current order status.
+                </p>
+
+                <span>
+                    Manage Orders →
+                </span>
+
+            </a>
+
+
+            @* CUSTOMERS *@
+            <a asp-page="/AdminUsers"
+               class="admin-dashboard-card">
+
+                <p class="admin-card-label">
+                    CUSTOMERS
+                </p>
+
+                <h2>
+                    Manage Customers
+                </h2>
+
+                <p>
+                    View customer accounts and
+                    activate or deactivate access.
+                </p>
+
+                <span>
+                    Manage Customers →
+                </span>
+
+            </a>
+
+
+        </div>
+
+    </div>
+
+</section>
