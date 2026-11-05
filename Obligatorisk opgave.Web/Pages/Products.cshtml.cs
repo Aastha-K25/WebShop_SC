@@ -36,7 +36,7 @@ public class Products : PageModel
     public BookGenre? SelectedGenre { get; set; }
 
 
-    // Henter produkter når siden åbnes
+    // Henter produkter nï¿½r siden ï¿½bnes
     public void OnGet(string? genre)
     {
         PopularBouquets =
@@ -63,15 +63,18 @@ public class Products : PageModel
                 out selectedGenre);
 
 
-        // Viser alle hvis genren ikke findes
-        if (!genreExists)
+        
+        // Viser alle, hvis teksten ikke kan omdannes til en genre, eller hvis vÃ¦rdien ikke findes i BookGenre.
+        if (!genreExists ||
+            !Enum.IsDefined(
+                typeof(BookGenre),
+                selectedGenre))
         {
             Bouquets =
                 _productRepository.GetAllBouquets();
 
             return;
         }
-
 
         SelectedGenre =
             selectedGenre;
@@ -115,7 +118,7 @@ public class Products : PageModel
 
 
         // GUEST
-        // En gæst har ingen bruger i sessionen
+        // En gï¿½st har ingen bruger i sessionen
         if (user == null)
         {
             List<ShoppingCartProduct> guestCart =
@@ -131,7 +134,7 @@ public class Products : PageModel
                 existingProduct?.Quantity ?? 0;
 
 
-            // Må ikke lægge flere i kurven end der er på lager
+            // Mï¿½ ikke lï¿½gge flere i kurven end der er pï¿½ lager
             if (currentQuantity < product.StockQuantity)
             {
                 _sessionService.AddToGuestCart(
@@ -146,7 +149,7 @@ public class Products : PageModel
 
 
         // ADMIN
-        // Admin må ikke bruge customer cart
+        // Admin mï¿½ ikke bruge customer cart
         if (user is Admin)
         {
             return RedirectToPage(
@@ -204,7 +207,7 @@ public class Products : PageModel
         }
         else
         {
-            // Må ikke overstige lageret
+            // Mï¿½ ikke overstige lageret
             if (quantity < product.StockQuantity)
             {
                 quantity =

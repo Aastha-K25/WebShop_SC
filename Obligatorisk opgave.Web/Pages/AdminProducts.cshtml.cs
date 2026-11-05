@@ -176,7 +176,7 @@ public class AdminProducts : PageModel
     }
 
 
-    // Bestemmer antal bøger ud fra størrelsen
+    // Bestemmer antal bï¿½ger ud fra stï¿½rrelsen
     private int GetNumberOfBooks(
         BouquetSize bouquetSize)
     {
@@ -221,6 +221,24 @@ public class AdminProducts : PageModel
 
 
         if (bouquet.StockQuantity < 0)
+        {
+            return false;
+        }
+
+
+        // Kontrollerer, at genren findes i BookGenre.
+        if (!Enum.IsDefined(
+                typeof(BookGenre),
+                bouquet.BookGenre))
+        {
+            return false;
+        }
+
+
+        // Kontrollerer, at stÃ¸rrelsen findes i BouquetSize.
+        if (!Enum.IsDefined(
+                typeof(BouquetSize),
+                bouquet.BouquetSize))
         {
             return false;
         }
