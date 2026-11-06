@@ -1,93 +1,107 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Obligatoris.opgave.Domain.Models;
-using Obligatorisk_opgave.Services;
+
+using Microsoft.AspNetCore.Mvc; // Bruges til at håndtere sider og handlinger
+using Microsoft.AspNetCore.Mvc.RazorPages; // Bruges til Razor Pages
+using Obligatoris.opgave.Domain.Models; // Giver adgang til vores modeller
+using Obligatorisk_opgave.Services; // Giver adgang til vores services
 
 namespace Obligatorisk_opgave.Pages;
 
+// PageModel som håndterer ændring af password
 public class ChangePassword : PageModel
 {
+    // Bruges til at kontrollere brugeren og ændre password
     private readonly AuthenticationService _authenticationService;
 
-    public ChangePassword(
-        AuthenticationService authenticationService)
+    // Constructor som modtager vores AuthenticationService
+    public ChangePassword(AuthenticationService authenticationService)
     {
+        // Gemmer servicen så vi kan bruge den i klassen
         _authenticationService = authenticationService;
     }
 
-    // Viser kun siden til en kunde, der er logget ind
+    // OnGet kører når kunden åbner siden til at ændre password
     public IActionResult OnGet()
     {
-        User? currentUser =
-            _authenticationService.GetCurrentUser();
+        // Henter brugeren som er logget ind
+        User? currentUser = _authenticationService.GetCurrentUser();
 
+        // Kontrollerer om brugeren er en Customer
         if (currentUser is not Customer)
         {
+            // Sender brugeren til login hvis det ikke er en kunde
             return RedirectToPage("/Login");
         }
 
+        // Viser siden hvor kunden kan ændre password
         return Page();
     }
 
-    // Kører når kunden sender formularen
+    // OnPost kører når kunden sender formularen
     public IActionResult OnPost()
     {
-        User? currentUser =
-            _authenticationService.GetCurrentUser();
+        // Henter brugeren som er logget ind
+        User? currentUser = _authenticationService.GetCurrentUser();
 
-        // Kontrollerer igen på serveren, at brugeren er Customer
+        // Kontrollerer igen at brugeren er en Customer
         if (currentUser is not Customer)
         {
+            // Sender brugeren til login hvis det ikke er en kunde
             return RedirectToPage("/Login");
         }
 
-        string currentPassword =
-            Request.Form["currentPassword"].ToString();
+        // Henter kundens nuværende password fra formularen
+        string currentPassword = Request.Form["currentPassword"].ToString();
 
-        string newPassword =
-            Request.Form["newPassword"].ToString();
+        // Henter det nye password fra formularen
+        string newPassword = Request.Form["newPassword"].ToString();
 
-        string confirmPassword =
-            Request.Form["confirmPassword"].ToString();
+        // Henter bekræftelsen af det nye password
+        string confirmPassword = Request.Form["confirmPassword"].ToString();
 
-        // Alle felter skal være udfyldt
+        // Kontrollerer om et af felterne er tomme
         if (string.IsNullOrWhiteSpace(currentPassword) ||
             string.IsNullOrWhiteSpace(newPassword) ||
             string.IsNullOrWhiteSpace(confirmPassword))
         {
-            TempData["ErrorMessage"] =
-                "Please fill out all fields.";
+            // Gemmer en fejlbesked som kan vises på siden
+            TempData["ErrorMessage"] = "Please fill out all fields.";
 
+            // Viser siden igen så kunden kan udfylde felterne
             return Page();
         }
 
-        // Det nye password skal skrives ens begge gange
+        // Kontrollerer om det nye password er skrevet ens begge gange
         if (newPassword != confirmPassword)
         {
-            TempData["ErrorMessage"] =
-                "The new passwords do not match.";
+            // Viser en fejl hvis de to passwords ikke er ens
+            TempData["ErrorMessage"] = "The new passwords do not match.";
 
+            // Viser siden igen uden at ændre password
             return Page();
         }
 
-        string? errorMessage =
-            _authenticationService.ChangePassword(
-                currentPassword,
-                newPassword);
+        // Sender det nuværende og nye password til AuthenticationService
+        // Servicen forsøger at ændre password og returnerer en eventuel fejl
+        string? errorMessage = _authenticationService.ChangePassword(
+            currentPassword, newPassword);
 
+        // Kontrollerer om der opstod en fejl under ændringen
         if (errorMessage != null)
         {
+            // Gemmer fejlbeskeden så den kan vises
             TempData["ErrorMessage"] = errorMessage;
+
+            // Viser siden igen hvis ændringen fejlede
             return Page();
         }
 
-        // Sessionen afsluttes efter ændringen,
-        // så kunden skal logge ind med det nye password
+        // Logger kunden ud efter password er ændret
         _authenticationService.Logout();
 
-        TempData["SuccessMessage"] =
-            "Your password has been changed. Please log in again.";
+        // Gemmer en besked om at password er ændret
+        TempData["SuccessMessage"] = "Your password has been changed. Please log in again.";
 
+        // Sender kunden til login så det nye password kan bruges
         return RedirectToPage("/Login");
     }
 }

@@ -1,22 +1,31 @@
 
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Obligatoris.opgave.Domain.Interfaces;
-using Obligatoris.opgave.Domain.Models;
-using Obligatorisk_opgave.Services;
+using Microsoft.AspNetCore.Mvc; // Bruges til at håndtere sider og handlinger
+using Microsoft.AspNetCore.Mvc.RazorPages; // Bruges til Razor Pages
+using Obligatoris.opgave.Domain.Interfaces; // Giver adgang til vores interfaces
+using Obligatoris.opgave.Domain.Models; // Giver adgang til vores modeller
+using Obligatorisk_opgave.Services; // Giver adgang til vores services
 
 namespace Obligatorisk_opgave.Pages;
 
+// PageModel som håndterer checkout og oprettelse af ordrer
 public class Checkout : PageModel
 {
+    // Bruges til at hente kundens indkøbskurv fra databasen
     private readonly IShoppingCartRepository _shoppingCartRepository;
+
+    // Bruges til at hente produkter fra databasen
     private readonly IProductRepository _productRepository;
+
+    // Bruges til at oprette ordrer i databasen
     private readonly IOrderRepository _orderRepository;
+
+    // Bruges til at finde den bruger som er logget ind
     private readonly SessionService _sessionService;
+
+    // Bruges til at kontrollere om brugeren har adgang
     private readonly AuthorizationService _authorizationService;
 
-
-    // Henter repositories og services
+    // Constructor som modtager vores repositories og services
     public Checkout(
         IShoppingCartRepository shoppingCartRepository,
         IProductRepository productRepository,
@@ -24,237 +33,213 @@ public class Checkout : PageModel
         SessionService sessionService,
         AuthorizationService authorizationService)
     {
+        // Gemmer vores shopping cart repository
         _shoppingCartRepository = shoppingCartRepository;
+
+        // Gemmer vores product repository
         _productRepository = productRepository;
+
+        // Gemmer vores order repository
         _orderRepository = orderRepository;
+
+        // Gemmer vores session service
         _sessionService = sessionService;
+
+        // Gemmer vores authorization service
         _authorizationService = authorizationService;
     }
 
-
-    // Kunden
+    // Gemmer kunden som gennemfører checkout
     public Customer? Customer { get; set; }
 
-
-    // Kundens kurv
+    // Gemmer kundens indkøbskurv fra databasen
     public ShoppingCart? ShoppingCart { get; set; }
 
+    // Opretter en tom liste til produkterne i kurven
+    public List<Product> Products { get; set; } = new List<Product>();
 
-    // Produkterne i kurven
-    public List<Product> Products { get; set; }
-        = new List<Product>();
-
-
-    // Fast leveringspris
+    // Fast leveringspris på 49 kr
     public decimal ShippingPrice { get; set; } = 49;
 
-
-    // Kører når Checkout siden åbnes
+    // OnGet kører når kunden åbner checkout siden
     public IActionResult OnGet()
     {
-        // Finder den bruger der er logget ind
-        User? user =
-            _sessionService.GetCurrentUser();
+        // Henter brugeren som er logget ind
+        User? user = _sessionService.GetCurrentUser();
 
-
-        // Kun en logget ind Customer må gå til checkout
+        // Kontrollerer om brugeren er en Customer
         if (user is not Customer customer)
         {
+            // Sender brugeren til login hvis det ikke er en kunde
             return RedirectToPage("/Login");
         }
 
-
-        // Kontrollerer adgang ud fra ACM
+        // Kontrollerer om brugeren har tilladelse til checkout
+        // Bruger vores AuthorizationService og adgangsregler
         if (!_authorizationService.CanCheckout(user))
         {
+            // Afviser adgang hvis brugeren ikke har tilladelse
             return Forbid();
         }
 
+        // Gemmer den aktuelle kunde
+        Customer = customer;
 
-        Customer =
-            customer;
+        // Henter kundens id
+        int customerId = customer.Id;
 
+        // Finder kundens indkøbskurv i databasen
+        ShoppingCart = _shoppingCartRepository.GetByCustomerId(customerId);
 
-        int customerId =
-            customer.Id;
-
-
-        // Finder kundens kurv
-        ShoppingCart =
-            _shoppingCartRepository.GetByCustomerId(
-                customerId);
-
-
-        // Sender tilbage hvis kurven ikke findes
+        // Kontrollerer om kunden har en indkøbskurv
         if (ShoppingCart == null)
         {
+            // Sender kunden tilbage hvis kurven ikke findes
             return RedirectToPage("/Cart");
         }
 
-
-        // Kontrollerer at kurven faktisk tilhører kunden
-        if (!_authorizationService.OwnsCart(
-                customer,
-                ShoppingCart))
+        // Kontrollerer om indkøbskurven faktisk tilhører kunden
+        if (!_authorizationService.OwnsCart(customer, ShoppingCart))
         {
+            // Afviser adgang hvis kunden ikke ejer kurven
             return Forbid();
         }
 
+        // Henter alle produkterne fra kundens indkøbskurv
+        Products = _shoppingCartRepository.GetProducts(ShoppingCart.Id);
 
-        // Henter produkterne i kurven
-        Products =
-            _shoppingCartRepository.GetProducts(
-                ShoppingCart.Id);
-
-
-        // Sender tilbage hvis kurven er tom
+        // Kontrollerer om indkøbskurven er tom
         if (Products.Count == 0)
         {
+            // Sender kunden tilbage hvis der ikke er nogen produkter
             return RedirectToPage("/Cart");
         }
 
-
+        // Viser checkout siden med kundens produkter
         return Page();
     }
 
-
-    // Kører når Complete Demo Payment trykkes
+    // OnPost kører når kunden forsøger at gennemføre demo betalingen
     public IActionResult OnPost(bool confirmDemoPayment)
     {
-        // Finder den bruger der er logget ind
-        User? user =
-            _sessionService.GetCurrentUser();
+        // Henter brugeren som er logget ind
+        User? user = _sessionService.GetCurrentUser();
 
-
-        // Kun en logget ind Customer må oprette en ordre
+        // Kontrollerer om brugeren er en Customer
         if (user is not Customer customer)
         {
+            // Sender brugeren til login hvis det ikke er en kunde
             return RedirectToPage("/Login");
         }
 
-
-        // Kontrollerer adgang ud fra ACM
+        // Kontrollerer om brugeren har tilladelse til checkout
         if (!_authorizationService.CanCheckout(user))
         {
+            // Afviser adgang hvis brugeren ikke har tilladelse
             return Forbid();
         }
 
-
-        // Kontrollerer at kunden har bekræftet demo betalingen
-        // Der bruges ikke rigtige kort eller betalingsoplysninger
+        // Kontrollerer om kunden har bekræftet demo betalingen
+        // Der bliver ikke brugt rigtige betalingsoplysninger
         if (!confirmDemoPayment)
         {
-            TempData["ErrorMessage"] =
-                "Please confirm the demo payment.";
+            // Gemmer en fejlbesked hvis betalingen ikke er bekræftet
+            TempData["ErrorMessage"] = "Please confirm the demo payment.";
 
+            // Sender kunden tilbage til checkout
             return RedirectToPage("/Checkout");
         }
 
+        // Henter kundens id
+        int customerId = customer.Id;
 
-        int customerId =
-            customer.Id;
+        // Finder kundens indkøbskurv i databasen
+        ShoppingCart? shoppingCart = _shoppingCartRepository.GetByCustomerId(customerId);
 
-
-        // Finder kundens kurv
-        ShoppingCart? shoppingCart =
-            _shoppingCartRepository.GetByCustomerId(
-                customerId);
-
-
+        // Kontrollerer om indkøbskurven findes
         if (shoppingCart == null)
         {
+            // Sender kunden tilbage hvis kurven ikke findes
             return RedirectToPage("/Cart");
         }
 
-
-        // Kontrollerer at kurven faktisk tilhører kunden
-        if (!_authorizationService.OwnsCart(
-                customer,
-                shoppingCart))
+        // Kontrollerer om kunden faktisk ejer indkøbskurven
+        if (!_authorizationService.OwnsCart(customer, shoppingCart))
         {
+            // Afviser adgang hvis kurven ikke tilhører kunden
             return Forbid();
         }
 
-
+        // Forsøger at gennemføre købet
         try
         {
-            // Opretter ordren og opdaterer lager og kurv
-            // Alle databaseændringer sker i én transaction
-            int orderId =
-                _orderRepository.PlaceOrder(
-                    customerId,
-                    ShippingPrice);
+            // Opretter ordren gennem vores OrderRepository
+            // PlaceOrder opdaterer også lageret og tømmer kurven
+            // Databaseændringerne sker i en samlet transaction
+            int orderId = _orderRepository.PlaceOrder(customerId, ShippingPrice);
 
-
-            // Sender videre til ordrebekræftelse
-            return RedirectToPage(
-                "/OrderConfirmation",
-                new { id = orderId });
+            // Sender kunden til ordrebekræftelsen med det nye ordre id
+            return RedirectToPage("/OrderConfirmation", new { id = orderId });
         }
+        // Fanger InvalidOperationException hvis checkout ikke kan gennemføres
         catch (InvalidOperationException)
         {
-            // Sender kunden tilbage hvis checkout ikke kan gennemføres
-            TempData["ErrorMessage"] =
-                "Your order could not be completed. Please check your cart.";
+            // Gemmer en fejlbesked som kan vises til kunden
+            TempData["ErrorMessage"] = "Your order could not be completed. Please check your cart.";
 
+            // Sender kunden tilbage til indkøbskurven
             return RedirectToPage("/Cart");
         }
     }
 
-
-    // Henter antal af et produkt
+    // Hjælpemetode som henter antallet af et bestemt produkt
     public int GetQuantity(int productId)
     {
+        // Kontrollerer om kundens indkøbskurv findes
         if (ShoppingCart == null)
         {
+            // Returnerer nul hvis kurven ikke findes
             return 0;
         }
 
-
-        return _shoppingCartRepository.GetProductQuantity(
-            ShoppingCart.Id,
-            productId);
+        // Finder antallet af produktet i databasen
+        return _shoppingCartRepository.GetProductQuantity(ShoppingCart.Id, productId);
     }
 
-
-    // Beregner prisen for et produkt
+    // Hjælpemetode som beregner den samlede pris for et produkt
     public decimal GetProductTotal(Product product)
     {
-        int quantity =
-            GetQuantity(
-                product.Id);
+        // Finder hvor mange kunden har af produktet
+        int quantity = GetQuantity(product.Id);
 
-
+        // Ganger produktets pris med antallet
         return product.Price * quantity;
     }
 
-
-    // Beregner subtotalen
+    // Hjælpemetode som beregner den samlede pris uden fragt
     public decimal GetSubtotal()
     {
+        // Starter subtotalen på nul
         decimal subtotal = 0;
 
-
+        // Går igennem alle produkterne i indkøbskurven
         foreach (Product product in Products)
         {
-            decimal productTotal =
-                GetProductTotal(
-                    product);
+            // Beregner den samlede pris for det enkelte produkt
+            decimal productTotal = GetProductTotal(product);
 
-
-            subtotal =
-                subtotal + productTotal;
+            // Lægger produktets samlede pris til subtotalen
+            subtotal = subtotal + productTotal;
         }
 
-
+        // Returnerer den samlede pris uden fragt
         return subtotal;
     }
 
-
-    // Beregner den samlede pris
+    // Hjælpemetode som beregner den samlede pris inklusive fragt
     public decimal GetTotalPrice()
     {
-        return GetSubtotal()
-            + ShippingPrice;
+        // Lægger den faste fragtpris til subtotalen
+        return GetSubtotal() + ShippingPrice;
     }
 }

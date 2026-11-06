@@ -1,288 +1,275 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Obligatoris.opgave.Domain.Interfaces;
-using Obligatoris.opgave.Domain.Models;
-using Obligatorisk_opgave.Services;
+
+using Microsoft.AspNetCore.Mvc; // Bruges til at håndtere sider og handlinger
+using Microsoft.AspNetCore.Mvc.RazorPages; // Bruges til Razor Pages
+using Obligatoris.opgave.Domain.Interfaces; // Giver adgang til vores interfaces
+using Obligatoris.opgave.Domain.Models; // Giver adgang til vores modeller
+using Obligatorisk_opgave.Services; // Giver adgang til vores services
 
 namespace Obligatorisk_opgave.Pages;
 
+// PageModel som håndterer produktsiden og Add to Bag
 public class Products : PageModel
 {
+    // Bruges til at hente produkter fra databasen
     private readonly IProductRepository _productRepository;
+
+    // Bruges til at hente og ændre kundens indkøbskurv
     private readonly IShoppingCartRepository _shoppingCartRepository;
+
+    // Bruges til at finde brugeren og håndtere gæstekurven
     private readonly SessionService _sessionService;
 
-
-    // Henter repositories og session service
+    // Constructor som modtager vores repositories og session service
     public Products(
         IProductRepository productRepository,
         IShoppingCartRepository shoppingCartRepository,
         SessionService sessionService)
     {
+        // Gemmer vores product repository
         _productRepository = productRepository;
+
+        // Gemmer vores shopping cart repository
         _shoppingCartRepository = shoppingCartRepository;
+
+        // Gemmer vores session service
         _sessionService = sessionService;
     }
 
+    // Opretter en tom liste til buketterne som skal vises
+    public List<Bouquet> Bouquets { get; set; } = new List<Bouquet>();
 
-    public List<Bouquet> Bouquets { get; set; } =
-        new List<Bouquet>();
+    // Opretter en tom liste til populære buketter
+    public List<Bouquet> PopularBouquets { get; set; } = new List<Bouquet>();
 
-
-    public List<Bouquet> PopularBouquets { get; set; } =
-        new List<Bouquet>();
-
-
+    // Gemmer den genre som brugeren har valgt
+    // Spørgsmålstegnet betyder at værdien må være null
     public BookGenre? SelectedGenre { get; set; }
 
+    // Gemmer teksten som brugeren søger efter
     public string SearchTerm { get; set; } = string.Empty;
 
-    // Henter produkter n�r siden �bnes
+    // OnGet kører når brugeren åbner produktsiden
     public void OnGet(string? genre, string? search)
     {
-        PopularBouquets =
-            _productRepository.GetPopularBouquets(4);
+        // Henter fire populære buketter fra databasen
+        PopularBouquets = _productRepository.GetPopularBouquets(4);
 
-        // Begrænser inputlængden og søger på serveren
+        // Fjerner ekstra mellemrum fra søgeteksten
+        // Bruger en tom tekst hvis search er null
         SearchTerm = search?.Trim() ?? string.Empty;
 
+        // Kontrollerer om søgeteksten er længere end 200 tegn
         if (SearchTerm.Length > 200)
         {
+            // Beholder kun de første 200 tegn
             SearchTerm = SearchTerm[..200];
         }
 
+        // Kontrollerer om brugeren har skrevet noget i søgefeltet
         if (!string.IsNullOrWhiteSpace(SearchTerm))
         {
+            // Søger efter buketter som matcher teksten
             Bouquets = _productRepository.SearchBouquets(SearchTerm);
+
+            // Stopper metoden fordi søgeresultaterne er hentet
             return;
         }
 
-
-        // Viser alle hvis der ikke er valgt genre
+        // Kontrollerer om brugeren har valgt en genre
         if (string.IsNullOrWhiteSpace(genre))
         {
-            Bouquets =
-                _productRepository.GetAllBouquets();
+            // Henter alle buketter hvis ingen genre er valgt
+            Bouquets = _productRepository.GetAllBouquets();
 
+            // Stopper metoden fordi alle buketter er hentet
             return;
         }
 
-
+        // Opretter en variabel til den valgte genre
         BookGenre selectedGenre;
 
+        // Forsøger at lave teksten om til en BookGenre enum
+        // true betyder at store og små bogstaver ikke gør en forskel
+        // out gemmer resultatet i selectedGenre
+        bool genreExists = Enum.TryParse(genre, true, out selectedGenre);
 
-        bool genreExists =
-            Enum.TryParse(
-                genre,
-                true,
-                out selectedGenre);
-
-
-        
-        // Viser alle, hvis teksten ikke kan omdannes til en genre, eller hvis værdien ikke findes i BookGenre.
+        // Kontrollerer om genren kunne læses og findes i vores enum
         if (!genreExists ||
-            !Enum.IsDefined(
-                typeof(BookGenre),
-                selectedGenre))
+            !Enum.IsDefined(typeof(BookGenre), selectedGenre))
         {
-            Bouquets =
-                _productRepository.GetAllBouquets();
+            // Viser alle buketter hvis genren er ugyldig
+            Bouquets = _productRepository.GetAllBouquets();
 
+            // Stopper metoden
             return;
         }
 
-        SelectedGenre =
-            selectedGenre;
+        // Gemmer den genre som brugeren har valgt
+        SelectedGenre = selectedGenre;
 
-
-        Bouquets =
-            _productRepository.GetBouquetsByGenre(
-                selectedGenre);
+        // Henter kun buketter som hører til den valgte genre
+        Bouquets = _productRepository.GetBouquetsByGenre(selectedGenre);
     }
 
-
-    // Add to Bag
-    public IActionResult OnPost(
-        int productId)
+    // OnPost kører når brugeren trykker Add to Bag
+    public IActionResult OnPost(int productId)
     {
-        // Finder produktet
-        Product? product =
-            _productRepository.GetById(
-                productId);
+        // Finder det valgte produkt i databasen
+        Product? product = _productRepository.GetById(productId);
 
-
-        // Stopper hvis produktet ikke findes
+        // Kontrollerer om produktet findes
         if (product == null)
         {
-            return RedirectToPage(
-                "/Products");
+            // Sender brugeren tilbage hvis produktet ikke findes
+            return RedirectToPage("/Products");
         }
 
-
-        // Stopper hvis produktet er udsolgt
+        // Kontrollerer om produktet er udsolgt
         if (product.StockQuantity <= 0)
         {
-            return RedirectToPage(
-                "/Products");
+            // Sender brugeren tilbage hvis lageret er tomt
+            return RedirectToPage("/Products");
         }
 
+        // Henter brugeren som er logget ind
+        User? user = _sessionService.GetCurrentUser();
 
-        // Finder den bruger der er logget ind
-        User? user =
-            _sessionService.GetCurrentUser();
-
-
-        // GUEST
-        // En g�st har ingen bruger i sessionen
+        // Hvis ingen er logget ind bruges gæstekurven
         if (user == null)
         {
-            List<ShoppingCartProduct> guestCart =
-                _sessionService.GetGuestCart();
+            // Henter gæstens indkøbskurv fra session
+            List<ShoppingCartProduct> guestCart = _sessionService.GetGuestCart();
 
+            // Finder produktet i gæstekurven hvis det allerede ligger der
+            ShoppingCartProduct? existingProduct = guestCart.FirstOrDefault(
+                item => item.ProductId == productId);
 
-            ShoppingCartProduct? existingProduct =
-                guestCart.FirstOrDefault(
-                    item => item.ProductId == productId);
+            // Finder hvor mange gæsten allerede har af produktet
+            // Bruger nul hvis produktet ikke findes i kurven
+            int currentQuantity = existingProduct?.Quantity ?? 0;
 
-
-            int currentQuantity =
-                existingProduct?.Quantity ?? 0;
-
-
-            // M� ikke l�gge flere i kurven end der er p� lager
+            // Kontrollerer om der stadig er flere på lager
             if (currentQuantity < product.StockQuantity)
             {
-                _sessionService.AddToGuestCart(
-                    productId,
-                    1);
+                // Tilføjer ét produkt til gæstekurven
+                _sessionService.AddToGuestCart(productId, 1);
             }
 
-
-            return RedirectToPage(
-                "/Cart");
+            // Sender gæsten til indkøbskurven
+            return RedirectToPage("/Cart");
         }
 
-
-        // ADMIN
-        // Admin m� ikke bruge customer cart
+        // Kontrollerer om brugeren er Admin
         if (user is Admin)
         {
-            return RedirectToPage(
-                "/Products");
+            // Sender admin tilbage da admin ikke må bruge kundekurven
+            return RedirectToPage("/Products");
         }
 
-
-        // CUSTOMER
+        // Kontrollerer om brugeren er en Customer
         if (user is not Customer customer)
         {
-            return RedirectToPage(
-                "/Products");
+            // Sender andre brugertyper tilbage til produktsiden
+            return RedirectToPage("/Products");
         }
 
+        // Henter kundens id
+        int customerId = customer.Id;
 
-        int customerId =
-            customer.Id;
+        // Finder kundens indkøbskurv i databasen
+        ShoppingCart? shoppingCart = _shoppingCartRepository.GetByCustomerId(customerId);
 
-
-        ShoppingCart? shoppingCart =
-            _shoppingCartRepository.GetByCustomerId(
-                customerId);
-
-
-        // Opretter kurv hvis kunden ikke har en
+        // Kontrollerer om kunden allerede har en kurv
         if (shoppingCart == null)
         {
-            int shoppingCartId =
-                _shoppingCartRepository.Create(
-                    customerId);
+            // Opretter en ny kurv og henter dens id
+            int shoppingCartId = _shoppingCartRepository.Create(customerId);
 
+            // Opretter et ShoppingCart objekt med det nye id
+            shoppingCart = new ShoppingCart
+            {
+                // Gemmer kurvens id
+                Id = shoppingCartId,
 
-            shoppingCart =
-                new ShoppingCart
-                {
-                    Id = shoppingCartId,
-                    CustomerId = customerId
-                };
+                // Gemmer id på kunden som ejer kurven
+                CustomerId = customerId
+            };
         }
 
+        // Finder hvor mange kunden allerede har af produktet i kurven
+        int quantity = _shoppingCartRepository.GetProductQuantity(
+            shoppingCart.Id, productId);
 
-        int quantity =
-            _shoppingCartRepository.GetProductQuantity(
-                shoppingCart.Id,
-                productId);
-
-
-        // Produktet findes ikke i kurven endnu
+        // Kontrollerer om produktet allerede ligger i kurven
         if (quantity == 0)
         {
-            _shoppingCartRepository.AddProduct(
-                shoppingCart.Id,
-                productId,
-                1);
+            // Tilføjer ét produkt hvis det ikke allerede findes
+            _shoppingCartRepository.AddProduct(shoppingCart.Id, productId, 1);
         }
         else
         {
-            // M� ikke overstige lageret
+            // Kontrollerer om der er plads til endnu et produkt
             if (quantity < product.StockQuantity)
             {
-                quantity =
-                    quantity + 1;
+                // Lægger én til det eksisterende antal
+                quantity = quantity + 1;
 
-
+                // Gemmer det nye antal i kundens databasekurv
                 _shoppingCartRepository.UpdateQuantity(
-                    shoppingCart.Id,
-                    productId,
-                    quantity);
+                    shoppingCart.Id, productId, quantity);
             }
         }
 
-
-        return RedirectToPage(
-            "/Cart");
+        // Sender kunden til indkøbskurven
+        return RedirectToPage("/Cart");
     }
 
-    // Finder billede til collection
-    public string GetCollectionImage(
-        BookGenre genre)
+    // Hjælpemetode som finder billedet til en bestemt genre
+    public string GetCollectionImage(BookGenre genre)
     {
+        // Kontrollerer om genren er Romance
         if (genre == BookGenre.Romance)
         {
+            // Returnerer billedet til Romance
             return "/Images/romanceall.png";
         }
 
-
+        // Kontrollerer om genren er Fantasy
         if (genre == BookGenre.Fantasy)
         {
+            // Returnerer billedet til Fantasy
             return "/Images/fantasyall.png";
         }
 
-
+        // Kontrollerer om genren er Crime
         if (genre == BookGenre.Crime)
         {
+            // Returnerer billedet til Crime
             return "/Images/crimeall.png";
         }
 
-
+        // Kontrollerer om genren er Biography
         if (genre == BookGenre.Biography)
         {
+            // Returnerer billedet til Biography
             return "/Images/Bioall.png";
         }
 
-
+        // Returnerer billedet til Dark Romance hvis ingen af de andre matcher
         return "/Images/DRALL.png";
     }
 
-
-    // Skriver Dark Romance med mellemrum
-    public string GetGenreName(
-        BookGenre genre)
+    // Hjælpemetode som bestemmer hvordan genren skal skrives
+    public string GetGenreName(BookGenre genre)
     {
+        // Kontrollerer om genren er DarkRomance
         if (genre == BookGenre.DarkRomance)
         {
+            // Returnerer navnet med mellemrum
             return "Dark Romance";
         }
 
-
+        // Laver de andre genrer om til tekst
         return genre.ToString();
     }
 }

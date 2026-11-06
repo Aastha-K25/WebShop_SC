@@ -1,387 +1,352 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Obligatoris.opgave.Domain.Interfaces;
-using Obligatoris.opgave.Domain.Models;
-using Obligatorisk_opgave.Services;
+
+using Microsoft.AspNetCore.Mvc; // Bruges til at håndtere sider og handlinger
+using Microsoft.AspNetCore.Mvc.RazorPages; // Bruges til Razor Pages
+using Obligatoris.opgave.Domain.Interfaces; // Giver adgang til vores interfaces
+using Obligatoris.opgave.Domain.Models; // Giver adgang til vores modeller
+using Obligatorisk_opgave.Services; // Giver adgang til vores services
 
 namespace Obligatorisk_opgave.Pages;
 
+// PageModel som håndterer indkøbskurven
 public class Cart : PageModel
 {
+    // Bruges til at hente og ændre indkøbskurven i databasen
     private readonly IShoppingCartRepository _shoppingCartRepository;
+
+    // Bruges til at hente produkter fra databasen
     private readonly IProductRepository _productRepository;
+
+    // Bruges til at finde brugeren og håndtere gæstekurven
     private readonly SessionService _sessionService;
 
-
+    // Constructor som modtager vores repositories og session service
     public Cart(
         IShoppingCartRepository shoppingCartRepository,
         IProductRepository productRepository,
         SessionService sessionService)
     {
+        // Gemmer vores shopping cart repository
         _shoppingCartRepository = shoppingCartRepository;
+
+        // Gemmer vores product repository
         _productRepository = productRepository;
+
+        // Gemmer vores session service
         _sessionService = sessionService;
     }
 
-
-    // Kundens database-kurv
+    // Gemmer kundens indkøbskurv fra databasen
     public ShoppingCart? ShoppingCart { get; set; }
 
+    // Opretter en tom liste til produkterne i kurven
+    public List<Product> Products { get; set; } = new List<Product>();
 
-    // Produkterne der skal vises
-    public List<Product> Products { get; set; }
-        = new List<Product>();
-
-
-    // Bruges til at vide om kurven tilhører en Guest
+    // Bruges til at kontrollere om kurven tilhører en gæst
     public bool IsGuest { get; set; }
 
-
-    // Fast leveringspris
+    // Fast leveringspris på 49 kr
     public decimal ShippingPrice { get; set; } = 49;
 
-
-    // Kører når Cart siden åbnes
+    // OnGet kører når indkøbskurven åbnes
     public void OnGet()
     {
+        // Henter den rigtige kurv ud fra brugertypen
         LoadCart();
     }
 
-
-    // Kører når en formular på Cart siden sendes
-    public IActionResult OnPost(
-        string action,
-        int productId,
-        int quantity)
+    // OnPost kører når kunden ændrer noget i indkøbskurven
+    public IActionResult OnPost(string action, int productId, int quantity)
     {
-        User? user =
-            _sessionService.GetCurrentUser();
+        // Henter brugeren som er logget ind
+        User? user = _sessionService.GetCurrentUser();
 
-
-        // -------------------------
-        // GUEST CART
-        // -------------------------
+        // Gæster har deres indkøbskurv gemt i session
         if (user == null)
         {
-            // Fjerner et produkt
+            // Kontrollerer om gæsten vil fjerne et produkt
             if (action == "remove")
             {
-                _sessionService.RemoveFromGuestCart(
-                    productId);
+                // Fjerner produktet fra gæstekurven
+                _sessionService.RemoveFromGuestCart(productId);
 
+                // Sender gæsten tilbage til kurven
                 return RedirectToPage("/Cart");
             }
 
-
-            // Tømmer hele kurven
+            // Kontrollerer om gæsten vil tømme hele kurven
             if (action == "clear")
             {
+                // Fjerner alle produkter fra gæstekurven
                 _sessionService.ClearGuestCart();
 
+                // Sender gæsten tilbage til kurven
                 return RedirectToPage("/Cart");
             }
 
-
-            // Opdaterer antal
+            // Kontrollerer om gæsten vil ændre antal
             if (action == "update")
             {
-                // Fjerner produktet hvis antal er 0
+                // Tjekker om det nye antal er nul eller mindre
                 if (quantity <= 0)
                 {
-                    _sessionService.RemoveFromGuestCart(
-                        productId);
+                    // Fjerner produktet hvis antal er nul eller mindre
+                    _sessionService.RemoveFromGuestCart(productId);
 
+                    // Sender gæsten tilbage til kurven
                     return RedirectToPage("/Cart");
                 }
 
+                // Finder produktet i databasen
+                Product? product = _productRepository.GetById(productId);
 
-                Product? product =
-                    _productRepository.GetById(
-                        productId);
-
-
+                // Kontrollerer om produktet findes
                 if (product == null)
                 {
+                    // Sender gæsten tilbage hvis produktet ikke findes
                     return RedirectToPage("/Cart");
                 }
 
-
-                // Antal må ikke overstige lageret
+                // Kontrollerer om antal overstiger lageret
                 if (quantity > product.StockQuantity)
                 {
-                    quantity =
-                        product.StockQuantity;
+                    // Ændrer antal så det højst svarer til lageret
+                    quantity = product.StockQuantity;
                 }
 
-
-                _sessionService.UpdateGuestCartQuantity(
-                    productId,
-                    quantity);
+                // Gemmer det nye antal i gæstekurven
+                _sessionService.UpdateGuestCartQuantity(productId, quantity);
             }
 
-
+            // Sender gæsten tilbage til indkøbskurven
             return RedirectToPage("/Cart");
         }
 
-
-        // -------------------------
-        // ADMIN
-        // -------------------------
-        // Admin må ikke bruge customer cart
+        // Admin må ikke bruge kundernes indkøbskurv
         if (user is Admin)
         {
+            // Sender admin til produktsiden
             return RedirectToPage("/Products");
         }
 
-
-        // -------------------------
-        // CUSTOMER CART
-        // -------------------------
+        // Kontrollerer om brugeren er en Customer
         if (user is not Customer customer)
         {
+            // Sender andre brugertyper til produktsiden
             return RedirectToPage("/Products");
         }
 
+        // Henter kundens id
+        int customerId = customer.Id;
 
-        int customerId =
-            customer.Id;
+        // Finder kundens indkøbskurv i databasen
+        ShoppingCart? shoppingCart = _shoppingCartRepository.GetByCustomerId(customerId);
 
-
-        ShoppingCart? shoppingCart =
-            _shoppingCartRepository.GetByCustomerId(
-                customerId);
-
-
+        // Kontrollerer om kunden har en kurv
         if (shoppingCart == null)
         {
+            // Sender kunden tilbage hvis kurven ikke findes
             return RedirectToPage("/Cart");
         }
 
-
-        // Fjerner et produkt
+        // Kontrollerer om kunden vil fjerne et produkt
         if (action == "remove")
         {
-            _shoppingCartRepository.RemoveProduct(
-                shoppingCart.Id,
-                productId);
+            // Fjerner produktet fra kundens indkøbskurv
+            _shoppingCartRepository.RemoveProduct(shoppingCart.Id, productId);
 
-
+            // Sender kunden tilbage til kurven
             return RedirectToPage("/Cart");
         }
 
-
-        // Tømmer hele kurven
+        // Kontrollerer om kunden vil tømme hele kurven
         if (action == "clear")
         {
-            _shoppingCartRepository.Clear(
-                shoppingCart.Id);
+            // Fjerner alle produkter fra kundens kurv
+            _shoppingCartRepository.Clear(shoppingCart.Id);
 
-
+            // Sender kunden tilbage til kurven
             return RedirectToPage("/Cart");
         }
 
-
-        // Opdaterer antal
+        // Kontrollerer om kunden vil ændre antal
         if (action == "update")
         {
+            // Tjekker om det nye antal er nul eller mindre
             if (quantity <= 0)
             {
-                _shoppingCartRepository.RemoveProduct(
-                    shoppingCart.Id,
-                    productId);
+                // Fjerner produktet fra kurven
+                _shoppingCartRepository.RemoveProduct(shoppingCart.Id, productId);
 
-
+                // Sender kunden tilbage til kurven
                 return RedirectToPage("/Cart");
             }
 
+            // Finder produktet i databasen
+            Product? product = _productRepository.GetById(productId);
 
-            Product? product =
-                _productRepository.GetById(
-                    productId);
-
-
+            // Kontrollerer om produktet findes
             if (product == null)
             {
+                // Sender kunden tilbage hvis produktet ikke findes
                 return RedirectToPage("/Cart");
             }
 
-
+            // Kontrollerer om kunden vil købe flere end der er på lager
             if (quantity > product.StockQuantity)
             {
-                quantity =
-                    product.StockQuantity;
+                // Ændrer antal så det højst svarer til lageret
+                quantity = product.StockQuantity;
             }
 
-
-            _shoppingCartRepository.UpdateQuantity(
-                shoppingCart.Id,
-                productId,
-                quantity);
+            // Gemmer det nye antal i kundens databasekurv
+            _shoppingCartRepository.UpdateQuantity(shoppingCart.Id, productId, quantity);
         }
 
-
+        // Sender kunden tilbage til indkøbskurven
         return RedirectToPage("/Cart");
     }
 
-
-    // Henter den rigtige kurv
+    // Hjælpemetode som henter indkøbskurven ud fra brugertypen
     private void LoadCart()
     {
-        User? user =
-            _sessionService.GetCurrentUser();
+        // Henter brugeren som er logget ind
+        User? user = _sessionService.GetCurrentUser();
 
-
-        // -------------------------
-        // GUEST
-        // -------------------------
+        // Hvis ingen er logget ind bruges gæstekurven
         if (user == null)
         {
+            // Markerer at kurven tilhører en gæst
             IsGuest = true;
 
+            // Henter gæstens produkter fra session
+            List<ShoppingCartProduct> guestCart = _sessionService.GetGuestCart();
 
-            List<ShoppingCartProduct> guestCart =
-                _sessionService.GetGuestCart();
-
-
+            // Går igennem alle produkterne i gæstekurven
             foreach (ShoppingCartProduct cartProduct in guestCart)
             {
-                Product? product =
-                    _productRepository.GetById(
-                        cartProduct.ProductId);
+                // Finder produktets oplysninger i databasen
+                Product? product = _productRepository.GetById(cartProduct.ProductId);
 
-
+                // Kontrollerer om produktet stadig findes
                 if (product != null)
                 {
-                    Products.Add(
-                        product);
+                    // Tilføjer produktet til listen som skal vises
+                    Products.Add(product);
                 }
             }
 
-
+            // Stopper metoden fordi gæstekurven er hentet
             return;
         }
 
-
-        // -------------------------
-        // ADMIN
-        // -------------------------
+        // Kontrollerer om brugeren er en Admin
         if (user is Admin)
         {
+            // Stopper fordi admin ikke bruger indkøbskurven
             return;
         }
 
-
-        // -------------------------
-        // CUSTOMER
-        // -------------------------
+        // Kontrollerer om brugeren er en Customer
         if (user is not Customer customer)
         {
+            // Stopper hvis brugeren ikke er en kunde
             return;
         }
 
-
+        // Markerer at kurven tilhører en kunde
         IsGuest = false;
 
+        // Finder kundens indkøbskurv i databasen
+        ShoppingCart = _shoppingCartRepository.GetByCustomerId(customer.Id);
 
-        ShoppingCart =
-            _shoppingCartRepository.GetByCustomerId(
-                customer.Id);
-
-
+        // Kontrollerer om kunden har en kurv
         if (ShoppingCart == null)
         {
+            // Stopper hvis kurven ikke findes
             return;
         }
 
-
-        Products =
-            _shoppingCartRepository.GetProducts(
-                ShoppingCart.Id);
+        // Henter alle produkterne fra kundens databasekurv
+        Products = _shoppingCartRepository.GetProducts(ShoppingCart.Id);
     }
 
-
-    // Henter antal af et produkt
+    // Hjælpemetode som finder antallet af et bestemt produkt
     public int GetQuantity(int productId)
     {
-        // Guest bruger session cart
+        // Kontrollerer om det er en gæstekurv
         if (IsGuest)
         {
-            List<ShoppingCartProduct> guestCart =
-                _sessionService.GetGuestCart();
+            // Henter gæstens kurv fra session
+            List<ShoppingCartProduct> guestCart = _sessionService.GetGuestCart();
 
+            // Finder det produkt som har det rigtige id
+            ShoppingCartProduct? cartProduct = guestCart.FirstOrDefault(
+                item => item.ProductId == productId);
 
-            ShoppingCartProduct? cartProduct =
-                guestCart.FirstOrDefault(
-                    item => item.ProductId == productId);
-
-
+            // Kontrollerer om produktet findes i kurven
             if (cartProduct == null)
             {
+                // Returnerer nul hvis produktet ikke findes
                 return 0;
             }
 
-
+            // Returnerer antallet af produktet i gæstekurven
             return cartProduct.Quantity;
         }
 
-
-        // Customer bruger database cart
+        // Kontrollerer om kundens databasekurv findes
         if (ShoppingCart == null)
         {
+            // Returnerer nul hvis kurven ikke findes
             return 0;
         }
 
-
+        // Henter antallet af produktet fra databasen
         return _shoppingCartRepository.GetProductQuantity(
-            ShoppingCart.Id,
-            productId);
+            ShoppingCart.Id, productId);
     }
 
-
-    // Beregner prisen for et produkt
+    // Hjælpemetode som beregner den samlede pris for et produkt
     public decimal GetProductTotal(Product product)
     {
-        int quantity =
-            GetQuantity(
-                product.Id);
+        // Finder hvor mange kunden har af produktet
+        int quantity = GetQuantity(product.Id);
 
-
+        // Ganger produktets pris med antallet
         return product.Price * quantity;
     }
 
-
-    // Beregner subtotalen
+    // Hjælpemetode som beregner prisen for alle produkter
     public decimal GetSubtotal()
     {
+        // Starter subtotalen på nul
         decimal subtotal = 0;
 
-
+        // Går igennem alle produkterne i kurven
         foreach (Product product in Products)
         {
-            decimal productTotal =
-                GetProductTotal(
-                    product);
+            // Beregner den samlede pris for det enkelte produkt
+            decimal productTotal = GetProductTotal(product);
 
-
-            subtotal =
-                subtotal + productTotal;
+            // Lægger produktets samlede pris til subtotalen
+            subtotal = subtotal + productTotal;
         }
 
-
+        // Returnerer den samlede pris uden fragt
         return subtotal;
     }
 
-
-    // Beregner samlet pris
+    // Hjælpemetode som beregner den samlede pris inklusive fragt
     public decimal GetTotalPrice()
     {
+        // Kontrollerer om indkøbskurven er tom
         if (Products.Count == 0)
         {
+            // Returnerer nul hvis der ikke er nogen produkter
             return 0;
         }
 
-
-        return GetSubtotal()
-            + ShippingPrice;
+        // Lægger fragtprisen til subtotalen
+        return GetSubtotal() + ShippingPrice;
     }
 }

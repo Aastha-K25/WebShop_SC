@@ -2,153 +2,128 @@
 @using Obligatoris.opgave.Domain.Models
 @using Obligatoris.opgave.Domain.Interfaces
 
+@* Giver adgang til session og indkøbskurven *@
 @inject SessionService SessionService
 @inject IShoppingCartRepository ShoppingCartRepository
 
 @{
-    // Henter den bruger der er logget ind
-    User? currentUser =
-        SessionService.GetCurrentUser();
+    // Henter brugeren som er logget ind
+    User? currentUser = SessionService.GetCurrentUser();
 
+    // Tjekker om der er en bruger logget ind
+    bool isLoggedIn = currentUser != null;
 
-    // Bruges til at styre hvad der vises i navbaren
-    bool isLoggedIn =
-        currentUser != null;
+    // Tjekker om brugeren er en kunde
+    bool isCustomer = currentUser is Customer;
 
-    bool isCustomer =
-        currentUser is Customer;
+    // Tjekker om brugeren er en admin
+    bool isAdmin = currentUser is Admin;
 
-    bool isAdmin =
-        currentUser is Admin;
-
-
-    // Antal varer i shopping bag
+    // Starter antallet af varer i kurven på nul
     int cartCount = 0;
 
-
-    // Guest-cart ligger i session
+    // Hvis brugeren ikke er logget ind bruges gæstekurven
     if (currentUser == null)
     {
-        List<ShoppingCartProduct> guestCart =
-            SessionService.GetGuestCart();
+        // Henter gæstens indkøbskurv fra session
+        List<ShoppingCartProduct> guestCart = SessionService.GetGuestCart();
 
-        cartCount =
-            guestCart.Sum(
-                item => item.Quantity);
+        // Lægger antallet af alle varer i kurven sammen
+        cartCount = guestCart.Sum(item => item.Quantity);
     }
 
-
-    // Customer-cart ligger i databasen
+    // Hvis brugeren er en kunde hentes kurven fra databasen
     if (currentUser is Customer customer)
     {
-        ShoppingCart? shoppingCart =
-            ShoppingCartRepository.GetByCustomerId(
-                customer.Id);
+        // Finder kundens indkøbskurv ved hjælp af kunde id
+        ShoppingCart? shoppingCart = ShoppingCartRepository.GetByCustomerId(customer.Id);
 
-
+        // Kontrollerer om kunden har en kurv
         if (shoppingCart != null)
         {
-            List<Product> cartProducts =
-                ShoppingCartRepository.GetProducts(
-                    shoppingCart.Id);
+            // Henter produkterne som ligger i kurven
+            List<Product> cartProducts = ShoppingCartRepository.GetProducts(shoppingCart.Id);
 
-
+            // Går igennem alle produkterne i kurven
             foreach (Product product in cartProducts)
             {
-                cartCount +=
-                    ShoppingCartRepository.GetProductQuantity(
-                        shoppingCart.Id,
-                        product.Id);
+                // Henter antal af hvert produkt og lægger det til cartCount
+                cartCount += ShoppingCartRepository.GetProductQuantity(
+                    shoppingCart.Id, product.Id);
             }
         }
     }
 }
 
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-
+    @* Fortæller browseren at siden bruger UTF8 *@
     <meta charset="utf-8" />
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0" />
+    @* Gør at hjemmesiden tilpasser sig skærmens størrelse *@
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    @* Viser sidens titel sammen med Paper & Petals *@
+    <title>@ViewData["Title"] - Paper & Petals</title>
 
-    <title>
-        @ViewData["Title"] - Paper & Petals
-    </title>
-
-
+    @* Importmap til JavaScript moduler *@
     <script type="importmap"></script>
 
+    @* Henter Bootstrap som bruges til design og layout *@
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-    <link rel="stylesheet"
-          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    @* Henter vores egen CSS fil *@
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
+    @* Henter CSS som hører til projektet *@
+    <link rel="stylesheet" href="~/Obligatorisk_opgave.styles.css" asp-append-version="true" />
 
-    <link rel="stylesheet"
-          href="~/css/site.css"
-          asp-append-version="true" />
-
-
-    <link rel="stylesheet"
-          href="~/Obligatorisk_opgave.styles.css"
-          asp-append-version="true" />
-
-
-    @await RenderSectionAsync(
-    "Styles",
-        required: false)
+    @* Gør det muligt for andre sider at tilføje deres egen CSS *@
+    @await RenderSectionAsync("Styles", required: false)
 
 </head>
 
-
 <body>
 
-
+    @* Headeren indeholder navigationen øverst på hjemmesiden *@
     <header>
 
+        @* Navbar som bruger Bootstrap til design og tilpasning *@
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow">
 
+            @* Holder indholdet samlet i en container *@
             <div class="container">
 
-
-                @* Logoet sender Admin til dashboard og andre til forsiden *@
+                @* Admin bliver sendt til dashboard når logoet trykkes *@
                 @if (isAdmin)
                 {
-                    <a class="navbar-brand"
-                       asp-page="/AdminDashboard">
+                    <a class="navbar-brand" asp-page="/AdminDashboard">
 
-                        <img class="navbar-logo"
-                             src="~/Images/logo.png"
-                             alt="Paper & Petals logo" />
+                        @* Viser vores logo *@
+                        <img class="navbar-logo" src="~/Images/logo.png" alt="Paper & Petals logo" />
 
-                        <span>
-                            Paper & Petals
-                        </span>
+                        @* Viser navnet ved siden af logoet *@
+                        <span>Paper & Petals</span>
 
                     </a>
                 }
                 else
                 {
-                    <a class="navbar-brand"
-                       asp-page="/Index">
+                    @* Andre brugere bliver sendt til forsiden *@
+                    <a class="navbar-brand" asp-page="/Index">
 
-                        <img class="navbar-logo"
-                             src="~/Images/logo.png"
-                             alt="Paper & Petals logo" />
+                        @* Viser vores logo *@
+                        <img class="navbar-logo" src="~/Images/logo.png" alt="Paper & Petals logo" />
 
-                        <span>
-                            Paper & Petals
-                        </span>
+                        @* Viser navnet ved siden af logoet *@
+                        <span>Paper & Petals</span>
 
                     </a>
                 }
 
-
-                @* Menuen bruges på mindre skærme *@
+                @* Knap som åbner og lukker menuen på mindre skærme *@
                 <button class="navbar-toggler"
                         type="button"
                         data-bs-toggle="collapse"
@@ -157,452 +132,329 @@
                         aria-expanded="false"
                         aria-label="Open navigation">
 
+                    @* Viser ikonet med de tre streger *@
                     <span class="navbar-toggler-icon"></span>
 
                 </button>
 
-
-                <div class="collapse navbar-collapse"
-                     id="mainNavbar">
-
+                @* Indeholder navigationen som kan foldes sammen *@
+                <div class="collapse navbar-collapse" id="mainNavbar">
 
                     @* Admin får sin egen navigation *@
                     @if (isAdmin)
                     {
+                        @* Liste med sider som admin kan besøge *@
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-
+                            @* Link til admin dashboard *@
                             <li class="nav-item">
-
-                                <a class="nav-link text-dark"
-                                   asp-page="/AdminDashboard">
-
+                                <a class="nav-link text-dark" asp-page="/AdminDashboard">
                                     Dashboard
-
                                 </a>
-
                             </li>
 
-
+                            @* Link til administration af produkter *@
                             <li class="nav-item">
-
-                                <a class="nav-link text-dark"
-                                   asp-page="/AdminProducts">
-
+                                <a class="nav-link text-dark" asp-page="/AdminProducts">
                                     Products
-
                                 </a>
-
                             </li>
 
-
+                            @* Link til administration af ordrer *@
                             <li class="nav-item">
-
-                                <a class="nav-link text-dark"
-                                   asp-page="/AdminOrders">
-
+                                <a class="nav-link text-dark" asp-page="/AdminOrders">
                                     Orders
-
                                 </a>
-
                             </li>
 
-
+                            @* Link til administration af kunder *@
                             <li class="nav-item">
-
-                                <a class="nav-link text-dark"
-                                   asp-page="/AdminUsers">
-
+                                <a class="nav-link text-dark" asp-page="/AdminUsers">
                                     Customers
-
                                 </a>
-
                             </li>
-
 
                         </ul>
                     }
                     else
                     {
-                        @* Navigation til webshoppen *@
+                        @* Navigation som vises til kunder og gæster *@
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-
+                            @* Link til forsiden *@
                             <li class="nav-item">
-
-                                <a class="nav-link text-dark"
-                                   asp-page="/Index">
-
+                                <a class="nav-link text-dark" asp-page="/Index">
                                     Home
-
                                 </a>
-
                             </li>
 
-
-                            @* Dropdown med bouquet-kategorier *@
+                            @* Dropdown menu med vores buketkategorier *@
                             <li class="nav-item dropdown">
 
+                                @* Knap som åbner listen med kategorier *@
                                 <a class="nav-link dropdown-toggle text-dark"
                                    href="#"
                                    role="button"
                                    data-bs-toggle="dropdown"
                                    aria-expanded="false">
-
                                     Bouquets
-
                                 </a>
 
-
+                                @* Liste med de forskellige kategorier *@
                                 <ul class="dropdown-menu">
 
-
+                                    @* Viser alle buketter *@
                                     <li>
-
-                                        <a class="dropdown-item"
-                                           asp-page="/Products">
-
+                                        <a class="dropdown-item" asp-page="/Products">
                                             All Bouquets
-
                                         </a>
-
                                     </li>
 
-
+                                    @* Laver en streg mellem menupunkterne *@
                                     <li>
                                         <hr class="dropdown-divider" />
                                     </li>
 
-
+                                    @* Viser buketter med genren Romance *@
                                     <li>
-
                                         <a class="dropdown-item"
                                            asp-page="/Products"
                                            asp-route-genre="Romance">
-
                                             Romance
-
                                         </a>
-
                                     </li>
 
-
+                                    @* Viser buketter med genren Dark Romance *@
                                     <li>
-
                                         <a class="dropdown-item"
                                            asp-page="/Products"
                                            asp-route-genre="DarkRomance">
-
                                             Dark Romance
-
                                         </a>
-
                                     </li>
 
-
+                                    @* Viser buketter med genren Fantasy *@
                                     <li>
-
                                         <a class="dropdown-item"
                                            asp-page="/Products"
                                            asp-route-genre="Fantasy">
-
                                             Fantasy
-
                                         </a>
-
                                     </li>
 
-
+                                    @* Viser buketter med genren Crime *@
                                     <li>
-
                                         <a class="dropdown-item"
                                            asp-page="/Products"
                                            asp-route-genre="Crime">
-
                                             Crime
-
                                         </a>
-
                                     </li>
 
-
+                                    @* Viser buketter med genren Biography *@
                                     <li>
-
                                         <a class="dropdown-item"
                                            asp-page="/Products"
                                            asp-route-genre="Biography">
-
                                             Biography
-
                                         </a>
-
                                     </li>
 
-
                                 </ul>
-
                             </li>
 
-
+                            @* Link til siden som forklarer hvordan webshoppen fungerer *@
                             <li class="nav-item">
-
-                                <a class="nav-link text-dark"
-                                   asp-page="/HowItWorks">
-
+                                <a class="nav-link text-dark" asp-page="/HowItWorks">
                                     How It Works
-
                                 </a>
-
                             </li>
 
-
+                            @* Link til siden med information om webshoppen *@
                             <li class="nav-item">
-
-                                <a class="nav-link text-dark"
-                                   asp-page="/About">
-
+                                <a class="nav-link text-dark" asp-page="/About">
                                     About Us
-
                                 </a>
-
                             </li>
 
-
+                            @* Link til kontaktsiden *@
                             <li class="nav-item">
-
-                                <a class="nav-link text-dark"
-                                   asp-page="/Contact">
-
+                                <a class="nav-link text-dark" asp-page="/Contact">
                                     Contact
-
                                 </a>
-
                             </li>
 
-
-                            @* Customer kan gå direkte til egne ordrer *@
+                            @* Kun kunder får vist link til deres egne ordrer *@
                             @if (isCustomer)
                             {
                                 <li class="nav-item">
-
-                                    <a class="nav-link text-dark"
-                                       asp-page="/Orders">
-
+                                    <a class="nav-link text-dark" asp-page="/Orders">
                                         My Orders
-
                                     </a>
-
                                 </li>
                             }
-
 
                         </ul>
                     }
 
-
-                    @* Ikoner og brugermenu i højre side *@
+                    @* Højre side af navbaren med login og indkøbskurv *@
                     <div class="navbar-icons d-flex align-items-center gap-3">
 
-                        @* Viser Log Out når brugeren er logget ind *@
+                        @* Viser Log Out hvis brugeren er logget ind *@
                         @if (isLoggedIn)
                         {
-                            <a class="nav-link text-dark"
-                               asp-page="/Logout">
-
+                            <a class="nav-link text-dark" asp-page="/Logout">
                                 Log Out
-
                             </a>
                         }
 
-
+                        @* Tjekker om brugeren er logget ind *@
                         @if (isLoggedIn)
                         {
+                            @* Dropdown menu til brugerkontoen *@
                             <div class="dropdown user-menu">
 
-
+                                @* Knap som åbner brugermenuen *@
                                 <button class="user-menu-button"
                                         type="button"
                                         data-bs-toggle="dropdown"
                                         aria-expanded="false"
                                         aria-label="Open user menu">
 
-                                    <img src="~/Images/user-icon.png"
-                                         alt="User menu" />
+                                    @* Viser brugerikonet *@
+                                    <img src="~/Images/user-icon.png" alt="User menu" />
 
                                 </button>
 
-
+                                @* Liste med de sider brugeren kan vælge *@
                                 <ul class="dropdown-menu dropdown-menu-end">
 
-
-                                    @* Customer-menu *@
+                                    @* Kunde får vist sine egne kontomuligheder *@
                                     @if (isCustomer)
                                     {
+                                        @* Link til kundens konto *@
                                         <li>
-
-                                            <a class="dropdown-item"
-                                               asp-page="/Account">
-
+                                            <a class="dropdown-item" asp-page="/Account">
                                                 My Account
-
                                             </a>
-
                                         </li>
 
-
+                                        @* Link til kundens ordrer *@
                                         <li>
-
-                                            <a class="dropdown-item"
-                                               asp-page="/Orders">
-
+                                            <a class="dropdown-item" asp-page="/Orders">
                                                 My Orders
-
                                             </a>
-
                                         </li>
 
-
+                                        @* Link til at ændre password *@
                                         <li>
-
-                                            <a class="dropdown-item"
-                                               asp-page="/ChangePassword">
-
+                                            <a class="dropdown-item" asp-page="/ChangePassword">
                                                 Change Password
-
                                             </a>
-
                                         </li>
 
-
+                                        @* Laver en streg mellem menupunkterne *@
                                         <li>
                                             <hr class="dropdown-divider" />
                                         </li>
                                     }
 
-
-                                    @* Admin-menu *@
+                                    @* Admin får link til sit dashboard *@
                                     @if (isAdmin)
                                     {
                                         <li>
-
-                                            <a class="dropdown-item"
-                                               asp-page="/AdminDashboard">
-
+                                            <a class="dropdown-item" asp-page="/AdminDashboard">
                                                 Admin Dashboard
-
                                             </a>
-
                                         </li>
 
-
+                                        @* Laver en streg mellem menupunkterne *@
                                         <li>
                                             <hr class="dropdown-divider" />
                                         </li>
                                     }
 
-
+                                    @* Link som sender brugeren til logout *@
                                     <li>
-
-                                        <a class="dropdown-item"
-                                           asp-page="/Logout">
-
+                                        <a class="dropdown-item" asp-page="/Logout">
                                             Log Out
-
                                         </a>
-
                                     </li>
 
-
                                 </ul>
-
                             </div>
                         }
                         else
                         {
-                            @* Menu til brugere der ikke er logget ind *@
+                            @* Menu som vises når brugeren ikke er logget ind *@
                             <div class="dropdown user-menu">
 
-
+                                @* Knap som åbner kontomenuen *@
                                 <button class="user-menu-button"
                                         type="button"
                                         data-bs-toggle="dropdown"
                                         aria-expanded="false"
                                         aria-label="Open account menu">
 
-                                    <img src="~/Images/user-icon.png"
-                                         alt="Account" />
+                                    @* Viser brugerikonet *@
+                                    <img src="~/Images/user-icon.png" alt="Account" />
 
                                 </button>
 
-
+                                @* Liste med muligheder for gæster *@
                                 <ul class="dropdown-menu dropdown-menu-end">
 
-
+                                    @* Link til login siden *@
                                     <li>
-
-                                        <a class="dropdown-item"
-                                           asp-page="/Login">
-
+                                        <a class="dropdown-item" asp-page="/Login">
                                             Log In
-
                                         </a>
-
                                     </li>
 
-
+                                    @* Link til at oprette en konto *@
                                     <li>
-
-                                        <a class="dropdown-item"
-                                           asp-page="/Register">
-
+                                        <a class="dropdown-item" asp-page="/Register">
                                             Create Account
-
                                         </a>
-
                                     </li>
 
-
+                                    @* Laver en streg mellem menupunkterne *@
                                     <li>
                                         <hr class="dropdown-divider" />
                                     </li>
 
-
+                                    @* Link til admin login *@
                                     <li>
-
-                                        <a class="dropdown-item"
-                                           asp-page="/AdminLogin">
-
+                                        <a class="dropdown-item" asp-page="/AdminLogin">
                                             Admin
-
                                         </a>
-
                                     </li>
 
-
                                 </ul>
-
                             </div>
                         }
 
-
-                        @* Kun Guest og Customer har shopping bag *@
+                        @* Kun gæster og kunder får vist indkøbskurven *@
                         @if (!isAdmin)
                         {
+                            @* Link som åbner indkøbskurven *@
                             <a asp-page="/Cart"
                                class="position-relative"
                                aria-label="View shopping bag">
 
-                                <img src="~/Images/cart-icon.png"
-                                     alt="Shopping bag" />
+                                @* Viser ikonet med indkøbskurven *@
+                                <img src="~/Images/cart-icon.png" alt="Shopping bag" />
 
-
-                                @* Badge vises kun når der er varer i kurven *@
+                                @* Viser kun antal varer hvis kurven ikke er tom *@
                                 @if (cartCount > 0)
                                 {
+                                    @* Lille badge som viser antal varer i kurven *@
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
 
+                                        @* Viser det samlede antal varer *@
                                         @cartCount
 
+                                        @* Ekstra tekst til skærmlæsere *@
                                         <span class="visually-hidden">
                                             items in shopping bag
                                         </span>
@@ -612,7 +464,6 @@
 
                             </a>
                         }
-
 
                     </div>
 
@@ -624,25 +475,29 @@
 
     </header>
 
-
     @* Her bliver indholdet fra den enkelte side vist *@
     <div class="main-content">
 
+        @* Main indeholder sidens vigtigste indhold *@
         <main role="main">
 
+            @* Indsætter indholdet fra den Razor side som er åbnet *@
             @RenderBody()
 
         </main>
 
     </div>
 
-
+    @* Footer som vises nederst på hjemmesiden *@
     <footer class="border-top footer text-muted">
 
+        @* Holder footerens indhold samlet *@
         <div class="container">
 
+            @* Viser årstal og webshopnavn *@
             &copy; 2026 - Paper & Petals -
 
+            @* Link til siden med privatlivspolitik *@
             <a asp-page="/Privacy">
                 Privacy
             </a>
@@ -651,20 +506,17 @@
 
     </footer>
 
-
+    @* Henter jQuery som bruges af JavaScript funktioner *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
+    @* Henter Bootstrap JavaScript til blandt andet dropdown menuer *@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script src="~/js/site.js"
-            asp-append-version="true"></script>
+    @* Henter vores egen JavaScript fil *@
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
-
-    @await RenderSectionAsync(
-    "Scripts",
-        required: false)
-
+    @* Gør det muligt for andre sider at tilføje deres egne scripts *@
+    @await RenderSectionAsync("Scripts", required: false)
 
 </body>
-
 </html>

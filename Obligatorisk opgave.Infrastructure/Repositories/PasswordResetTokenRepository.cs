@@ -1,36 +1,31 @@
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using Obligatoris.opgave.Domain.Interfaces;
-using Obligatoris.opgave.Domain.Models;
+
+using Microsoft.Data.SqlClient; // Bruges til at arbejde med SQL Server
+using Microsoft.Extensions.Configuration; // Bruges til at hente indstillinger
+using Obligatoris.opgave.Domain.Interfaces; // Giver adgang til vores interfaces
+using Obligatoris.opgave.Domain.Models; // Giver adgang til vores modeller
 
 namespace Obligatorisk_opgave.Infrastructure.Repositories;
 
-public class PasswordResetTokenRepository
-    : IPasswordResetTokenRepository
+// Repository som håndterer password reset tokens i databasen
+public class PasswordResetTokenRepository : IPasswordResetTokenRepository
 {
-    // Connection stringen bruges til at oprette forbindelse
-    // til SQL Server-databasen.
+    // Gemmer forbindelsesoplysningerne til databasen
     private readonly string _connectionString;
 
-
-    // Connection stringen hentes fra User Secrets.
-    public PasswordResetTokenRepository(
-        IConfiguration configuration)
+    // Constructor som modtager vores konfiguration
+    public PasswordResetTokenRepository(IConfiguration configuration)
     {
-        _connectionString =
-            configuration.GetConnectionString("PaperPetalsDatabase")
-            ?? throw new InvalidOperationException(
-                "Database connection string was not found.");
+        // Henter connection string fra konfigurationen
+        // Stopper med en fejl hvis den ikke findes
+        _connectionString = configuration.GetConnectionString("PaperPetalsDatabase")
+            ?? throw new InvalidOperationException("Database connection string was not found.");
     }
 
-
-    // Finder et password reset-token ud fra tokenets hash.
-    //
-    // Vi gemmer ikke det oprindelige token i databasen.
-    // Derfor søger vi efter den sikre hash-værdi.
-    public PasswordResetToken? GetByTokenHash(
-        string tokenHash)
+    // Finder et password reset token ud fra dets hash
+    public PasswordResetToken? GetByTokenHash(string tokenHash)
     {
+        // SQL som finder tokenet ud fra dets hash
+        // Vi søger efter hash fordi det rigtige token ikke gemmes i databasen
         string sql = """
             SELECT
                 Id,
@@ -42,35 +37,37 @@ public class PasswordResetTokenRepository
             WHERE TokenHash = @TokenHash;
             """;
 
-        using SqlConnection connection =
-            new SqlConnection(_connectionString);
+        // Opretter forbindelsen til databasen
+        using SqlConnection connection = new SqlConnection(_connectionString);
 
-        using SqlCommand command =
-            new SqlCommand(sql, connection);
+        // Gør SQL forespørgslen klar
+        using SqlCommand command = new SqlCommand(sql, connection);
 
-        // Tokenets hash sendes som en SQL-parameter.
-        command.Parameters.AddWithValue(
-            "@TokenHash",
-            tokenHash);
+        // Sender tokenets hash som parameter for at undgå SQL injection
+        command.Parameters.AddWithValue("@TokenHash", tokenHash);
 
+        // Åbner forbindelsen til databasen
         connection.Open();
 
-        using SqlDataReader reader =
-            command.ExecuteReader();
+        // Kører SQL og læser resultatet
+        using SqlDataReader reader = command.ExecuteReader();
 
+        // Tjekker om databasen fandt et token
         if (reader.Read())
         {
+            // Laver resultatet om til et PasswordResetToken objekt
             return CreatePasswordResetToken(reader);
         }
 
-        // Hvis tokenet ikke findes, returnerer vi null.
+        // Returnerer null hvis tokenet ikke findes
         return null;
     }
 
-
-    // Gemmer et nyt password reset-token.
+    // Gemmer et nyt password reset token i databasen
     public void Add(PasswordResetToken token)
     {
+        // SQL som indsætter et nyt token
+        // OUTPUT INSERTED.Id henter det nye id
         string sql = """
             INSERT INTO paperpetals.PasswordResetTokens
             (
@@ -89,47 +86,40 @@ public class PasswordResetTokenRepository
             );
             """;
 
-        using SqlConnection connection =
-            new SqlConnection(_connectionString);
+        // Opretter forbindelsen til databasen
+        using SqlConnection connection = new SqlConnection(_connectionString);
 
-        using SqlCommand command =
-            new SqlCommand(sql, connection);
+        // Gør SQL forespørgslen klar
+        using SqlCommand command = new SqlCommand(sql, connection);
 
-        command.Parameters.AddWithValue(
-            "@UserId",
-            token.UserId);
+        // Sender id på brugeren som ejer tokenet
+        command.Parameters.AddWithValue("@UserId", token.UserId);
 
-        command.Parameters.AddWithValue(
-            "@TokenHash",
-            token.TokenHash);
+        // Sender tokenets hash i stedet for selve tokenet
+        command.Parameters.AddWithValue("@TokenHash", token.TokenHash);
 
-        command.Parameters.AddWithValue(
-            "@ExpiresAt",
-            token.ExpiresAt);
+        // Sender tidspunktet hvor tokenet udløber
+        command.Parameters.AddWithValue("@ExpiresAt", token.ExpiresAt);
 
-        // Et nyt token er endnu ikke blevet brugt.
-        // UsedAt er derfor normalt null.
-        command.Parameters.AddWithValue(
-            "@UsedAt",
-            (object?)token.UsedAt ?? DBNull.Value);
+        // Sender tidspunktet hvor tokenet blev brugt
+        // Bruger DBNull.Value hvis UsedAt er null
+        command.Parameters.AddWithValue("@UsedAt", (object?)token.UsedAt ?? DBNull.Value);
 
+        // Åbner forbindelsen til databasen
         connection.Open();
 
-        // SQL Server opretter tokenets id.
-        int newTokenId =
-            Convert.ToInt32(command.ExecuteScalar());
+        // Opretter tokenet og henter det nye id
+        int newTokenId = Convert.ToInt32(command.ExecuteScalar());
 
-        // Det nye id gemmes også på objektet.
+        // Gemmer det nye id i vores token objekt
         token.Id = newTokenId;
     }
 
-
-    // Opdaterer et eksisterende token.
-    //
-    // Metoden bruges blandt andet, når tokenet er blevet anvendt,
-    // og UsedAt skal gemmes i databasen.
+    // Opdaterer et eksisterende password reset token
     public void Update(PasswordResetToken token)
     {
+        // SQL som opdaterer tokenets oplysninger
+        // Bruges blandt andet til at gemme hvornår tokenet blev brugt
         string sql = """
             UPDATE paperpetals.PasswordResetTokens
             SET
@@ -140,84 +130,83 @@ public class PasswordResetTokenRepository
             WHERE Id = @Id;
             """;
 
-        using SqlConnection connection =
-            new SqlConnection(_connectionString);
+        // Opretter forbindelsen til databasen
+        using SqlConnection connection = new SqlConnection(_connectionString);
 
-        using SqlCommand command =
-            new SqlCommand(sql, connection);
+        // Gør SQL forespørgslen klar
+        using SqlCommand command = new SqlCommand(sql, connection);
 
-        command.Parameters.AddWithValue(
-            "@Id",
-            token.Id);
+        // Sender id på tokenet som skal opdateres
+        command.Parameters.AddWithValue("@Id", token.Id);
 
-        command.Parameters.AddWithValue(
-            "@UserId",
-            token.UserId);
+        // Sender brugerens id
+        command.Parameters.AddWithValue("@UserId", token.UserId);
 
-        command.Parameters.AddWithValue(
-            "@TokenHash",
-            token.TokenHash);
+        // Sender tokenets hash
+        command.Parameters.AddWithValue("@TokenHash", token.TokenHash);
 
-        command.Parameters.AddWithValue(
-            "@ExpiresAt",
-            token.ExpiresAt);
+        // Sender tokenets udløbstidspunkt
+        command.Parameters.AddWithValue("@ExpiresAt", token.ExpiresAt);
 
-        command.Parameters.AddWithValue(
-            "@UsedAt",
-            (object?)token.UsedAt ?? DBNull.Value);
+        // Sender tidspunktet hvor tokenet blev brugt
+        // Bruger DBNull.Value hvis det endnu ikke er brugt
+        command.Parameters.AddWithValue("@UsedAt", (object?)token.UsedAt ?? DBNull.Value);
 
+        // Åbner forbindelsen til databasen
         connection.Open();
 
+        // Kører SQL og opdaterer tokenet
         command.ExecuteNonQuery();
     }
 
-
-    // Sletter tokens, som ikke længere kan bruges.
-    //
-    // Det gælder både tokens, der er udløbet,
-    // og tokens, der allerede er blevet brugt.
+    // Sletter tokens som er udløbet eller allerede brugt
     public void DeleteExpiredTokens()
     {
+        // SQL som sletter tokens der ikke længere kan bruges
         string sql = """
             DELETE FROM paperpetals.PasswordResetTokens
             WHERE ExpiresAt <= @CurrentTime
                OR UsedAt IS NOT NULL;
             """;
 
-        using SqlConnection connection =
-            new SqlConnection(_connectionString);
+        // Opretter forbindelsen til databasen
+        using SqlConnection connection = new SqlConnection(_connectionString);
 
-        using SqlCommand command =
-            new SqlCommand(sql, connection);
+        // Gør SQL forespørgslen klar
+        using SqlCommand command = new SqlCommand(sql, connection);
 
-        // Vi bruger UTC, fordi ExpiresAt også gemmes som UTC.
-        command.Parameters.AddWithValue(
-            "@CurrentTime",
-            DateTime.UtcNow);
+        // Sender det aktuelle tidspunkt i UTC
+        // Bruges til at finde tokens som er udløbet
+        command.Parameters.AddWithValue("@CurrentTime", DateTime.UtcNow);
 
+        // Åbner forbindelsen til databasen
         connection.Open();
 
+        // Kører SQL og sletter de ugyldige tokens
         command.ExecuteNonQuery();
     }
 
-
-    // Denne hjælpemetode laver én række fra databasen
-    // om til et PasswordResetToken-objekt.
-    private static PasswordResetToken CreatePasswordResetToken(
-        SqlDataReader reader)
+    // Hjælpemetode som laver data fra databasen om til et token objekt
+    private static PasswordResetToken CreatePasswordResetToken(SqlDataReader reader)
     {
+        // Opretter et PasswordResetToken objekt med værdier fra databasen
         return new PasswordResetToken
         {
+            // Henter tokenets id fra første kolonne
             Id = reader.GetInt32(0),
 
+            // Henter brugerens id fra anden kolonne
             UserId = reader.GetInt32(1),
 
+            // Henter tokenets hash fra tredje kolonne
             TokenHash = reader.GetString(2),
 
+            // Henter udløbstidspunktet fra fjerde kolonne
             ExpiresAt = reader.GetDateTime(3),
 
-            // UsedAt må gerne være null,
-            // hvis tokenet endnu ikke er blevet brugt.
+            // Tjekker om UsedAt er tom i databasen
+            // Returnerer null hvis det ikke er brugt
+            // Ellers henter den tidspunktet hvor det blev brugt
             UsedAt = reader.IsDBNull(4)
                 ? null
                 : reader.GetDateTime(4)

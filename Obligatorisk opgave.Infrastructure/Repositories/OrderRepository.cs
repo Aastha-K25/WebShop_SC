@@ -1,30 +1,30 @@
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using Obligatoris.opgave.Domain.Interfaces;
-using Obligatoris.opgave.Domain.Models;
+
+using Microsoft.Data.SqlClient; // Bruges til at arbejde med SQL Server
+using Microsoft.Extensions.Configuration; // Bruges til at hente indstillinger
+using Obligatoris.opgave.Domain.Interfaces; // Giver adgang til vores interfaces
+using Obligatoris.opgave.Domain.Models; // Giver adgang til vores modeller
 
 namespace Obligatorisk_opgave.Infrastructure.Repositories;
 
+// Repository som håndterer ordrer i databasen
 public class OrderRepository : IOrderRepository
 {
-    // Connection stringen bruges til at oprette forbindelse
-    // til SQL Server-databasen.
+    // Gemmer forbindelsesoplysningerne til databasen
     private readonly string _connectionString;
 
-
-    // Connection stringen hentes fra User Secrets.
+    // Constructor som får adgang til vores konfiguration
     public OrderRepository(IConfiguration configuration)
     {
-        _connectionString =
-            configuration.GetConnectionString("PaperPetalsDatabase")
-            ?? throw new InvalidOperationException(
-                "Database connection string was not found.");
+        // Henter connection string fra konfigurationen
+        // Stopper med en fejl hvis den ikke findes
+        _connectionString = configuration.GetConnectionString("PaperPetalsDatabase")
+            ?? throw new InvalidOperationException("Database connection string was not found.");
     }
 
-
-    // Henter én ordre ud fra ordrens id.
+    // Henter en bestemt ordre ud fra dens id
     public Order? GetById(int id)
     {
+        // SQL som vælger oplysningerne fra Orders tabellen
         string sql = """
             SELECT
                 Id,
@@ -36,39 +36,39 @@ public class OrderRepository : IOrderRepository
             WHERE Id = @Id;
             """;
 
-        using SqlConnection connection =
-            new SqlConnection(_connectionString);
+        // Opretter forbindelsen til databasen
+        using SqlConnection connection = new SqlConnection(_connectionString);
 
-        using SqlCommand command =
-            new SqlCommand(sql, connection);
+        // Gør vores SQL klar til at blive kørt
+        using SqlCommand command = new SqlCommand(sql, connection);
 
-        command.Parameters.AddWithValue(
-            "@Id",
-            id);
+        // Sender id som en parameter så vi undgår SQL injection
+        command.Parameters.AddWithValue("@Id", id);
 
+        // Åbner forbindelsen til databasen
         connection.Open();
 
-        using SqlDataReader reader =
-            command.ExecuteReader();
+        // Kører SQL og læser resultatet
+        using SqlDataReader reader = command.ExecuteReader();
 
-
+        // Tjekker om databasen fandt en ordre
         if (reader.Read())
         {
+            // Laver resultatet om til et Order objekt
             return CreateOrder(reader);
         }
 
-
+        // Returnerer null hvis ordren ikke findes
         return null;
     }
 
-
-    // Henter alle ordrer, som tilhører en bestemt kunde.
+    // Henter alle ordrer som tilhører en bestemt kunde
     public List<Order> GetByCustomerId(int customerId)
     {
-        List<Order> orders =
-            new List<Order>();
+        // Opretter en tom liste til kundens ordrer
+        List<Order> orders = new List<Order>();
 
-
+        // Henter kundens ordrer med de nyeste først
         string sql = """
             SELECT
                 Id,
@@ -81,46 +81,43 @@ public class OrderRepository : IOrderRepository
             ORDER BY OrderDate DESC;
             """;
 
+        // Opretter forbindelsen til databasen
+        using SqlConnection connection = new SqlConnection(_connectionString);
 
-        using SqlConnection connection =
-            new SqlConnection(_connectionString);
+        // Gør SQL forespørgslen klar
+        using SqlCommand command = new SqlCommand(sql, connection);
 
-        using SqlCommand command =
-            new SqlCommand(sql, connection);
+        // Sender kundens id sikkert som en parameter
+        command.Parameters.AddWithValue("@CustomerId", customerId);
 
-
-        command.Parameters.AddWithValue(
-            "@CustomerId",
-            customerId);
-
-
+        // Åbner forbindelsen
         connection.Open();
 
-        using SqlDataReader reader =
-            command.ExecuteReader();
+        // Henter resultaterne fra databasen
+        using SqlDataReader reader = command.ExecuteReader();
 
-
+        // Går igennem alle ordrer som blev fundet
         while (reader.Read())
         {
-            Order order =
-                CreateOrder(reader);
+            // Laver rækken fra databasen om til et Order objekt
+            Order order = CreateOrder(reader);
 
+            // Tilføjer ordren til listen
             orders.Add(order);
         }
 
-
+        // Returnerer listen med kundens ordrer
         return orders;
     }
 
-
-    // Henter alle ordrer.
-    // Bruges af Admin til at se og behandle ordrer.
+    // Henter alle ordrer fra databasen
+    // Kan bruges af admin til at se og behandle ordrer
     public List<Order> GetAll()
     {
-        List<Order> orders =
-            new List<Order>();
+        // Opretter en tom liste til alle ordrer
+        List<Order> orders = new List<Order>();
 
-
+        // Henter alle ordrer med de nyeste først
         string sql = """
             SELECT
                 Id,
@@ -132,40 +129,39 @@ public class OrderRepository : IOrderRepository
             ORDER BY OrderDate DESC;
             """;
 
+        // Opretter forbindelsen til databasen
+        using SqlConnection connection = new SqlConnection(_connectionString);
 
-        using SqlConnection connection =
-            new SqlConnection(_connectionString);
+        // Gør SQL forespørgslen klar
+        using SqlCommand command = new SqlCommand(sql, connection);
 
-        using SqlCommand command =
-            new SqlCommand(sql, connection);
-
-
+        // Åbner forbindelsen
         connection.Open();
 
-        using SqlDataReader reader =
-            command.ExecuteReader();
+        // Kører SQL og læser resultaterne
+        using SqlDataReader reader = command.ExecuteReader();
 
-
+        // Går igennem alle ordrer
         while (reader.Read())
         {
-            Order order =
-                CreateOrder(reader);
+            // Laver resultatet om til et Order objekt
+            Order order = CreateOrder(reader);
 
+            // Tilføjer ordren til listen
             orders.Add(order);
         }
 
-
+        // Returnerer alle ordrerne
         return orders;
     }
 
-
-    // Henter produkterne, der hører til en bestemt ordre.
+    // Henter produkterne som hører til en bestemt ordre
     public List<OrderProduct> GetOrderProducts(int orderId)
     {
-        List<OrderProduct> orderProducts =
-            new List<OrderProduct>();
+        // Opretter en tom liste til ordreprodukterne
+        List<OrderProduct> orderProducts = new List<OrderProduct>();
 
-
+        // Henter produkter som hører til det valgte ordre id
         string sql = """
             SELECT
                 OrderId,
@@ -176,56 +172,52 @@ public class OrderRepository : IOrderRepository
             WHERE OrderId = @OrderId;
             """;
 
+        // Opretter forbindelsen til databasen
+        using SqlConnection connection = new SqlConnection(_connectionString);
 
-        using SqlConnection connection =
-            new SqlConnection(_connectionString);
+        // Gør SQL forespørgslen klar
+        using SqlCommand command = new SqlCommand(sql, connection);
 
-        using SqlCommand command =
-            new SqlCommand(sql, connection);
+        // Sender ordre id som en parameter
+        command.Parameters.AddWithValue("@OrderId", orderId);
 
-
-        command.Parameters.AddWithValue(
-            "@OrderId",
-            orderId);
-
-
+        // Åbner forbindelsen
         connection.Open();
 
-        using SqlDataReader reader =
-            command.ExecuteReader();
+        // Kører SQL og læser resultaterne
+        using SqlDataReader reader = command.ExecuteReader();
 
-
+        // Går igennem alle produkterne på ordren
         while (reader.Read())
         {
-            OrderProduct orderProduct =
-                new OrderProduct
-                {
-                    OrderId =
-                        reader.GetInt32(0),
+            // Opretter et nyt OrderProduct objekt
+            OrderProduct orderProduct = new OrderProduct
+            {
+                // Henter ordre id fra første kolonne
+                OrderId = reader.GetInt32(0),
 
-                    ProductId =
-                        reader.GetInt32(1),
+                // Henter produkt id fra anden kolonne
+                ProductId = reader.GetInt32(1),
 
-                    Quantity =
-                        reader.GetInt32(2),
+                // Henter antal fra tredje kolonne
+                Quantity = reader.GetInt32(2),
 
-                    PriceAtPurchase =
-                        reader.GetDecimal(3)
-                };
+                // Henter prisen fra købstidspunktet
+                PriceAtPurchase = reader.GetDecimal(3)
+            };
 
-
-            orderProducts.Add(
-                orderProduct);
+            // Tilføjer produktet til listen
+            orderProducts.Add(orderProduct);
         }
 
-
+        // Returnerer listen med ordreprodukterne
         return orderProducts;
     }
 
-
-    // Gemmer en ny ordre og returnerer ordrens nye id.
+    // Gemmer en ny ordre i databasen
     public int Add(Order order)
     {
+        // SQL som indsætter en ny ordre i Orders tabellen
         string sql = """
             INSERT INTO paperpetals.Orders
             (
@@ -244,65 +236,52 @@ public class OrderRepository : IOrderRepository
             );
             """;
 
+        // Opretter forbindelsen til databasen
+        using SqlConnection connection = new SqlConnection(_connectionString);
 
-        using SqlConnection connection =
-            new SqlConnection(_connectionString);
+        // Gør SQL forespørgslen klar
+        using SqlCommand command = new SqlCommand(sql, connection);
 
-        using SqlCommand command =
-            new SqlCommand(sql, connection);
+        // Sender kundens id som en parameter
+        command.Parameters.AddWithValue("@CustomerId", order.CustomerId);
 
+        // Sender datoen for ordren
+        command.Parameters.AddWithValue("@OrderDate", order.OrderDate);
 
-        command.Parameters.AddWithValue(
-            "@CustomerId",
-            order.CustomerId);
+        // Sender den samlede pris som skal være beregnet i backend
+        command.Parameters.AddWithValue("@TotalPrice", order.TotalPrice);
 
+        // Laver ordrestatus om til tekst før den gemmes
+        command.Parameters.AddWithValue("@Status", order.Status.ToString());
 
-        command.Parameters.AddWithValue(
-            "@OrderDate",
-            order.OrderDate);
-
-
-        // TotalPrice skal beregnes i backend.
-        command.Parameters.AddWithValue(
-            "@TotalPrice",
-            order.TotalPrice);
-
-
-        command.Parameters.AddWithValue(
-            "@Status",
-            order.Status.ToString());
-
-
+        // Åbner forbindelsen
         connection.Open();
 
+        // Opretter ordren og henter dens nye id
+        int newOrderId = Convert.ToInt32(command.ExecuteScalar());
 
-        int newOrderId =
-            Convert.ToInt32(
-                command.ExecuteScalar());
+        // Gemmer det nye id i vores Order objekt
+        order.Id = newOrderId;
 
-
-        order.Id =
-            newOrderId;
-
-
+        // Returnerer id på den nye ordre
         return newOrderId;
     }
 
-
-    // Gemmer forbindelsen mellem en ordre og et produkt.
+    // Gemmer et produkt på en bestemt ordre
     public void AddProductToOrder(
         int orderId,
         int productId,
         int quantity,
         decimal priceAtPurchase)
     {
+        // Kontrollerer at antal er større end nul
         if (quantity <= 0)
         {
-            throw new ArgumentException(
-                "Quantity must be greater than zero.");
+            // Stopper hvis antal er ugyldigt
+            throw new ArgumentException("Quantity must be greater than zero.");
         }
 
-
+        // SQL som forbinder produktet med ordren
         string sql = """
             INSERT INTO paperpetals.OrderProducts
             (
@@ -320,100 +299,86 @@ public class OrderRepository : IOrderRepository
             );
             """;
 
+        // Opretter forbindelsen til databasen
+        using SqlConnection connection = new SqlConnection(_connectionString);
 
-        using SqlConnection connection =
-            new SqlConnection(_connectionString);
+        // Gør SQL forespørgslen klar
+        using SqlCommand command = new SqlCommand(sql, connection);
 
-        using SqlCommand command =
-            new SqlCommand(sql, connection);
+        // Sender id på ordren
+        command.Parameters.AddWithValue("@OrderId", orderId);
 
+        // Sender id på produktet
+        command.Parameters.AddWithValue("@ProductId", productId);
 
-        command.Parameters.AddWithValue(
-            "@OrderId",
-            orderId);
+        // Sender hvor mange der er købt
+        command.Parameters.AddWithValue("@Quantity", quantity);
 
+        // Gemmer prisen som produktet havde da det blev købt
+        command.Parameters.AddWithValue("@PriceAtPurchase", priceAtPurchase);
 
-        command.Parameters.AddWithValue(
-            "@ProductId",
-            productId);
-
-
-        command.Parameters.AddWithValue(
-            "@Quantity",
-            quantity);
-
-
-        // Gemmer prisen fra købstidspunktet.
-        command.Parameters.AddWithValue(
-            "@PriceAtPurchase",
-            priceAtPurchase);
-
-
+        // Åbner forbindelsen
         connection.Open();
 
+        // Kører SQL og gemmer produktet på ordren
         command.ExecuteNonQuery();
     }
 
-
-    // Gennemfører checkout i én samlet transaction
+    // Gennemfører kundens køb
     // Opretter ordre, opdaterer lager og tømmer kurven
     public int PlaceOrder(
         int customerId,
         decimal shippingPrice)
     {
-        // Kontrollerer at kunde og leveringspris er gyldige
+        // Kontrollerer at kunde id er gyldigt og fragt ikke er negativ
         if (customerId <= 0 || shippingPrice < 0)
         {
-            throw new ArgumentException(
-                "Invalid checkout information.");
+            // Stopper hvis oplysningerne er ugyldige
+            throw new ArgumentException("Invalid checkout information.");
         }
 
+        // Opretter forbindelsen til databasen
+        using SqlConnection connection = new SqlConnection(_connectionString);
 
-        using SqlConnection connection =
-            new SqlConnection(_connectionString);
-
+        // Åbner forbindelsen
         connection.Open();
 
+        // Starter en transaction så ændringerne hænger sammen
+        // Serializable hjælper med at beskytte mod samtidige ændringer
+        using SqlTransaction transaction = connection.BeginTransaction(
+            System.Data.IsolationLevel.Serializable);
 
-        // Alle databaseændringer skal gennemføres samlet
-        // Serializable beskytter også ved samtidige køb
-        using SqlTransaction transaction =
-            connection.BeginTransaction(
-                System.Data.IsolationLevel.Serializable);
-
+        // Forsøger at gennemføre hele købet
         try
         {
-            // Finder kundens egen kurv
+            // SQL som finder kundens indkøbskurv
             string cartSql = """
                 SELECT Id
                 FROM paperpetals.ShoppingCarts
                 WHERE CustomerId = @CustomerId;
                 """;
 
-            using SqlCommand cartCommand =
-                new SqlCommand(
-                    cartSql,
-                    connection,
-                    transaction);
+            // Gør SQL klar og knytter den til vores transaction
+            using SqlCommand cartCommand = new SqlCommand(
+                cartSql, connection, transaction);
 
-            cartCommand.Parameters.AddWithValue(
-                "@CustomerId",
-                customerId);
+            // Sender kundens id som en parameter
+            cartCommand.Parameters.AddWithValue("@CustomerId", customerId);
 
-            object? cartResult =
-                cartCommand.ExecuteScalar();
+            // Henter id på kundens indkøbskurv
+            object? cartResult = cartCommand.ExecuteScalar();
 
+            // Tjekker om kunden har en indkøbskurv
             if (cartResult == null)
             {
-                throw new InvalidOperationException(
-                    "Shopping cart was not found.");
+                // Stopper hvis kurven ikke findes
+                throw new InvalidOperationException("Shopping cart was not found.");
             }
 
-            int cartId =
-                Convert.ToInt32(cartResult);
+            // Laver resultatet om til et heltal
+            int cartId = Convert.ToInt32(cartResult);
 
-
-            // Henter antal, pris og lager direkte fra databasen
+            // Henter produkter, antal, pris og lager fra databasen
             string productsSql = """
                 SELECT
                     p.Id,
@@ -427,77 +392,67 @@ public class OrderRepository : IOrderRepository
                 ORDER BY p.Id;
                 """;
 
-            using SqlCommand productsCommand =
-                new SqlCommand(
-                    productsSql,
-                    connection,
-                    transaction);
+            // Gør SQL klar og bruger den samme transaction
+            using SqlCommand productsCommand = new SqlCommand(
+                productsSql, connection, transaction);
 
-            productsCommand.Parameters.AddWithValue(
-                "@ShoppingCartId",
-                cartId);
+            // Sender indkøbskurvens id som en parameter
+            productsCommand.Parameters.AddWithValue("@ShoppingCartId", cartId);
 
+            // Opretter en liste med produkt id, antal og pris
+            List<(int ProductId, int Quantity, decimal Price)> products =
+                new List<(int, int, decimal)>();
 
-            // Gemmer oplysningerne midlertidigt
-            List<(int ProductId, int Quantity, decimal Price)>
-                products =
-                    new List<(int, int, decimal)>();
-
+            // Starter den samlede produktpris på nul
             decimal subtotal = 0;
 
-
-            using (SqlDataReader reader =
-                   productsCommand.ExecuteReader())
+            // Henter produkterne fra databasen
+            using (SqlDataReader reader = productsCommand.ExecuteReader())
             {
+                // Går igennem alle produkter i kurven
                 while (reader.Read())
                 {
-                    int productId =
-                        reader.GetInt32(0);
+                    // Henter produktets id
+                    int productId = reader.GetInt32(0);
 
-                    int quantity =
-                        reader.GetInt32(1);
+                    // Henter antal kunden vil købe
+                    int quantity = reader.GetInt32(1);
 
-                    decimal price =
-                        reader.GetDecimal(2);
+                    // Henter produktets aktuelle pris
+                    decimal price = reader.GetDecimal(2);
 
-                    int stockQuantity =
-                        reader.GetInt32(3);
+                    // Henter hvor mange der er på lager
+                    int stockQuantity = reader.GetInt32(3);
 
-
-                    // Antal og lager kontrolleres igen
+                    // Kontrollerer antal, lager og pris
                     if (quantity <= 0 ||
                         quantity > stockQuantity ||
                         price < 0)
                     {
+                        // Stopper hvis produktet ikke kan købes
                         throw new InvalidOperationException(
                             "A product is unavailable or has invalid information.");
                     }
 
+                    // Lægger produktets pris gange antal til subtotalen
+                    subtotal = subtotal + (price * quantity);
 
-                    subtotal =
-                        subtotal + (price * quantity);
-
-                    products.Add((
-                        productId,
-                        quantity,
-                        price));
+                    // Gemmer produktets oplysninger i listen
+                    products.Add((productId, quantity, price));
                 }
             }
 
-
-            // En tom kurv må ikke oprette en ordre
+            // Kontrollerer at kurven indeholder produkter
             if (products.Count == 0)
             {
-                throw new InvalidOperationException(
-                    "Shopping cart is empty.");
+                // Stopper hvis kurven er tom
+                throw new InvalidOperationException("Shopping cart is empty.");
             }
 
+            // Beregner den samlede pris inklusive fragt
+            decimal totalPrice = subtotal + shippingPrice;
 
-            decimal totalPrice =
-                subtotal + shippingPrice;
-
-
-            // Opretter ordren
+            // SQL som opretter den nye ordre
             string orderSql = """
                 INSERT INTO paperpetals.Orders
                 (
@@ -516,38 +471,30 @@ public class OrderRepository : IOrderRepository
                 );
                 """;
 
-            using SqlCommand orderCommand =
-                new SqlCommand(
-                    orderSql,
-                    connection,
-                    transaction);
+            // Gør SQL klar og bruger den samme transaction
+            using SqlCommand orderCommand = new SqlCommand(
+                orderSql, connection, transaction);
 
-            orderCommand.Parameters.AddWithValue(
-                "@CustomerId",
-                customerId);
+            // Sender kundens id
+            orderCommand.Parameters.AddWithValue("@CustomerId", customerId);
 
-            orderCommand.Parameters.AddWithValue(
-                "@OrderDate",
-                DateTime.UtcNow);
+            // Gemmer tidspunktet for ordren i UTC
+            orderCommand.Parameters.AddWithValue("@OrderDate", DateTime.UtcNow);
 
+            // Sender den samlede pris som decimal
             orderCommand.Parameters.Add(
-                "@TotalPrice",
-                System.Data.SqlDbType.Decimal
-                ).Value = totalPrice;
+                "@TotalPrice", System.Data.SqlDbType.Decimal).Value = totalPrice;
 
-            orderCommand.Parameters.AddWithValue(
-                "@Status",
-                OrderStatus.Pending.ToString());
+            // Giver den nye ordre status Pending
+            orderCommand.Parameters.AddWithValue("@Status", OrderStatus.Pending.ToString());
 
+            // Opretter ordren og henter dens nye id
+            int orderId = Convert.ToInt32(orderCommand.ExecuteScalar());
 
-            int orderId =
-                Convert.ToInt32(
-                    orderCommand.ExecuteScalar());
-
-
-            // Gemmer produkterne på ordren
+            // Går igennem alle produkterne som kunden køber
             foreach (var product in products)
             {
+                // SQL som gemmer produktet på ordren
                 string orderProductSql = """
                     INSERT INTO paperpetals.OrderProducts
                     (
@@ -565,33 +512,27 @@ public class OrderRepository : IOrderRepository
                     );
                     """;
 
-                using SqlCommand orderProductCommand =
-                    new SqlCommand(
-                        orderProductSql,
-                        connection,
-                        transaction);
+                // Gør SQL klar og bruger den samme transaction
+                using SqlCommand orderProductCommand = new SqlCommand(
+                    orderProductSql, connection, transaction);
 
-                orderProductCommand.Parameters.AddWithValue(
-                    "@OrderId",
-                    orderId);
+                // Sender id på den nye ordre
+                orderProductCommand.Parameters.AddWithValue("@OrderId", orderId);
 
-                orderProductCommand.Parameters.AddWithValue(
-                    "@ProductId",
-                    product.ProductId);
+                // Sender produktets id
+                orderProductCommand.Parameters.AddWithValue("@ProductId", product.ProductId);
 
-                orderProductCommand.Parameters.AddWithValue(
-                    "@Quantity",
-                    product.Quantity);
+                // Sender antal kunden har købt
+                orderProductCommand.Parameters.AddWithValue("@Quantity", product.Quantity);
 
-                orderProductCommand.Parameters.AddWithValue(
-                    "@PriceAtPurchase",
-                    product.Price);
+                // Gemmer produktets pris fra købstidspunktet
+                orderProductCommand.Parameters.AddWithValue("@PriceAtPurchase", product.Price);
 
+                // Gemmer produktet på ordren i databasen
                 orderProductCommand.ExecuteNonQuery();
 
-
-                // Trækker antal fra lageret
-                // Stopper hvis der ikke længere er nok på lager
+                // SQL som trækker det købte antal fra lageret
+                // Opdaterer kun hvis der stadig er nok på lager
                 string stockSql = """
                     UPDATE paperpetals.Products
                     SET StockQuantity = StockQuantity - @Quantity
@@ -599,129 +540,118 @@ public class OrderRepository : IOrderRepository
                       AND StockQuantity >= @Quantity;
                     """;
 
-                using SqlCommand stockCommand =
-                    new SqlCommand(
-                        stockSql,
-                        connection,
-                        transaction);
+                // Gør SQL klar og bruger den samme transaction
+                using SqlCommand stockCommand = new SqlCommand(
+                    stockSql, connection, transaction);
 
-                stockCommand.Parameters.AddWithValue(
-                    "@ProductId",
-                    product.ProductId);
+                // Sender id på produktet som skal opdateres
+                stockCommand.Parameters.AddWithValue("@ProductId", product.ProductId);
 
-                stockCommand.Parameters.AddWithValue(
-                    "@Quantity",
-                    product.Quantity);
+                // Sender hvor mange der skal trækkes fra lageret
+                stockCommand.Parameters.AddWithValue("@Quantity", product.Quantity);
 
-                int updatedRows =
-                    stockCommand.ExecuteNonQuery();
+                // Opdaterer lageret og gemmer antal ændrede rækker
+                int updatedRows = stockCommand.ExecuteNonQuery();
 
-
+                // Kontrollerer at præcis én produktrække blev opdateret
                 if (updatedRows != 1)
                 {
-                    throw new InvalidOperationException(
-                        "Not enough products in stock.");
+                    // Stopper købet hvis lageret ikke kunne opdateres
+                    throw new InvalidOperationException("Not enough products in stock.");
                 }
             }
 
-
-            // Tømmer først kurven når alle produkter er behandlet
+            // SQL som fjerner produkterne fra indkøbskurven
             string clearCartSql = """
                 DELETE FROM paperpetals.ShoppingCartProducts
                 WHERE ShoppingCartId = @ShoppingCartId;
                 """;
 
-            using SqlCommand clearCartCommand =
-                new SqlCommand(
-                    clearCartSql,
-                    connection,
-                    transaction);
+            // Gør SQL klar og bruger den samme transaction
+            using SqlCommand clearCartCommand = new SqlCommand(
+                clearCartSql, connection, transaction);
 
-            clearCartCommand.Parameters.AddWithValue(
-                "@ShoppingCartId",
-                cartId);
+            // Sender id på kurven som skal tømmes
+            clearCartCommand.Parameters.AddWithValue("@ShoppingCartId", cartId);
 
-            int deletedRows =
-                clearCartCommand.ExecuteNonQuery();
+            // Tømmer kurven og gemmer antal slettede rækker
+            int deletedRows = clearCartCommand.ExecuteNonQuery();
 
+            // Kontrollerer at det rigtige antal produkter blev fjernet
             if (deletedRows != products.Count)
             {
-                throw new InvalidOperationException(
-                    "Shopping cart changed during checkout.");
+                // Stopper hvis kurven har ændret sig under købet
+                throw new InvalidOperationException("Shopping cart changed during checkout.");
             }
 
-
-            // Alle ændringer gemmes samlet
+            // Godkender og gemmer alle ændringer i databasen samlet
             transaction.Commit();
 
+            // Returnerer id på den gennemførte ordre
             return orderId;
         }
+        // Fanger fejl som opstår under købet
         catch
         {
-            // Hvis noget fejler bliver alle ændringer fortrudt
+            // Fortryder databaseændringerne hvis noget fejler
             transaction.Rollback();
 
+            // Sender fejlen videre så den kan håndteres
             throw;
         }
     }
 
-    // Opdaterer status på en ordre.
+    // Opdaterer status på en bestemt ordre
     public void UpdateStatus(
         int orderId,
         OrderStatus status)
     {
+        // SQL som ændrer status på den valgte ordre
         string sql = """
             UPDATE paperpetals.Orders
             SET Status = @Status
             WHERE Id = @OrderId;
             """;
 
+        // Opretter forbindelsen til databasen
+        using SqlConnection connection = new SqlConnection(_connectionString);
 
-        using SqlConnection connection =
-            new SqlConnection(_connectionString);
+        // Gør SQL forespørgslen klar
+        using SqlCommand command = new SqlCommand(sql, connection);
 
-        using SqlCommand command =
-            new SqlCommand(sql, connection);
+        // Sender id på ordren som skal opdateres
+        command.Parameters.AddWithValue("@OrderId", orderId);
 
+        // Laver den nye status om til tekst
+        command.Parameters.AddWithValue("@Status", status.ToString());
 
-        command.Parameters.AddWithValue(
-            "@OrderId",
-            orderId);
-
-
-        command.Parameters.AddWithValue(
-            "@Status",
-            status.ToString());
-
-
+        // Åbner forbindelsen til databasen
         connection.Open();
 
+        // Kører SQL og opdaterer ordrens status
         command.ExecuteNonQuery();
     }
 
-
-    // Laver én række fra Orders-tabellen
-    // om til et Order-objekt.
-    private static Order CreateOrder(
-        SqlDataReader reader)
+    // Hjælpemetode som laver data fra databasen om til en ordre
+    private static Order CreateOrder(SqlDataReader reader)
     {
+        // Opretter et nyt Order objekt med værdier fra databasen
         return new Order
         {
-            Id =
-                reader.GetInt32(0),
+            // Henter ordrens id fra første kolonne
+            Id = reader.GetInt32(0),
 
-            CustomerId =
-                reader.GetInt32(1),
+            // Henter kundens id fra anden kolonne
+            CustomerId = reader.GetInt32(1),
 
-            OrderDate =
-                reader.GetDateTime(2),
+            // Henter datoen fra tredje kolonne
+            OrderDate = reader.GetDateTime(2),
 
-            TotalPrice =
-                reader.GetDecimal(3),
+            // Henter den samlede pris fra fjerde kolonne
+            TotalPrice = reader.GetDecimal(3),
 
-            Status =
-                Enum.Parse<OrderStatus>(
-                    reader.GetString(4))
+            // Henter status som tekst og laver den om til OrderStatus
+            Status = Enum.Parse<OrderStatus>(reader.GetString(4))
         };
     }
 }
