@@ -403,6 +403,17 @@
                     @* Ikoner og brugermenu i højre side *@
                     <div class="navbar-icons d-flex align-items-center gap-3">
 
+                        @* Viser Log Out når brugeren er logget ind *@
+                        @if (isLoggedIn)
+                        {
+                            <a class="nav-link text-dark"
+                               asp-page="/Logout">
+
+                                Log Out
+
+                            </a>
+                        }
+
 
                         @if (isLoggedIn)
                         {
