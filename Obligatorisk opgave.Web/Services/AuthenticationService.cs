@@ -1,3 +1,4 @@
+
 using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using Obligatoris.opgave.Domain.Models;
@@ -13,6 +14,7 @@ public class AuthenticationService
     private readonly PasswordHasher _passwordHasher;
     private readonly SessionService _sessionService;
     private readonly IMemoryCache _memoryCache;
+    private readonly ILogger<AuthenticationService> _logger;
     private readonly IPasswordResetTokenRepository _passwordResetTokenRepository;
 
     private const int MaximumLoginAttempts = 5;
@@ -23,13 +25,15 @@ public class AuthenticationService
         IPasswordResetTokenRepository passwordResetTokenRepository,
         PasswordHasher passwordHasher,
         SessionService sessionService,
-        IMemoryCache memoryCache)
+        IMemoryCache memoryCache,
+        ILogger<AuthenticationService> logger)
     {
         _userRepository = userRepository;
         _passwordResetTokenRepository = passwordResetTokenRepository;
         _passwordHasher = passwordHasher;
         _sessionService = sessionService;
         _memoryCache = memoryCache;
+        _logger = logger;
     }
 
 
@@ -109,9 +113,7 @@ public class AuthenticationService
 
     // Logger en bruger ind.
     // Null betyder, at login lykkedes.
-    public string? Login(
-        string email,
-        string password)
+    public string? Login(  string email,string password)
     {
         string normalizedEmail =
             email
@@ -129,6 +131,9 @@ public class AuthenticationService
         // Kontrollerer om login midlertidigt er blokeret
         if (IsLoginBlocked(normalizedEmail))
         {
+            _logger.LogWarning(
+                "Login attempt blocked due to too many failed attempts.");
+
             return "Too many failed login attempts. Please try again later.";
         }
 
@@ -184,6 +189,12 @@ public class AuthenticationService
         // Sessionen oprettes først efter korrekt authentication
         _sessionService.CreateSession(
             user);
+
+
+        // Registrerer et vellykket login uden password
+        _logger.LogInformation(
+            "User successfully authenticated. UserId: {UserId}",
+            user.Id);
 
 
         return null;
@@ -485,6 +496,12 @@ public class AuthenticationService
         loginAttempt.NumberOfAttempts++;
 
 
+        // Logger det fejlede loginforsøg
+        _logger.LogWarning(
+            "Failed login attempt. Attempt number: {AttemptNumber}",
+            loginAttempt.NumberOfAttempts);
+
+
         // Kontoens login begrænses midlertidigt efter fem forsøg
         if (loginAttempt.NumberOfAttempts >=
             MaximumLoginAttempts)
@@ -493,6 +510,11 @@ public class AuthenticationService
                 DateTime.UtcNow
                     .AddMinutes(
                         15);
+
+
+            // Logger når login bliver midlertidigt blokeret
+            _logger.LogWarning(
+                "Login temporarily blocked after repeated failed attempts.");
         }
 
 

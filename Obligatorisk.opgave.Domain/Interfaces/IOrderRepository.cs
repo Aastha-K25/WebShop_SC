@@ -28,8 +28,15 @@ public interface IOrderRepository
         int quantity,
         decimal priceAtPurchase);
 
+    // Gennemfører checkout i én samlet transaction
+    // Returnerer id på den nye ordre
+    int PlaceOrder(
+        int customerId,
+        decimal shippingPrice);
+
     // Opdaterer ordrens status
     void UpdateStatus(
         int orderId,
         OrderStatus status);
+
 }

@@ -306,7 +306,28 @@
 
         </div>
 
+        @* Søgning efter produkter *@
+        <form method="get"
+              asp-page="/Products"
+              role="search"
+              style="margin: 1rem 0;">
 
+            <label for="productSearch">
+                Search bouquets
+            </label>
+
+            <input id="productSearch"
+                   type="search"
+                   name="search"
+                   value="@Model.SearchTerm"
+                   maxlength="200"
+                   placeholder="Search by name or description" />
+
+            <button type="submit">
+                Search
+            </button>
+
+        </form>
 
         @* Filter *@
         <div class="products-filter">

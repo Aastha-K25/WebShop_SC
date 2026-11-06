@@ -266,16 +266,58 @@
                         </div>
 
 
-                        <form method="post">
 
-                            <button type="submit"
-                                    class="btn btn-dark w-100 py-3">
+                        @* DEMO PAYMENT *@
+                        <div class="mb-4">
 
-                                Place Order
+                            <h3 class="h6 mb-3">
+                                Payment Method
+                            </h3>
 
-                            </button>
+                            <div class="border rounded-3 p-3">
 
-                        </form>
+                                <p class="fw-semibold mb-2">
+                                    Demo Payment
+                                </p>
+
+                                <p class="text-muted small mb-3">
+                                    This is a simulated payment for our school project.
+                                    No real money or card information is used.
+                                </p>
+
+                                <form method="post">
+
+                                    <div class="form-check mb-3">
+
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               id="confirmDemoPayment"
+                                               name="confirmDemoPayment"
+                                               value="true"
+                                               required />
+
+                                        <label class="form-check-label"
+                                               for="confirmDemoPayment">
+
+                                            I understand this is a simulated payment.
+
+                                        </label>
+
+                                    </div>
+
+                                    <button type="submit"
+                                            class="btn btn-dark w-100 py-3">
+
+                                        Complete Demo Payment
+
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
 
 
                         <div class="text-center mt-4">

@@ -51,7 +51,6 @@
 
             </div>
 
-
             <div class="form-group">
 
                 <label for="surname">
@@ -65,7 +64,6 @@
                        required />
 
             </div>
-
 
             <div class="form-group">
 
@@ -81,7 +79,6 @@
 
             </div>
 
-
             <div class="form-group full-width">
 
                 <label for="address">
@@ -96,7 +93,6 @@
 
             </div>
 
-
             <div class="form-group">
 
                 <label for="password">
@@ -107,10 +103,18 @@
                        id="password"
                        name="password"
                        autocomplete="new-password"
+                       minlength="15"
+                       maxlength="64"
+                       aria-describedby="passwordHelp"
                        required />
 
-            </div>
+                <p id="passwordHelp" class="register-description">
+                    Use 15 to 64 characters.
+                    Avoid common passwords and do not use your
+                    name or email as your password.
+                </p>
 
+            </div>
 
             <div class="form-group">
 
@@ -122,10 +126,11 @@
                        id="confirmPassword"
                        name="confirmPassword"
                        autocomplete="new-password"
+                       minlength="15"
+                       maxlength="64"
                        required />
 
             </div>
-
 
             <button type="submit"
                     class="register-button">
@@ -135,7 +140,6 @@
             </button>
 
         </form>
-
 
         <p class="account-link">
 

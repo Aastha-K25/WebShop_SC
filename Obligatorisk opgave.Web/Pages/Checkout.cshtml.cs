@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Obligatoris.opgave.Domain.Interfaces;
@@ -117,8 +118,8 @@ public class Checkout : PageModel
     }
 
 
-    // Kører når Place Order trykkes
-    public IActionResult OnPost()
+    // Kører når Complete Demo Payment trykkes
+    public IActionResult OnPost(bool confirmDemoPayment)
     {
         // Finder den bruger der er logget ind
         User? user =
@@ -136,6 +137,17 @@ public class Checkout : PageModel
         if (!_authorizationService.CanCheckout(user))
         {
             return Forbid();
+        }
+
+
+        // Kontrollerer at kunden har bekræftet demo betalingen
+        // Der bruges ikke rigtige kort eller betalingsoplysninger
+        if (!confirmDemoPayment)
+        {
+            TempData["ErrorMessage"] =
+                "Please confirm the demo payment.";
+
+            return RedirectToPage("/Checkout");
         }
 
 
@@ -164,104 +176,29 @@ public class Checkout : PageModel
         }
 
 
-        // Henter produkterne i kurven
-        List<Product> products =
-            _shoppingCartRepository.GetProducts(
-                shoppingCart.Id);
-
-
-        if (products.Count == 0)
+        try
         {
+            // Opretter ordren og opdaterer lager og kurv
+            // Alle databaseændringer sker i én transaction
+            int orderId =
+                _orderRepository.PlaceOrder(
+                    customerId,
+                    ShippingPrice);
+
+
+            // Sender videre til ordrebekræftelse
+            return RedirectToPage(
+                "/OrderConfirmation",
+                new { id = orderId });
+        }
+        catch (InvalidOperationException)
+        {
+            // Sender kunden tilbage hvis checkout ikke kan gennemføres
+            TempData["ErrorMessage"] =
+                "Your order could not be completed. Please check your cart.";
+
             return RedirectToPage("/Cart");
         }
-
-
-        decimal subtotal = 0;
-
-
-        // Beregner prisen og tjekker lager
-        foreach (Product product in products)
-        {
-            int quantity =
-                _shoppingCartRepository.GetProductQuantity(
-                    shoppingCart.Id,
-                    product.Id);
-
-
-            // Stopper hvis antal er ugyldigt
-            if (quantity <= 0)
-            {
-                return RedirectToPage("/Cart");
-            }
-
-
-            // Stopper hvis der ikke er nok på lager
-            if (quantity > product.StockQuantity)
-            {
-                return RedirectToPage("/Cart");
-            }
-
-
-            subtotal =
-                subtotal + (product.Price * quantity);
-        }
-
-
-        decimal totalPrice =
-            subtotal + ShippingPrice;
-
-
-        // Opretter ordren
-        Order order = new Order
-        {
-            CustomerId = customerId,
-            OrderDate = DateTime.UtcNow,
-            TotalPrice = totalPrice,
-            Status = OrderStatus.Pending
-        };
-
-
-        // Gemmer ordren
-        int orderId =
-            _orderRepository.Add(
-                order);
-
-
-        // Gemmer produkterne på ordren
-        foreach (Product product in products)
-        {
-            int quantity =
-                _shoppingCartRepository.GetProductQuantity(
-                    shoppingCart.Id,
-                    product.Id);
-
-
-            _orderRepository.AddProductToOrder(
-                orderId,
-                product.Id,
-                quantity,
-                product.Price);
-
-
-            // Trækker antal fra lageret
-            product.StockQuantity =
-                product.StockQuantity - quantity;
-
-
-            _productRepository.Update(
-                product);
-        }
-
-
-        // Tømmer kurven
-        _shoppingCartRepository.Clear(
-            shoppingCart.Id);
-
-
-        // Sender videre til ordrebekræftelse
-        return RedirectToPage(
-            "/OrderConfirmation",
-            new { id = orderId });
     }
 
 

@@ -29,4 +29,7 @@ public interface IProductRepository
 
     // Sletter et produkt ud fra id
     void Delete(int id);
+
+    // Søger efter buketter ud fra navn eller beskrivelse
+    List<Bouquet> SearchBouquets(string searchTerm);
 }

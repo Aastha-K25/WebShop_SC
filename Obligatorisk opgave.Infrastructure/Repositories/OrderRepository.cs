@@ -355,6 +355,316 @@ public class OrderRepository : IOrderRepository
     }
 
 
+    // Gennemfører checkout i én samlet transaction
+    // Opretter ordre, opdaterer lager og tømmer kurven
+    public int PlaceOrder(
+        int customerId,
+        decimal shippingPrice)
+    {
+        // Kontrollerer at kunde og leveringspris er gyldige
+        if (customerId <= 0 || shippingPrice < 0)
+        {
+            throw new ArgumentException(
+                "Invalid checkout information.");
+        }
+
+
+        using SqlConnection connection =
+            new SqlConnection(_connectionString);
+
+        connection.Open();
+
+
+        // Alle databaseændringer skal gennemføres samlet
+        // Serializable beskytter også ved samtidige køb
+        using SqlTransaction transaction =
+            connection.BeginTransaction(
+                System.Data.IsolationLevel.Serializable);
+
+        try
+        {
+            // Finder kundens egen kurv
+            string cartSql = """
+                SELECT Id
+                FROM paperpetals.ShoppingCarts
+                WHERE CustomerId = @CustomerId;
+                """;
+
+            using SqlCommand cartCommand =
+                new SqlCommand(
+                    cartSql,
+                    connection,
+                    transaction);
+
+            cartCommand.Parameters.AddWithValue(
+                "@CustomerId",
+                customerId);
+
+            object? cartResult =
+                cartCommand.ExecuteScalar();
+
+            if (cartResult == null)
+            {
+                throw new InvalidOperationException(
+                    "Shopping cart was not found.");
+            }
+
+            int cartId =
+                Convert.ToInt32(cartResult);
+
+
+            // Henter antal, pris og lager direkte fra databasen
+            string productsSql = """
+                SELECT
+                    p.Id,
+                    scp.Quantity,
+                    p.Price,
+                    p.StockQuantity
+                FROM paperpetals.ShoppingCartProducts scp
+                INNER JOIN paperpetals.Products p
+                    ON scp.ProductId = p.Id
+                WHERE scp.ShoppingCartId = @ShoppingCartId
+                ORDER BY p.Id;
+                """;
+
+            using SqlCommand productsCommand =
+                new SqlCommand(
+                    productsSql,
+                    connection,
+                    transaction);
+
+            productsCommand.Parameters.AddWithValue(
+                "@ShoppingCartId",
+                cartId);
+
+
+            // Gemmer oplysningerne midlertidigt
+            List<(int ProductId, int Quantity, decimal Price)>
+                products =
+                    new List<(int, int, decimal)>();
+
+            decimal subtotal = 0;
+
+
+            using (SqlDataReader reader =
+                   productsCommand.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    int productId =
+                        reader.GetInt32(0);
+
+                    int quantity =
+                        reader.GetInt32(1);
+
+                    decimal price =
+                        reader.GetDecimal(2);
+
+                    int stockQuantity =
+                        reader.GetInt32(3);
+
+
+                    // Antal og lager kontrolleres igen
+                    if (quantity <= 0 ||
+                        quantity > stockQuantity ||
+                        price < 0)
+                    {
+                        throw new InvalidOperationException(
+                            "A product is unavailable or has invalid information.");
+                    }
+
+
+                    subtotal =
+                        subtotal + (price * quantity);
+
+                    products.Add((
+                        productId,
+                        quantity,
+                        price));
+                }
+            }
+
+
+            // En tom kurv må ikke oprette en ordre
+            if (products.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "Shopping cart is empty.");
+            }
+
+
+            decimal totalPrice =
+                subtotal + shippingPrice;
+
+
+            // Opretter ordren
+            string orderSql = """
+                INSERT INTO paperpetals.Orders
+                (
+                    CustomerId,
+                    OrderDate,
+                    TotalPrice,
+                    Status
+                )
+                OUTPUT INSERTED.Id
+                VALUES
+                (
+                    @CustomerId,
+                    @OrderDate,
+                    @TotalPrice,
+                    @Status
+                );
+                """;
+
+            using SqlCommand orderCommand =
+                new SqlCommand(
+                    orderSql,
+                    connection,
+                    transaction);
+
+            orderCommand.Parameters.AddWithValue(
+                "@CustomerId",
+                customerId);
+
+            orderCommand.Parameters.AddWithValue(
+                "@OrderDate",
+                DateTime.UtcNow);
+
+            orderCommand.Parameters.Add(
+                "@TotalPrice",
+                System.Data.SqlDbType.Decimal
+                ).Value = totalPrice;
+
+            orderCommand.Parameters.AddWithValue(
+                "@Status",
+                OrderStatus.Pending.ToString());
+
+
+            int orderId =
+                Convert.ToInt32(
+                    orderCommand.ExecuteScalar());
+
+
+            // Gemmer produkterne på ordren
+            foreach (var product in products)
+            {
+                string orderProductSql = """
+                    INSERT INTO paperpetals.OrderProducts
+                    (
+                        OrderId,
+                        ProductId,
+                        Quantity,
+                        PriceAtPurchase
+                    )
+                    VALUES
+                    (
+                        @OrderId,
+                        @ProductId,
+                        @Quantity,
+                        @PriceAtPurchase
+                    );
+                    """;
+
+                using SqlCommand orderProductCommand =
+                    new SqlCommand(
+                        orderProductSql,
+                        connection,
+                        transaction);
+
+                orderProductCommand.Parameters.AddWithValue(
+                    "@OrderId",
+                    orderId);
+
+                orderProductCommand.Parameters.AddWithValue(
+                    "@ProductId",
+                    product.ProductId);
+
+                orderProductCommand.Parameters.AddWithValue(
+                    "@Quantity",
+                    product.Quantity);
+
+                orderProductCommand.Parameters.AddWithValue(
+                    "@PriceAtPurchase",
+                    product.Price);
+
+                orderProductCommand.ExecuteNonQuery();
+
+
+                // Trækker antal fra lageret
+                // Stopper hvis der ikke længere er nok på lager
+                string stockSql = """
+                    UPDATE paperpetals.Products
+                    SET StockQuantity = StockQuantity - @Quantity
+                    WHERE Id = @ProductId
+                      AND StockQuantity >= @Quantity;
+                    """;
+
+                using SqlCommand stockCommand =
+                    new SqlCommand(
+                        stockSql,
+                        connection,
+                        transaction);
+
+                stockCommand.Parameters.AddWithValue(
+                    "@ProductId",
+                    product.ProductId);
+
+                stockCommand.Parameters.AddWithValue(
+                    "@Quantity",
+                    product.Quantity);
+
+                int updatedRows =
+                    stockCommand.ExecuteNonQuery();
+
+
+                if (updatedRows != 1)
+                {
+                    throw new InvalidOperationException(
+                        "Not enough products in stock.");
+                }
+            }
+
+
+            // Tømmer først kurven når alle produkter er behandlet
+            string clearCartSql = """
+                DELETE FROM paperpetals.ShoppingCartProducts
+                WHERE ShoppingCartId = @ShoppingCartId;
+                """;
+
+            using SqlCommand clearCartCommand =
+                new SqlCommand(
+                    clearCartSql,
+                    connection,
+                    transaction);
+
+            clearCartCommand.Parameters.AddWithValue(
+                "@ShoppingCartId",
+                cartId);
+
+            int deletedRows =
+                clearCartCommand.ExecuteNonQuery();
+
+            if (deletedRows != products.Count)
+            {
+                throw new InvalidOperationException(
+                    "Shopping cart changed during checkout.");
+            }
+
+
+            // Alle ændringer gemmes samlet
+            transaction.Commit();
+
+            return orderId;
+        }
+        catch
+        {
+            // Hvis noget fejler bliver alle ændringer fortrudt
+            transaction.Rollback();
+
+            throw;
+        }
+    }
+
     // Opdaterer status på en ordre.
     public void UpdateStatus(
         int orderId,

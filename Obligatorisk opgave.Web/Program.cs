@@ -1,11 +1,60 @@
+
 using Obligatoris.opgave.Domain.Interfaces;
 using Obligatoris.opgave.Domain.Models;
 using Obligatorisk_opgave.Security;
 using Obligatorisk_opgave.Services;
 using Microsoft.AspNetCore.Http;
+using Serilog;
+using Serilog.Events;
 using Obligatorisk_opgave.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+// ==================================================
+// SECURITY LOGGING
+// ==================================================
+
+// Gemmer logfiler lokalt uden for wwwroot
+string logFolder =
+    Path.Combine(
+        Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData),
+        "PaperAndPetals",
+        "Logs");
+
+
+// Opretter mappen hvis den ikke findes
+Directory.CreateDirectory(logFolder);
+
+
+// Bestemmer hvor logfilerne skal gemmes
+string logPath =
+    Path.Combine(
+        logFolder,
+        "security-.log");
+
+
+// Gemmer logmeddelelser i filer
+// Opretter en ny logfil hver dag
+Log.Logger =
+    new LoggerConfiguration()
+        .MinimumLevel.Information()
+        .MinimumLevel.Override(
+            "Microsoft",
+            LogEventLevel.Warning)
+        .WriteTo.Console()
+        .WriteTo.File(
+            logPath,
+            rollingInterval: RollingInterval.Day,
+            fileSizeLimitBytes: 5_000_000,
+            rollOnFileSizeLimit: true,
+            retainedFileCountLimit: 7)
+        .CreateLogger();
+
+
+// Gør Serilog tilgængelig gennem ILogger
+builder.Host.UseSerilog();
 
 
 // Gør Razor Pages klar

@@ -35,12 +35,27 @@ public class Products : PageModel
 
     public BookGenre? SelectedGenre { get; set; }
 
+    public string SearchTerm { get; set; } = string.Empty;
 
     // Henter produkter n�r siden �bnes
-    public void OnGet(string? genre)
+    public void OnGet(string? genre, string? search)
     {
         PopularBouquets =
             _productRepository.GetPopularBouquets(4);
+
+        // Begrænser inputlængden og søger på serveren
+        SearchTerm = search?.Trim() ?? string.Empty;
+
+        if (SearchTerm.Length > 200)
+        {
+            SearchTerm = SearchTerm[..200];
+        }
+
+        if (!string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            Bouquets = _productRepository.SearchBouquets(SearchTerm);
+            return;
+        }
 
 
         // Viser alle hvis der ikke er valgt genre

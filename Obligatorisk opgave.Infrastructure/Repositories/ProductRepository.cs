@@ -1,3 +1,4 @@
+
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Obligatoris.opgave.Domain.Interfaces;
@@ -26,7 +27,7 @@ public class ProductRepository : IProductRepository
     {
         List<Bouquet> bouquets = GetAllBouquets();
 
-        // Bouquet arver fra Product.Derfor kan listen med buketter omdannes til en liste med produkter.
+        // Bouquet arver fra Product. Derfor kan listen med buketter omdannes til en liste med produkter.
         return bouquets.Cast<Product>().ToList();
     }
 
@@ -227,6 +228,53 @@ public class ProductRepository : IProductRepository
     }
 
 
+    // Søger efter navn eller beskrivelse med en SQL-parameter
+    public List<Bouquet> SearchBouquets(string searchTerm)
+    {
+        List<Bouquet> bouquets = new List<Bouquet>();
+
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return GetAllBouquets();
+        }
+
+        string sql = """
+                     SELECT p.Id, p.Name, p.Description, p.Price,
+                            p.ImagePath, p.ImageDescription, p.IsPopular,
+                            p.StockQuantity, b.FlowerType, b.BouquetSize,
+                            b.BookGenre, b.NumberOfBooks
+                     FROM paperpetals.Products p
+                     INNER JOIN paperpetals.Bouquets b ON p.Id = b.ProductId
+                     WHERE p.Name LIKE @SearchTerm
+                        OR p.Description LIKE @SearchTerm
+                     ORDER BY p.Name;
+                     """;
+
+        using SqlConnection connection =
+            new SqlConnection(_connectionString);
+
+        using SqlCommand command =
+            new SqlCommand(sql, connection);
+
+        command.Parameters.Add(
+            "@SearchTerm",
+            System.Data.SqlDbType.NVarChar,
+            202
+        ).Value = "%" + searchTerm.Trim() + "%";
+
+        connection.Open();
+
+        using SqlDataReader reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            bouquets.Add(CreateBouquet(reader));
+        }
+
+        return bouquets;
+    }
+
+
     // Gemmer et nyt produkt i databasen.
     public void Add(Product product)
     {
@@ -363,6 +411,7 @@ public class ProductRepository : IProductRepository
                 bouquet.NumberOfBooks);
 
             bouquetCommand.ExecuteNonQuery();
+
 
             // Begge dele er gemt korrekt.
             transaction.Commit();
